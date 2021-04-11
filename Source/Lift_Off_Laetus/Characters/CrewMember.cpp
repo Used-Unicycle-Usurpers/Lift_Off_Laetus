@@ -2,6 +2,7 @@
 
 
 #include "CrewMember.h"
+#include "Crew.h"
 
 // Sets default values
 ACrewMember::ACrewMember()
@@ -15,6 +16,8 @@ ACrewMember::ACrewMember()
 void ACrewMember::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//team 
 	
 }
 

@@ -2,6 +2,7 @@
 
 
 #include "Crew.h"
+#include "CrewMember.h"
 
 // Sets default values
 ACrew::ACrew()
@@ -16,6 +17,14 @@ void ACrew::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Array of crew members 
+	ACrewMember crewMembers[5] = {};
+	
+	// Index of current crew member 
+	int selectedCharacter =  0;
+
+	// Number of cores in team 
+	int cores = 0;
 }
 
 // Called every frame
