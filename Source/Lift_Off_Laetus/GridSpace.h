@@ -9,8 +9,7 @@
 #include "GridSpace.generated.h"
 
 UCLASS()
-class LIFT_OFF_LAETUS_API AGridSpace : public AActor
-{
+class LIFT_OFF_LAETUS_API AGridSpace : public AActor {
 	GENERATED_BODY()
 	
 public:	
