@@ -20,80 +20,127 @@ ALift_Off_LaetusGameMode::ALift_Off_LaetusGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
-
-	//grid.rows.AddUninitialized(16);//Init(struct ALift_Off_LaetusGameMode::FRow, 16);
-	for (int i = 0; i < 16; i++) {
-		struct FRow row;
-		for (int j = 0; j < 34; j++) {
-			row.row.Add(j);
-		}
-		grid.rows.Add(row);
-	}
 }
 
+/**
+ * Called at the very beginning of the game. Sets up the map of AGridSpaces with
+ * all the information contained in /Config/grid.txt.
+ */
 void ALift_Off_LaetusGameMode::BeginPlay() {
-	TArray<AActor*> results;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATargetPoint::StaticClass(), results);
-	ATargetPoint* startPoint = (ATargetPoint*)results[0];
-	FVector start = startPoint->GetActorLocation();
+	//Read in the config file and store the 2D array of integers that detail
+	//what each tile contains.
+	initializeGrid();
 
-	FCollisionQueryParams cqp;
-	FHitResult hr;
+	FVector start = grid.startingLocation;
 
 	int tileWidth = 200;
-	int numTilesWidth = 16;
+	int numTilesWidth = grid.NumRows;
 	int tileLength = 200;
-	int numTilesLength = 34;
+	int numTilesLength = grid.NumColumns;
 
+	//One by one, place grid space according to the information contained in the
+	//config file.
 	for (int i = 0; i < numTilesWidth; i++) {
 		for (int j = 0; j < numTilesLength; j++) {
-			FVector startHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, 600);
-			FVector endHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, -600);
-			FVector location = FVector(start.X + j * tileLength, start.Y + i * tileWidth, 600);
-			FRotator rotation = FRotator(0, 0, 0);
-			GetWorld()->LineTraceSingleByChannel(hr, startHeight, endHeight, ECC_Visibility, cqp);
-			if (hr.bBlockingHit == true) {
-				if (hr.GetActor() != this) {
-					location.Z = hr.ImpactPoint.Z + 10;
-					AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
+			int configInfo = grid.rows[i].rowNums[j];
+			FCollisionQueryParams cqp;
+			FHitResult hr;
+
+			if (configInfo != 0 && configInfo != 5) {
+				//Calculate location of the next AGridSpace
+				FVector location = FVector(start.X + j * tileLength, start.Y + i * tileWidth, 11);
+				FRotator rotation = FRotator(0, 0, 0);
+
+				//Run a trace to place the AGridSpace just a few units above the ground
+				FVector startHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, 600);
+				FVector endHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, -600);
+				GetWorld()->LineTraceSingleByChannel(hr, startHeight, endHeight, ECC_Visibility, cqp);
+				if (hr.bBlockingHit == true) {
+					if (hr.GetActor() != this) {
+						//Hit a valid point of the map, spasn the AGridSpace
+						location.Z = hr.ImpactPoint.Z + 10;
+						AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
+						tile->setGridLocation(i, j);
+
+						//For debug purposes, set color of the tiles
+						switch (configInfo) {
+						case 2:
+							tile->SetToRed();
+							break;
+						case 3:
+							tile->SetToBlue();
+							break;
+						case 4:
+							tile->SetToGreen();
+							break;
+						}
+
+						//Finally, store the reference in the grid for easy access later
+						grid.rows[i].tiles.Add(tile);
+					}
 				}
 			}
 		}
 	}
-
-	initializeGrid();
-	
-	for (int i = 0; i < grid.rows.Num(); i++) {
-		struct FRow row = grid.rows[i];
-		for (int j = 0; j < row.row.Num(); j++) {
-			UE_LOG(LogTemp, Warning, TEXT("Entry: %d"), row.row[j]);
-		}
-	}
-
 }
 
+/**
+ * Initialize the map tiles using the information in /Config/grid.txt. This loads
+ * the number for each tile into @bold grid struct, but will not spawn AGridSpace
+ * actors until BeginPlay.
+ */
 bool ALift_Off_LaetusGameMode::initializeGrid() {
 	TArray<FString> lines;
 	FString name = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Config/grid.txt"));
 	FString delimeter = ",";
+	
+	//Parse the lines of the file into an array of strings
 	FFileHelper::LoadFileToStringArray(lines, *name);
+
+	//The first two lines should be the number of rows and columns, respectively
 	grid.NumRows = FCString::Atoi(*lines[0]);
 	grid.NumColumns = FCString::Atoi(*lines[1]);
 	
+	//Break the third line up into the three coordinates of the starting location
+	//(i.e. the location to place the first, top left tile).
 	TArray<FString> locationStr;
 	lines[2].ParseIntoArray(locationStr, *delimeter, false);
 	grid.startingLocation.X = FCString::Atoi(*locationStr[0]);
 	grid.startingLocation.Y = FCString::Atoi(*locationStr[1]);
 	grid.startingLocation.Z = FCString::Atoi(*locationStr[2]);
 
-	for (int i = 3; i < grid.NumRows; i++) {
-		FString nextLine = lines[i];
+	//Remainder of the file is an 2D array of the different tiles of the map. The
+	//numbers encode details about that space, add the number here and the 
+	//corresponding tiles will be spawned at BeginPlay.
+	for (int i = 0; i < grid.NumRows; i++) {
+		FString nextLine = lines[i+3];
 		TArray<FString> rowStr;
 		nextLine.ParseIntoArray(rowStr, *delimeter, false);
+		struct FRow newRow;
 		for (int j = 0; j < grid.NumColumns; j++) {
-			grid.rows[i].row[j] = FCString::Atoi(*rowStr[j]);
+			//grid.rows[i].rowNums[j] = FCString::Atoi(*rowStr[j]);
+			newRow.rowNums.Add(FCString::Atoi(*rowStr[j]));
 		}
+		grid.rows.Add(newRow);
 	}
 
 	return true;
 }
+
+/**
+ * Returns the AGridSpace that resides at the given coordinates, where the 
+ * x value of the coordinates is the row index, the y value is the column 
+ * index.
+ * 
+ * @param coordinates the row and column number of the desired AGridSpace
+ * @return the AGridSpace that resides at the given coordinates, nullptr if the
+ * given row and column do not exist in the confines of the map, or if there is 
+ * no tile there (i.e. a hole in the map).
+ */
+AGridSpace* ALift_Off_LaetusGameMode::getTile(FVector2D coordinates) {
+	if (VALID_IDX(coordinates.X, grid.NumRows) && VALID_IDX(coordinates.Y, grid.NumColumns)) {
+		return grid.rows[coordinates.X].tiles[coordinates.Y];
+	}else {
+		return nullptr;
+	}
+};
