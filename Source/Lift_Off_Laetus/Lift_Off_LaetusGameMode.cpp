@@ -58,7 +58,7 @@ void ALift_Off_LaetusGameMode::BeginPlay() {
 				if (hr.bBlockingHit == true) {
 					if (hr.GetActor() != this) {
 						//Hit a valid point of the map, spasn the AGridSpace
-						location.Z = hr.ImpactPoint.Z + 10;
+						location.Z = grid.tileHeight;
 						AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
 						tile->setGridLocation(i, j);
 
@@ -100,11 +100,12 @@ bool ALift_Off_LaetusGameMode::initializeGrid() {
 	//The first two lines should be the number of rows and columns, respectively
 	grid.NumRows = FCString::Atoi(*lines[0]);
 	grid.NumColumns = FCString::Atoi(*lines[1]);
+	grid.tileHeight = FCString::Atoi(*lines[2]);
 	
 	//Break the third line up into the three coordinates of the starting location
 	//(i.e. the location to place the first, top left tile).
 	TArray<FString> locationStr;
-	lines[2].ParseIntoArray(locationStr, *delimeter, false);
+	lines[3].ParseIntoArray(locationStr, *delimeter, false);
 	grid.startingLocation.X = FCString::Atoi(*locationStr[0]);
 	grid.startingLocation.Y = FCString::Atoi(*locationStr[1]);
 	grid.startingLocation.Z = FCString::Atoi(*locationStr[2]);
@@ -113,12 +114,11 @@ bool ALift_Off_LaetusGameMode::initializeGrid() {
 	//numbers encode details about that space, add the number here and the 
 	//corresponding tiles will be spawned at BeginPlay.
 	for (int i = 0; i < grid.NumRows; i++) {
-		FString nextLine = lines[i+3];
+		FString nextLine = lines[i+4];
 		TArray<FString> rowStr;
 		nextLine.ParseIntoArray(rowStr, *delimeter, false);
 		struct FRow newRow;
 		for (int j = 0; j < grid.NumColumns; j++) {
-			//grid.rows[i].rowNums[j] = FCString::Atoi(*rowStr[j]);
 			newRow.rowNums.Add(FCString::Atoi(*rowStr[j]));
 		}
 		grid.rows.Add(newRow);

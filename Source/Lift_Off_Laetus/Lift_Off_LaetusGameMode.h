@@ -45,6 +45,10 @@ struct FGrid {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MyCategory)
 		int NumColumns;
 
+	//The number of columns in the grid i.e. the number of AGridSpaces in each FRow in rows.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MyCategory)
+		float tileHeight;
+
 	//The point in three-dimensional space to start placing AGridSpaces (i.e. top-left 
 	//tile of the map grid). All AGridSpaces will be placed in relation to this point.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MyCategory)
