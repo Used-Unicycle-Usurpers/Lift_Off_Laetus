@@ -5,11 +5,7 @@
 #include "Lift_Off_LaetusCharacter.h"
 #include "Controllers/CrewController.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
-#include "Engine/TargetPoint.h"
 #include "Misc/FileHelper.h"
-#include "PowerUps/SlimeTree.h"
-#include "PowerUps/Rock.h"
-#include "PowerUps/Shrub.h"
 #include "UObject/ConstructorHelpers.h"
 
 ALift_Off_LaetusGameMode::ALift_Off_LaetusGameMode(){

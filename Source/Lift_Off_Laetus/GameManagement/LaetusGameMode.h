@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Lift_Off_Laetus/Characters/Crew.h"
-#include "Lift_Off_Laetus/GridSpace.h"
+#include "GridSpace.h"
+#include "Grid.h"
 #include "LaetusGameMode.generated.h"
 
 /**
@@ -17,6 +18,10 @@ class LIFT_OFF_LAETUS_API ALaetusGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	ALaetusGameMode();
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
 		int32 crewCount = 2;
@@ -36,9 +41,10 @@ private:
 	// TimerHandle turnTimer;     // Keeps track of the time left in the turn
 	// TurnActionStack * turnStack;  // Records the actions taken during the current turn
 
-	// Board parameters
-	AGridSpace * gridSpaces; // 2D array, defined at runtime
-	
+	//The grid representing the tiles of the map.
+	UPROPERTY(EditAnywhere, Category = MyCategory)
+		AGrid* grid;
+
 	// Private helper methods
 	void ClearTurnActionStack(); // Clears the stack of actions done on the current crew's turn
 

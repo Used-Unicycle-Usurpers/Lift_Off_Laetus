@@ -1,6 +1,27 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "LaetusGameMode.h"
+#include "../Controllers/CrewController.h"
+
+ALaetusGameMode::ALaetusGameMode() {
+	// use our custom PlayerController class
+	PlayerControllerClass = ACrewController::StaticClass();
+
+	// set default pawn class to our Blueprinted character
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
+	if (PlayerPawnBPClass.Class != nullptr) {
+		DefaultPawnClass = PlayerPawnBPClass.Class;
+	}
+}
+
+/**
+ * Called at the very beginning of the game. Sets up the map of AGridSpaces with
+ * all the information contained in /Config/grid.txt.
+ */
+void ALaetusGameMode::BeginPlay() {
+	grid = GetWorld()->SpawnActor<AGrid>(FVector(0, 0, 0), FRotator(0, 0, 0));
+}
+
 
 void ALaetusGameMode::ChangeTurn()
 {
