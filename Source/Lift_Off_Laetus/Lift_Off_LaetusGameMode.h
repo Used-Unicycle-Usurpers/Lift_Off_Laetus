@@ -8,6 +8,10 @@
 #include "Lift_Off_LaetusGameMode.generated.h"
 
 #define VALID_IDX(idx, upperBound) idx > 0 && idx < upperBound
+#define SLIME_TREE 5
+#define ROCK 6
+#define SHRUB 7
+
 
 /**
  * Struct representing a single row of AGridSpaces in an FGrid.

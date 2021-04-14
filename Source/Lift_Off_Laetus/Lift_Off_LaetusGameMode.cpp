@@ -7,17 +7,18 @@
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Engine/TargetPoint.h"
 #include "Misc/FileHelper.h"
+#include "PowerUps/SlimeTree.h"
+#include "PowerUps/Rock.h"
+#include "PowerUps/Shrub.h"
 #include "UObject/ConstructorHelpers.h"
 
-ALift_Off_LaetusGameMode::ALift_Off_LaetusGameMode()
-{
+ALift_Off_LaetusGameMode::ALift_Off_LaetusGameMode(){
 	// use our custom PlayerController class
 	PlayerControllerClass = ACrewController::StaticClass();
 
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
-	if (PlayerPawnBPClass.Class != nullptr)
-	{
+	if (PlayerPawnBPClass.Class != nullptr){
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 }
@@ -43,42 +44,51 @@ void ALift_Off_LaetusGameMode::BeginPlay() {
 	for (int i = 0; i < numTilesWidth; i++) {
 		for (int j = 0; j < numTilesLength; j++) {
 			int configInfo = grid.rows[i].rowNums[j];
-			FCollisionQueryParams cqp;
-			FHitResult hr;
-
+			
 			if (configInfo != 0 && configInfo != 5) {
 				//Calculate location of the next AGridSpace
-				FVector location = FVector(start.X + j * tileLength, start.Y + i * tileWidth, 11);
+				FVector location = FVector(start.X + j * tileLength, start.Y + i * tileWidth, grid.tileHeight);
 				FRotator rotation = FRotator(0, 0, 0);
+				AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
+				tile->setGridLocation(i, j);
 
-				//Run a trace to place the AGridSpace just a few units above the ground
-				FVector startHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, 600);
-				FVector endHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, -600);
-				GetWorld()->LineTraceSingleByChannel(hr, startHeight, endHeight, ECC_Visibility, cqp);
-				if (hr.bBlockingHit == true) {
-					if (hr.GetActor() != this) {
-						//Hit a valid point of the map, spasn the AGridSpace
-						location.Z = grid.tileHeight;
-						AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
-						tile->setGridLocation(i, j);
-
-						//For debug purposes, set color of the tiles
-						switch (configInfo) {
-						case 2:
-							tile->SetToRed();
-							break;
-						case 3:
-							tile->SetToBlue();
-							break;
-						case 4:
-							tile->SetToGreen();
-							break;
-						}
-
-						//Finally, store the reference in the grid for easy access later
-						grid.rows[i].tiles.Add(tile);
-					}
+				//For debug purposes, set color of the tiles
+				switch (configInfo) {
+				case 2:
+					tile->SetToRed();
+					break;
+				case 3:
+					tile->SetToBlue();
+					break;
+				case 4:
+					tile->SetToGreen();
+					break;
 				}
+
+				//Finally, store the reference in the grid for easy access later
+				grid.rows[i].tiles.Add(tile);
+			}
+		}
+	}
+
+	//Now go through and spawn each harvest source, and provide a refernce to each
+	//surrounding tile that will be able to harvest from it.
+	for (int i = 0; i < numTilesWidth; i++) {
+		for (int j = 0; j < numTilesLength; j++) {
+			int configInfo = grid.rows[i].rowNums[j];
+			FVector location = FVector(start.X + j * tileLength, start.Y + i * tileWidth, grid.tileHeight);
+			FRotator rotation = FRotator(0, 0, 0);
+			
+			switch (configInfo) {
+			case SLIME_TREE:
+				ASlimeTree* tree = GetWorld()->SpawnActor<ASlimeTree>(location, rotation);
+				break;
+			case ROCK:
+				ARock * rock = GetWorld()->SpawnActor<ARock>(location, rotation);
+				break;
+			case SHRUB:
+				AShrub * tree = GetWorld()->SpawnActor<AShrub>(location, rotation);
+				break;
 			}
 		}
 	}
