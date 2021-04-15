@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "CrewMember.h"
 #include "Crew.generated.h"
 
 UCLASS()
@@ -13,17 +14,30 @@ class LIFT_OFF_LAETUS_API ACrew : public APawn
 
 public:
 	// Sets default values for this pawn's properties
-	ACrew();
+	ACrew(); 
+
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	// Array of crew members 
+	ACrewMember* crewMembers[3] = {};
+
+	// Index of current crew member 
+	int32 selectedCharacter;
+
+	// Number of cores in team 
+	int32 cores;
+
+	// Would the ActionBar component go here? 
 };
