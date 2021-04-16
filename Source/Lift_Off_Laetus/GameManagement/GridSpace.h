@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "../Characters/CrewMember.h"
+#include "../PowerUps/HarvestSource.h"
 #include "GridSpace.generated.h"
 
 UCLASS()
@@ -58,6 +59,10 @@ public:
 	void setGridLocation(int row, int column);
 	FVector2D getGridLocation();
 
+	AHarvestSource* getHarvestSource();
+	void setHarvestSource(AHarvestSource* newSource);
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -69,4 +74,6 @@ private:
 	//The row and column of this AGridSpace. The X component is 
 	//the row and the Y component is the column.
 	FVector2D gridLocation;
+
+	AHarvestSource* harvestSource;
 };

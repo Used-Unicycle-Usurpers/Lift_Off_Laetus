@@ -5,31 +5,16 @@
 #include "../PowerUps/Rock.h"
 #include "../PowerUps/Shrub.h"
 
-static TArray<UStaticMesh*> treeTrunks;
-static TArray<FString> treeTrunkReferences = {
-	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase.sampleMap_with_Environment__1__TreeBase'",
-	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase1.sampleMap_with_Environment__1__TreeBase1",
-	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase2.sampleMap_with_Environment__1__TreeBase2'",
-	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase3.sampleMap_with_Environment__1__TreeBase3'",
-	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase4.sampleMap_with_Environment__1__TreeBase4'",
-	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase5.sampleMap_with_Environment__1__TreeBase5'",
-	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase6.sampleMap_with_Environment__1__TreeBase6'",
-};
-
 // Sets default values
 AGrid::AGrid() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	for (int i = 0; i < treeTrunkReferences.Num(); i++) {
-		static ConstructorHelpers::FObjectFinder<UStaticMesh>temp(*treeTrunkReferences[i]);
-		treeTrunks.Add(temp.Object);
-	}
-
 }
 
 // Called when the game starts or when spawned
 void AGrid::BeginPlay() {
+	Super::BeginPlay();
+
 	//Read in the config file and store the 2D array of integers that detail
 	//what each tile contains.
 	initializeGrid();
@@ -81,6 +66,7 @@ void AGrid::placeGridSpaces() {
 				AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
 				tile->setGridLocation(i, j);
 
+				/*
 				//For debug purposes, set color of the tiles
 				switch (configInfo) {
 				case 2:
@@ -93,9 +79,15 @@ void AGrid::placeGridSpaces() {
 					tile->SetToGreen();
 					break;
 				}
+				*/
 
 				//Finally, store the reference in the grid for easy access later
 				rows[i].tiles.Add(tile);
+			}
+			else {
+				//Use nullptr to make spots on the grid where there is no tile 
+				//i.e. a hole in the map.
+				rows[i].tiles.Add(nullptr);
 			}
 		}
 	}
@@ -104,7 +96,7 @@ void AGrid::placeGridSpaces() {
 void AGrid::placeEnvironmentObjects() {
 	TArray<FString> lines;
 	FString name = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Config/grid_env.txt"));
-	FString delimeter = ",";
+	FString delimeter = "|";
 
 	//Parse the lines of the file into an array of strings
 	FFileHelper::LoadFileToStringArray(lines, *name);
@@ -114,19 +106,20 @@ void AGrid::placeEnvironmentObjects() {
 		TArray<FString> rowStr;
 		nextLine.ParseIntoArray(rowStr, *delimeter, false);
 
-		HarvestSourceType type = intToHarvestSourceType(FCString::Atoi(*rowStr[0]));
-		int numTiles = FCString::Atoi(*rowStr[1]);
+		HarvestSourceType type = intToHarvestSourceType(FCString::Atoi(*rowStr[0].RightChop(5)));
 		
 		//Average the coordinates of the tiles to place between all of them
 		TArray<FVector2D> coordinates;
-		for (int j = 2; j < (numTiles * 2)+1; j+=2) {
-			coordinates.Add(FVector2D(FCString::Atoi(*rowStr[j]), FCString::Atoi(*rowStr[j + 1])));
+		TArray<FString> coordStrs;
+		rowStr[1].RightChop(6).ParseIntoArray(coordStrs, TEXT(","), false);
+		for (int j = 0; j < coordStrs.Num(); j+=2) {
+			coordinates.Add(FVector2D(FCString::Atoi(*coordStrs[j]), FCString::Atoi(*coordStrs[j + 1])));
 		}
 		FVector2D gridLocation = averageCoordinates(coordinates);
 		FVector mapLocation = FVector(gridLocation.X, gridLocation.Y, 0);
 
 		//Spawn and keep a reference
-		AHarvestSource* source;
+		AHarvestSource* source = nullptr;
 		switch (type) {
 		case SlimeTree:
 			source = GetWorld()->SpawnActor<ASlimeTree>(mapLocation, FRotator(0, 0, 0));
@@ -138,9 +131,28 @@ void AGrid::placeEnvironmentObjects() {
 			source = GetWorld()->SpawnActor<AShrub>(mapLocation, FRotator(0, 0, 0));
 			break;
 		}
-		 
-		//Pass reference to the surrounding tiles
 
+		TArray<FString> neighbrCoords;
+		rowStr[2].RightChop(10).ParseIntoArray(neighbrCoords, TEXT(","), false);
+		for (int j = 0; j < neighbrCoords.Num(); j += 2) {
+			int row = FCString::Atoi(*neighbrCoords[j]);
+			int column = FCString::Atoi(*neighbrCoords[j + 1]);
+			AGridSpace* neighbor = getTile(FVector2D(row, column));
+			if (IsValid(neighbor) && IsValid(source)) {
+				neighbor->setHarvestSource(source);
+			}else {
+				UE_LOG(LogTemp, Warning, TEXT("Error: invalid tile coordinates: (%d,%d)"), row, column);
+			}
+		}
+
+		/*
+		if (IsValid(source)) {
+			//Pass reference to the surrounding tiles
+			for (int j = 0; j < coordinates.Num(); j++) {
+				AGridSpace* neighbor = getTile(coordinates[j]);
+				neighbor->setHarvestSource(source);
+			}
+		}*/
 	}
 }
 
@@ -230,7 +242,12 @@ bool AGrid::initializeGrid() {
  */
 AGridSpace* AGrid::getTile(FVector2D coordinates) {
 	if (VALID_IDX(coordinates.X, numRows) && VALID_IDX(coordinates.Y, numColumns)) {
-		return rows[coordinates.X].tiles[coordinates.Y];
+		AGridSpace* tile = rows[coordinates.X].tiles[coordinates.Y];
+		if (IsValid(tile)) {
+			return tile;
+		}	else {
+			return nullptr;
+		}
 	}else {
 		return nullptr;
 	}

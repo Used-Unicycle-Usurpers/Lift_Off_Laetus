@@ -8,7 +8,7 @@
 #include "../PowerUps/HarvestSource.h"
 #include "Grid.generated.h"
 
-#define VALID_IDX(idx, upperBound) idx > 0 && idx < upperBound
+#define VALID_IDX(idx, upperBound) idx >= 0 && idx < upperBound
 #define HARVEST_SLIME_TREE 2
 #define HARVEST_ROCK 3
 #define HARVEST_SHRUB 4

@@ -147,3 +147,22 @@ void AGridSpace::setGridLocation(int row, int column) {
 FVector2D AGridSpace::getGridLocation() {
 	return gridLocation;
 }
+
+AHarvestSource* AGridSpace::getHarvestSource() {
+	return harvestSource;
+}
+
+void AGridSpace::setHarvestSource(AHarvestSource* newSource) {
+	harvestSource = newSource;
+	switch (harvestSource->getHarvestSourceType()) {
+	case SlimeTree:
+		SetToRed();
+		break;
+	case Rock:
+		SetToBlue();
+		break;
+	case Shrub:
+		SetToGreen();
+		break;
+	}
+}
