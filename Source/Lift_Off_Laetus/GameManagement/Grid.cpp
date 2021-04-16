@@ -5,10 +5,27 @@
 #include "../PowerUps/Rock.h"
 #include "../PowerUps/Shrub.h"
 
+static TArray<UStaticMesh*> treeTrunks;
+static TArray<FString> treeTrunkReferences = {
+	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase.sampleMap_with_Environment__1__TreeBase'",
+	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase1.sampleMap_with_Environment__1__TreeBase1",
+	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase2.sampleMap_with_Environment__1__TreeBase2'",
+	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase3.sampleMap_with_Environment__1__TreeBase3'",
+	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase4.sampleMap_with_Environment__1__TreeBase4'",
+	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase5.sampleMap_with_Environment__1__TreeBase5'",
+	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase6.sampleMap_with_Environment__1__TreeBase6'",
+};
+
 // Sets default values
 AGrid::AGrid() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	for (int i = 0; i < treeTrunkReferences.Num(); i++) {
+		static ConstructorHelpers::FObjectFinder<UStaticMesh>temp(*treeTrunkReferences[i]);
+		treeTrunks.Add(temp.Object);
+	}
+
 }
 
 // Called when the game starts or when spawned
@@ -17,6 +34,33 @@ void AGrid::BeginPlay() {
 	//what each tile contains.
 	initializeGrid();
 
+	placeGridSpaces();
+
+	placeEnvironmentObjects();
+		
+	//Now go through and spawn each harvest source, and provide a refernce to each
+	//surrounding tile that will be able to harvest from it.
+	/*
+	for (int i = 0; i < numTilesWidth; i++) {
+		for (int j = 0; j < numTilesLength; j++) {
+			int configInfo = rows[i].rowNums[j];
+			switch (configInfo) {
+			case SLIME_TREE:
+				placeSlimeTree(i, j);
+				break;
+			case ROCK:
+				placeRock(i, j);
+				break;	
+			case SHRUB:
+				placeShrub(i, j);
+				break;
+			}
+		}
+	}
+	*/
+}
+
+void AGrid::placeGridSpaces() {
 	FVector start = startingLocation;
 
 	int tileWidth = 200;
@@ -55,45 +99,74 @@ void AGrid::BeginPlay() {
 			}
 		}
 	}
+}
 
-	//Now go through and spawn each harvest source, and provide a refernce to each
-	//surrounding tile that will be able to harvest from it.
-	/*
-	for (int i = 0; i < numTilesWidth; i++) {
-		for (int j = 0; j < numTilesLength; j++) {
-			int configInfo = rows[i].rowNums[j];
-			switch (configInfo) {
-			case SLIME_TREE:
-				placeSlimeTree(i, j);
-				break;
-			case ROCK:
-				placeRock(i, j);
-				break;	
-			case SHRUB:
-				placeShrub(i, j);
-				break;
-			}
+void AGrid::placeEnvironmentObjects() {
+	TArray<FString> lines;
+	FString name = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Config/grid_env.txt"));
+	FString delimeter = ",";
+
+	//Parse the lines of the file into an array of strings
+	FFileHelper::LoadFileToStringArray(lines, *name);
+	
+	for (int i = 0; i < lines.Num(); i++) {
+		FString nextLine = lines[i];
+		TArray<FString> rowStr;
+		nextLine.ParseIntoArray(rowStr, *delimeter, false);
+
+		HarvestSourceType type = intToHarvestSourceType(FCString::Atoi(*rowStr[0]));
+		int numTiles = FCString::Atoi(*rowStr[1]);
+		
+		//Average the coordinates of the tiles to place between all of them
+		TArray<FVector2D> coordinates;
+		for (int j = 2; j < (numTiles * 2)+1; j+=2) {
+			coordinates.Add(FVector2D(FCString::Atoi(*rowStr[j]), FCString::Atoi(*rowStr[j + 1])));
 		}
+		FVector2D gridLocation = averageCoordinates(coordinates);
+		FVector mapLocation = FVector(gridLocation.X, gridLocation.Y, 0);
+
+		//Spawn and keep a reference
+		AHarvestSource* source;
+		switch (type) {
+		case SlimeTree:
+			source = GetWorld()->SpawnActor<ASlimeTree>(mapLocation, FRotator(0, 0, 0));
+			break;
+		case Rock:
+			source = GetWorld()->SpawnActor<ARock>(mapLocation, FRotator(0, 0, 0));
+			break;
+		case Shrub:
+			source = GetWorld()->SpawnActor<AShrub>(mapLocation, FRotator(0, 0, 0));
+			break;
+		}
+		 
+		//Pass reference to the surrounding tiles
+
 	}
-	*/
 }
 
-void AGrid::placeSlimeTree(int row, int column) {
-	FVector location = FVector(startingLocation.X + column * 200, startingLocation.Y + row * 200, tileHeight);
-	FRotator rotation = FRotator(0, 0, 0);
-	ASlimeTree* tree = GetWorld()->SpawnActor<ASlimeTree>(location, rotation);
+HarvestSourceType AGrid::intToHarvestSourceType(int type) {
+	switch(type) {
+		case SLIME_TREE:
+			return SlimeTree;
+		case ROCK:
+			return Rock;
+		case SHRUB:
+			return Shrub;
+		default:
+			return Shrub;
+	}
 }
 
-void AGrid::placeRock(int row, int column) {
-	FVector location = FVector(startingLocation.X + column * 200, startingLocation.Y + row * 200, tileHeight);
-	FRotator rotation = FRotator(0, 0, 0);
-	ARock* rock = GetWorld()->SpawnActor<ARock>(location, rotation);
-}
-
-void AGrid::placeShrub(int row, int column) {
-	FVector location = FVector(startingLocation.X + column * 200, startingLocation.Y + row * 200, tileHeight);
-	FRotator rotation = FRotator(0, 0, 0);
-	AShrub* shrub = GetWorld()->SpawnActor<AShrub>(location, rotation);
+FVector2D AGrid::averageCoordinates(TArray<FVector2D> coordinates) {
+	int rowSum = 0;
+	int columnSum = 0;
+	for (int i = 0; i < coordinates.Num(); i++) {
+		//Confusing, but for coordinates, X is the offset by row, which means we need
+		//to move along the Y axis in world coordaintes, and vice versa for column
+		rowSum += (startingLocation.X + coordinates[i].Y * 200);
+		columnSum += (startingLocation.Y + coordinates[i].X * 200);
+	}
+	return FVector2D(rowSum / coordinates.Num(), columnSum / coordinates.Num());
 }
 
 // Called every frame

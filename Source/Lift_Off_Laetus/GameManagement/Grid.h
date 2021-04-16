@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GridSpace.h"
+#include "../PowerUps/HarvestSource.h"
 #include "Grid.generated.h"
 
 #define VALID_IDX(idx, upperBound) idx > 0 && idx < upperBound
@@ -82,7 +83,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = MyCategory)
 		FVector startingLocation;
 
-	void placeSlimeTree(int row, int column);
-	void placeRock(int row, int column);
-	void placeShrub(int row, int column);
+	void placeGridSpaces();
+	void placeEnvironmentObjects();
+	FVector2D averageCoordinates(TArray<FVector2D> coordinates);
+	HarvestSourceType intToHarvestSourceType(int type);
 };
