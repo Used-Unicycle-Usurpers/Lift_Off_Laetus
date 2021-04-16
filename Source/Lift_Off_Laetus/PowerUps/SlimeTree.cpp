@@ -4,6 +4,7 @@
 #include "SlimeTree.h"
 #include "SlimeOrb.h"
 
+//References to random meshes to pick from on construction.
 static TArray<FString> treeTrunkReferences = {
 	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase.sampleMap_with_Environment__1__TreeBase'",
 	"StaticMesh'/Game/Geometry/MapPieces/sampleMap_with_Environment__1__TreeBase1.sampleMap_with_Environment__1__TreeBase1",
@@ -27,6 +28,7 @@ static TArray<FString> treeBushReferences = {
 ASlimeTree::ASlimeTree() {
 	setHarvestSourceType(HarvestSourceType::SlimeTree);
 	/*
+	//Pick a random trunk and brush mesh
 	trunkMesh = CreateDefaultSubobject<UStaticMeshComponent>("TreeMesh");
 	bushMesh = CreateDefaultSubobject<UStaticMeshComponent>("BushMesh");
 

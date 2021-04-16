@@ -24,14 +24,33 @@ void AHarvestSource::Tick(float DeltaTime) {
 
 }
 
+/**
+ * Returns the HarvestSourceType that this AHarvestSource is.
+ * 
+ * @return a HarvestSourceType enum representing the type of AHarvestSource 
+ *     this is.
+ */
 HarvestSourceType AHarvestSource::getHarvestSourceType() {
 	return type;
 }
 
+/**
+ * Set the type of this AHarvestSource to the given HarvestSourceType.
+ * 
+ * @param newType a HarvestSourceType enum representing the type of AHarvestSource
+ *     this is.
+ */
 void AHarvestSource::setHarvestSourceType(HarvestSourceType newType) {
 	type = newType;
 }
 
+/**
+ * TODO:
+ * Harvest the corresponding material from this space
+ * 
+ * @return a pointer to an APowerUpActor representing the powerup that was
+ *     just harvested by an ACrewMember.
+ */
 APowerUpActor* AHarvestSource::harvest() {
 	return nullptr;
 }

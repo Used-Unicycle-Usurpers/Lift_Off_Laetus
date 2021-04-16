@@ -44,6 +44,7 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
 
+	//For visual debugging
 	void SetToRed();
 	void SetToBlue();
 	void SetToGreen();
@@ -59,10 +60,10 @@ public:
 	void setGridLocation(int row, int column);
 	FVector2D getGridLocation();
 
-	AHarvestSource* getHarvestSource();
+	//Getter and setter for harvestSource
 	void setHarvestSource(AHarvestSource* newSource);
-
-
+	AHarvestSource* getHarvestSource();
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -75,5 +76,7 @@ private:
 	//the row and the Y component is the column.
 	FVector2D gridLocation;
 
+	//The HarvestSource that occupants of this tile can harvest from
+	//during their turn.
 	AHarvestSource* harvestSource;
 };
