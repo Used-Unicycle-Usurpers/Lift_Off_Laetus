@@ -17,14 +17,4 @@ public:
 	ASlimeTree();
 
 	virtual APowerUpActor* harvest() override;
-
-	/*
-	//For visual debugging
-	UPROPERTY(EditAnywhere)
-		class UStaticMeshComponent* trunkMesh;
-
-	//For visual debugging
-	UPROPERTY(EditAnywhere)
-		class UStaticMeshComponent* bushMesh;
-	*/
 };

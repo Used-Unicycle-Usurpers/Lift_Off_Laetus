@@ -4,8 +4,23 @@
 #include "Rock.h"
 #include "EnergizedOre.h"
 
+static TArray<FString> rockMeshReferences = {
+	"StaticMesh'/Game/Geometry/MapPieces/HarvestSourceMeshes/ENV_Rock1.ENV_Rock1'",
+	"StaticMesh'/Game/Geometry/MapPieces/HarvestSourceMeshes/ENV_Rock2.ENV_Rock2'",
+};
+
 ARock::ARock() {
 	setHarvestSourceType(HarvestSourceType::Rock);
+
+	//Pick a random mesh
+	mesh = CreateDefaultSubobject<UStaticMeshComponent>("TreeMesh");
+
+	int randomIdx = FMath::RandRange(0.f, (float)rockMeshReferences.Num() - 1);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh(*rockMeshReferences[randomIdx]);
+	mesh->SetStaticMesh(randMesh.Object);
+	mesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
+	mesh->SetWorldLocation(GetActorLocation());
+	SetRootComponent(mesh);
 }
 
 APowerUpActor* ARock::harvest() {
