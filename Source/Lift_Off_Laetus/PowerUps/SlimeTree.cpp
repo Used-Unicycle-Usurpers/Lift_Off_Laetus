@@ -18,9 +18,22 @@ ASlimeTree::ASlimeTree() {
 	//Pick a random mesh
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>("TreeMesh");
 
-	int randomIdx = FMath::RandRange(0.f, (float) treeMeshReferences.Num() - 1);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh(*treeMeshReferences[randomIdx]);
-	mesh->SetStaticMesh(randMesh.Object);
+	int randomIdx = FMath::RandRange(0, treeMeshReferences.Num() - 1);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh1(*treeMeshReferences[0]);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh2(*treeMeshReferences[1]);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh3(*treeMeshReferences[2]);
+	switch (randomIdx) {
+	case 0:
+		mesh->SetStaticMesh(randMesh1.Object);
+		break;
+	case 1:
+		mesh->SetStaticMesh(randMesh2.Object);
+		break;
+	default:
+		mesh->SetStaticMesh(randMesh3.Object);
+		break;
+	}
+	
 	mesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
 	mesh->SetWorldLocation(GetActorLocation());
 	SetRootComponent(mesh);

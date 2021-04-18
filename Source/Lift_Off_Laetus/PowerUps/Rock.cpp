@@ -15,9 +15,18 @@ ARock::ARock() {
 	//Pick a random mesh
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>("TreeMesh");
 
-	int randomIdx = FMath::RandRange(0.f, (float)rockMeshReferences.Num() - 1);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh(*rockMeshReferences[randomIdx]);
-	mesh->SetStaticMesh(randMesh.Object);
+	int randomIdx = FMath::RandRange(0, rockMeshReferences.Num() - 1);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh1(*rockMeshReferences[0]);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh2(*rockMeshReferences[1]);
+	switch (randomIdx) {
+	case 0:
+		mesh->SetStaticMesh(randMesh1.Object);
+		break;
+	default:
+		mesh->SetStaticMesh(randMesh2.Object);
+		break;
+	}
+
 	mesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
 	mesh->SetWorldLocation(GetActorLocation());
 	SetRootComponent(mesh);

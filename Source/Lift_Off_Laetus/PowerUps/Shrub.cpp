@@ -14,9 +14,16 @@ AShrub::AShrub() {
 	//Pick a random mesh
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>("TreeMesh");
 
-	int randomIdx = FMath::RandRange(0.f, (float)shrubMeshReferences.Num() - 1);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh(*shrubMeshReferences[randomIdx]);
-	mesh->SetStaticMesh(randMesh.Object);
+	int randomIdx = FMath::RandRange(0, shrubMeshReferences.Num() - 1);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh1(*shrubMeshReferences[0]);
+	
+	//Using a switch here so we can easily add more shrub meshes later.
+	switch (randomIdx) {
+	case 0:
+	default:
+		mesh->SetStaticMesh(randMesh1.Object);
+	}
+
 	mesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
 	mesh->SetWorldLocation(GetActorLocation());
 	SetRootComponent(mesh);
