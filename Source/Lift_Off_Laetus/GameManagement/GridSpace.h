@@ -58,6 +58,11 @@ public:
 	void setGridLocation(int row, int column);
 	FVector2D getGridLocation();
 
+	//Apply/get/remove extra movement cost for this space
+	void SetExtraMoveCost(int cost);
+	int32 GetExtraMoveCost();
+	void ResetExtraMoveCost();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -69,4 +74,7 @@ private:
 	//The row and column of this AGridSpace. The X component is 
 	//the row and the Y component is the column.
 	FVector2D gridLocation;
+
+	//The additional cost of moving through this space
+	int32 extraMoveCost = 0;
 };

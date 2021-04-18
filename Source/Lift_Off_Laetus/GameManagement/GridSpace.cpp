@@ -147,3 +147,28 @@ void AGridSpace::setGridLocation(int row, int column) {
 FVector2D AGridSpace::getGridLocation() {
 	return gridLocation;
 }
+
+/**
+* Set the "extra" movement cost for entities moving through this space.
+* 
+* @param cost - the new movement cost
+*/
+void AGridSpace::SetExtraMoveCost(int cost) {
+	extraMoveCost = cost;
+}
+
+/**
+* Gets the "extra" movement cost value on this space.
+* 
+* @return the cost, as an integer.
+*/
+int32 AGridSpace::GetExtraMoveCost() {
+	return extraMoveCost;
+}
+
+/**
+* Resets the "extra" movement cost on this space to zero.
+*/
+void AGridSpace::ResetExtraMoveCost() {
+	extraMoveCost = 0;
+}
