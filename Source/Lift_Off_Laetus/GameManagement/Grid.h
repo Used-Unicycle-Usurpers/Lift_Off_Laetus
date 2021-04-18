@@ -5,9 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GridSpace.h"
+#include "../PowerUps/HarvestSource.h"
 #include "Grid.generated.h"
 
-#define VALID_IDX(idx, upperBound) idx > 0 && idx < upperBound
+#define VALID_IDX(idx, upperBound) idx >= 0 && idx < upperBound
 #define HARVEST_SLIME_TREE 2
 #define HARVEST_ROCK 3
 #define HARVEST_SHRUB 4
@@ -82,7 +83,29 @@ private:
 	UPROPERTY(EditAnywhere, Category = MyCategory)
 		FVector startingLocation;
 
-	void placeSlimeTree(int row, int column);
-	void placeRock(int row, int column);
-	void placeShrub(int row, int column);
+	/**
+	 * Given the information in the TArray rows (loaded with information from
+	 * /Config/grid.txt during intializeGrid()), place a GridSpace actor on each
+	 * tile of the map.
+	 */
+	void placeGridSpaces();
+
+	/**
+	 * Given the infomation in /Config/grid_env.txt, place each of the specified
+	 * HarvestSources in the map, passing a reference to that actor to all of the
+	 * neighboring tiles that will be able to harvest from it.
+	 */
+	void placeEnvironmentObjects();
+
+	/**
+	 * With the given array of (row, column) coordinates, average together all the
+	 * row (x) components and all the column (y) components in world coordinates.
+	 */
+	FVector2D averageCoordinates(TArray<FVector2D> coordinates);
+
+	/**
+	 * Convert the given interger @bold type to the corresponding
+	 * HarvestSourceType enum.
+	 */
+	HarvestSourceType intToHarvestSourceType(int type);
 };

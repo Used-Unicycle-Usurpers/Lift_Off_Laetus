@@ -13,94 +13,20 @@ AGrid::AGrid() {
 
 // Called when the game starts or when spawned
 void AGrid::BeginPlay() {
+	Super::BeginPlay();
+
 	//Read in the config file and store the 2D array of integers that detail
 	//what each tile contains.
 	initializeGrid();
 
-	FVector start = startingLocation;
+	//Now place a grid space over each map tile based on the info loaded in
+	//from /Config/grid.txt during intializeGrid().
+	placeGridSpaces();
 
-	int tileWidth = 200;
-	int numTilesWidth = numRows;
-	int tileLength = 200;
-	int numTilesLength = numColumns;
+	//Now place the harvest sources based the infomration in /Config/grid_env.txt.
+	placeEnvironmentObjects();
 
-	//One by one, place grid space according to the information contained in the
-	//config file.
-	for (int i = 0; i < numTilesWidth; i++) {
-		for (int j = 0; j < numTilesLength; j++) {
-			int configInfo = rows[i].rowNums[j];
-
-			if (configInfo != 0 && configInfo != 5) {
-				//Calculate location of the next AGridSpace
-				FVector location = FVector(start.X + j * tileLength, start.Y + i * tileWidth, tileHeight);
-				FRotator rotation = FRotator(0, 0, 0);
-				AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
-				tile->setGridLocation(i, j);
-
-				//For debug purposes, set color of the tiles
-				switch (configInfo) {
-				case 2:
-					tile->SetToRed();
-					break;
-				case 3:
-					tile->SetToBlue();
-					break;
-				case 4:
-					tile->SetToGreen();
-					break;
-				}
-
-				//Finally, store the reference in the grid for easy access later
-				rows[i].tiles.Add(tile);
-			}
-		}
-	}
-
-	//Now go through and spawn each harvest source, and provide a refernce to each
-	//surrounding tile that will be able to harvest from it.
-	/*
-	for (int i = 0; i < numTilesWidth; i++) {
-		for (int j = 0; j < numTilesLength; j++) {
-			int configInfo = rows[i].rowNums[j];
-			switch (configInfo) {
-			case SLIME_TREE:
-				placeSlimeTree(i, j);
-				break;
-			case ROCK:
-				placeRock(i, j);
-				break;	
-			case SHRUB:
-				placeShrub(i, j);
-				break;
-			}
-		}
-	}
-	*/
 }
-
-void AGrid::placeSlimeTree(int row, int column) {
-	FVector location = FVector(startingLocation.X + column * 200, startingLocation.Y + row * 200, tileHeight);
-	FRotator rotation = FRotator(0, 0, 0);
-	ASlimeTree* tree = GetWorld()->SpawnActor<ASlimeTree>(location, rotation);
-}
-
-void AGrid::placeRock(int row, int column) {
-	FVector location = FVector(startingLocation.X + column * 200, startingLocation.Y + row * 200, tileHeight);
-	FRotator rotation = FRotator(0, 0, 0);
-	ARock* rock = GetWorld()->SpawnActor<ARock>(location, rotation);
-}
-
-void AGrid::placeShrub(int row, int column) {
-	FVector location = FVector(startingLocation.X + column * 200, startingLocation.Y + row * 200, tileHeight);
-	FRotator rotation = FRotator(0, 0, 0);
-	AShrub* shrub = GetWorld()->SpawnActor<AShrub>(location, rotation);
-}
-
-// Called every frame
-void AGrid::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-}
-
 
 /**
  * Initialize the map tiles using the information in /Config/grid.txt. This loads
@@ -157,8 +83,166 @@ bool AGrid::initializeGrid() {
  */
 AGridSpace* AGrid::getTile(FVector2D coordinates) {
 	if (VALID_IDX(coordinates.X, numRows) && VALID_IDX(coordinates.Y, numColumns)) {
-		return rows[coordinates.X].tiles[coordinates.Y];
-	}else {
+		AGridSpace* tile = rows[coordinates.X].tiles[coordinates.Y];
+		if (IsValid(tile)) {
+			return tile;
+		}
+		else {
+			return nullptr;
+		}
+	}
+	else {
 		return nullptr;
 	}
 };
+
+/**
+ * Given the information in the TArray rows (loaded with information from 
+ * /Config/grid.txt during intializeGrid()), place a GridSpace actor on each 
+ * tile of the map.
+ */
+void AGrid::placeGridSpaces() {
+	FVector start = startingLocation;
+
+	int tileWidth = 200;
+	int numTilesWidth = numRows;
+	int tileLength = 200;
+	int numTilesLength = numColumns;
+
+	//One by one, place grid space according to the information contained in the
+	//config file.
+	for (int i = 0; i < numTilesWidth; i++) {
+		for (int j = 0; j < numTilesLength; j++) {
+			int configInfo = rows[i].rowNums[j];
+
+			if (configInfo != 0 && configInfo != 5) {
+				//Calculate location of the next AGridSpace
+				FVector location = FVector(start.X + j * tileLength, start.Y + i * tileWidth, tileHeight);
+				FRotator rotation = FRotator(0, 0, 0);
+				AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
+				tile->setGridLocation(i, j);
+
+				//Finally, store the reference in the grid for easy access later
+				rows[i].tiles.Add(tile);
+			}
+			else {
+				//Use nullptr to make spots on the grid where there is no tile 
+				//i.e. a hole in the map.
+				rows[i].tiles.Add(nullptr);
+			}
+		}
+	}
+}
+
+/**
+ * Given the infomation in /Config/grid_env.txt, place each of the specified
+ * HarvestSources in the map, passing a reference to that actor to all of the
+ * neighboring tiles that will be able to harvest from it.
+ */
+void AGrid::placeEnvironmentObjects() {
+	TArray<FString> lines;
+	FString name = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Config/grid_env.txt"));
+	FString delimeter = "|";
+
+	//Parse the lines of the file into an array of strings
+	FFileHelper::LoadFileToStringArray(lines, *name);
+	
+	//Line by line, place each HarvestSource at the specified location.
+	for (int i = 0; i < lines.Num(); i++) {
+		FString nextLine = lines[i];
+		TArray<FString> rowStr;
+		nextLine.ParseIntoArray(rowStr, *delimeter, false);//Divide into tokens by "|"
+
+		//The type to be substring after the "type=" in the config file.
+		HarvestSourceType type = intToHarvestSourceType(FCString::Atoi(*rowStr[0].RightChop(5)));
+		
+		//Average the coordinates of the tiles to place between all of them.
+		TArray<FVector2D> coordinates;
+		TArray<FString> coordStrs;
+		rowStr[1].RightChop(6).ParseIntoArray(coordStrs, TEXT(","), false);//Substring after "tiles="
+		for (int j = 0; j < coordStrs.Num(); j+=2) {
+			coordinates.Add(FVector2D(FCString::Atoi(*coordStrs[j]), FCString::Atoi(*coordStrs[j + 1])));
+		}
+		FVector2D gridLocation = averageCoordinates(coordinates);
+		FVector mapLocation = FVector(gridLocation.X, gridLocation.Y, 0);
+
+		//Now spawn the HarvestSource, and keep a reference to pass to neigboring tiles
+		AHarvestSource* source = nullptr;
+		switch (type) {
+		case SlimeTree:
+			source = GetWorld()->SpawnActor<ASlimeTree>(mapLocation, FRotator(0, 0, 0));
+			break;
+		case Rock:
+			source = GetWorld()->SpawnActor<ARock>(mapLocation, FRotator(0, 0, 0));
+			break;
+		case Shrub:
+			source = GetWorld()->SpawnActor<AShrub>(mapLocation, FRotator(0, 0, 0));
+			break;
+		}
+
+		//Access neighoring tiles, and pass a reference to source so they can harvest
+		//from this source during the game.
+		TArray<FString> neighbrCoords;
+		rowStr[2].RightChop(10).ParseIntoArray(neighbrCoords, TEXT(","), false);//substring after "neighbors="
+		for (int j = 0; j < neighbrCoords.Num(); j += 2) {
+			int row = FCString::Atoi(*neighbrCoords[j]);
+			int column = FCString::Atoi(*neighbrCoords[j + 1]);
+
+			AGridSpace* neighbor = getTile(FVector2D(row, column));
+			if (IsValid(neighbor) && IsValid(source)) {
+				neighbor->setHarvestSource(source);
+			}else {
+				UE_LOG(LogTemp, Warning, TEXT("Error: invalid tile coordinates: (%d,%d)"), row, column);
+			}
+		}
+	}
+}
+
+/**
+ * With the given array of (row, column) coordinates, average together all the 
+ * row (x) components and all the column (y) components in world coordinates.
+ * 
+ * @param coordinates a TArray of FVecto2D coordinates, where the X component is 
+ *     row index and the Y component is the column index.
+ * @return a single FVector2D in which the X component is the average of the X
+ *     components in coordinates, and the Y component is the average of the Y
+ *     components in coordinates.
+ */
+FVector2D AGrid::averageCoordinates(TArray<FVector2D> coordinates) {
+	int rowSum = 0;
+	int columnSum = 0;
+	for (int i = 0; i < coordinates.Num(); i++) {
+		//Confusing, but for coordinates, X is the offset by row, which means we need
+		//to move along the Y axis in world coordaintes, and vice versa for column
+		rowSum += (startingLocation.X + coordinates[i].Y * 200);
+		columnSum += (startingLocation.Y + coordinates[i].X * 200);
+	}
+	return FVector2D(rowSum / coordinates.Num(), columnSum / coordinates.Num());
+}
+
+/**
+ * Convert the given interger type to the corresponding
+ * HarvestSourceType enum.
+ *
+ * @param type the integer representation of the type of harvest source
+ * @return the HarvestSourceType enum that corresponds to type,
+ *     Invalid if @bold type cannot be converted to a valid HarvestSourceType
+ *     (outside range of enum)
+ */
+HarvestSourceType AGrid::intToHarvestSourceType(int type) {
+	switch (type) {
+	case SLIME_TREE:
+		return SlimeTree;
+	case ROCK:
+		return Rock;
+	case SHRUB:
+		return Shrub;
+	default:
+		return Invalid;
+	}
+}
+
+// Called every frame
+void AGrid::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+}

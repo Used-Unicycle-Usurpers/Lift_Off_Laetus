@@ -41,11 +41,6 @@ void AGridSpace::BeginPlay(){
 	Super::BeginPlay();
 }
 
-// Called every frame
-void AGridSpace::Tick(float DeltaTime){
-	Super::Tick(DeltaTime);
-}
-
 /**
  * Called when a new actor walks onto this AGridSpace. If it was a CrewMember, set it as 
  * the new occupant of this AGridSpace if is a valid actor (i.e. not pending kill and not 
@@ -112,7 +107,6 @@ void AGridSpace::setOccupant(ACrewMember* newOccupant) {
  * Returns the current occupant of this AGrid space.
  * @return pointer to the crewMember currently occupying this AGridSpace,
  *     nullptr if there is no occupant
- *
  */
 ACrewMember* AGridSpace::getOccupant() {
 	return occupant;
@@ -147,6 +141,45 @@ void AGridSpace::setGridLocation(int row, int column) {
 FVector2D AGridSpace::getGridLocation() {
 	return gridLocation;
 }
+
+/**
+ * Set the AHarvestSource occupants of this tile can harvest from, to the given
+ * AHarvestSource. For visuall debugging, the AGridSpace will turn red if it now
+ * has a refernce to an ASlimeTree, blue if Rock, and green if Shrub.
+ * 
+ * @param newSource a pointer to an AHarvestSource that this AGridSpace will now
+ *     have access to.
+ */
+void AGridSpace::setHarvestSource(AHarvestSource* newSource) {
+	harvestSource = newSource;
+	switch (harvestSource->getHarvestSourceType()) {
+	case SlimeTree:
+		SetToRed();
+		break;
+	case Rock:
+		SetToBlue();
+		break;
+	case Shrub:
+		SetToGreen();
+		break;
+	}
+}
+
+/**
+ * Returns the AHarvestSource that this tile allows the occupant to harvest
+ * from during their turn.
+ *
+ * @return a pointer to the AHarvestSource that this AGridSpace as access to.
+ */
+AHarvestSource* AGridSpace::getHarvestSource() {
+	return harvestSource;
+}
+
+// Called every frame
+void AGridSpace::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+}
+
 
 /**
 * Set the "extra" movement cost for entities moving through this space.
