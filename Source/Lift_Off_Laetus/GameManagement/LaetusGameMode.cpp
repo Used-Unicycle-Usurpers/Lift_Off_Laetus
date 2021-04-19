@@ -20,6 +20,18 @@ ALaetusGameMode::ALaetusGameMode() {
  */
 void ALaetusGameMode::BeginPlay() {
 	grid = GetWorld()->SpawnActor<AGrid>(FVector(0, 0, 0), FRotator(0, 0, 0));
+
+	//The code below is to test if crew and crewmember are working correctly
+	class ACrew * redTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0)); 
+	class ACrew * blueTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
+	
+	//set teams
+	redTeam->SetTeam(0);
+	blueTeam->SetTeam(1);
+
+	// add to crews array
+	crews.Add(redTeam);
+	crews.Add(blueTeam);
 }
 
 

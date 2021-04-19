@@ -36,7 +36,9 @@ private:
 	int32 coresToWin = 3;  // Number of cores needed to win
 
 	// Crew/turn parameters
-	ACrew * crews;     // Array of crews, defined at runtime
+	//ACrew* crews;     // Array of crews, defined at runtime
+	TArray<AActor*> crews; // for testing
+
 	int32 currentCrew = 0;          // Which crew is playing currently
 	// TimerHandle turnTimer;     // Keeps track of the time left in the turn
 	// TurnActionStack * turnStack;  // Records the actions taken during the current turn
