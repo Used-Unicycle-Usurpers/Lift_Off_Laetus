@@ -10,8 +10,7 @@
  * 
  */
 UCLASS()
-class LIFT_OFF_LAETUS_API ASlimeTree : public AHarvestSource
-{
+class LIFT_OFF_LAETUS_API ASlimeTree : public AHarvestSource {
 	GENERATED_BODY()
 	
 public:

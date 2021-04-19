@@ -7,11 +7,14 @@
 #include "PowerUpActor.h"
 #include "HarvestSource.generated.h"
 
+//Enum detailing the diffirent possible types of harvest sources, plus
+//one for invalid type.
 UENUM()
 enum HarvestSourceType {
 	Rock,
 	SlimeTree,
-	Shrub
+	Shrub,
+	Invalid
 };
 
 UCLASS()
@@ -25,8 +28,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	//Getter for the HarvestSourceType of this AHarvestSouce.
 	HarvestSourceType getHarvestSourceType();
 
+	/**
+	 * TODO:
+	 * Harvest the corresponding material from this space
+	 */
 	virtual APowerUpActor* harvest();
 
 	UPROPERTY(EditAnywhere)
@@ -36,9 +44,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	//Sets the HarvestSourceType of this AHarvestSource. Only child classes should
+	//be able to set their type.
 	void setHarvestSourceType(HarvestSourceType newType);
 
 private:	
+	//The type fo AHarvestSource this is (SlimeTree, Rock, or Shrub)
 	HarvestSourceType type;
 
 };

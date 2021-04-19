@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "../Characters/CrewMember.h"
+#include "../PowerUps/HarvestSource.h"
 #include "GridSpace.generated.h"
 
 UCLASS()
@@ -43,6 +44,7 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
 
+	//For visual debugging
 	void SetToRed();
 	void SetToBlue();
 	void SetToGreen();
@@ -58,6 +60,10 @@ public:
 	void setGridLocation(int32 row, int32 column);
 	FVector2D getGridLocation();
 
+	//Getter and setter for harvestSource
+	void setHarvestSource(AHarvestSource* newSource);
+	AHarvestSource* getHarvestSource();
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -69,4 +75,8 @@ private:
 	//The row and column of this AGridSpace. The X component is 
 	//the row and the Y component is the column.
 	FVector2D gridLocation;
+
+	//The HarvestSource that occupants of this tile can harvest from
+	//during their turn.
+	AHarvestSource* harvestSource;
 };
