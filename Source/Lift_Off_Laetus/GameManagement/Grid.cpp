@@ -118,6 +118,9 @@ void AGrid::placeGridSpaces() {
 	int tileLength = 200;
 	int numTilesLength = numColumns;
 
+	FCollisionQueryParams cqp;
+	FHitResult hr;
+
 	//One by one, place grid space according to the information contained in the
 	//config file.
 	for (int i = 0; i < numTilesWidth; i++) {
@@ -125,8 +128,15 @@ void AGrid::placeGridSpaces() {
 			int configInfo = rows[i].rowNums[j];
 
 			if (configInfo != 0 && configInfo != 5) {
-				//Calculate location of the next AGridSpace
+				//Do a line trace down to place the GridSpace just a few units above the groud.
 				FVector location = FVector(start.X + j * tileLength, start.Y + i * tileWidth, tileHeight);
+				FVector startHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, 600);
+				FVector endHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, -600);
+				GetWorld()->LineTraceSingleByChannel(hr, startHeight, endHeight, ECC_Visibility, cqp);
+				if (hr.bBlockingHit == true && hr.GetActor() != this) {
+						location.Z = hr.ImpactPoint.Z;
+				}
+
 				FRotator rotation = FRotator(0, 0, 0);
 				AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
 				tile->setGridLocation(i, j);
@@ -174,6 +184,16 @@ void AGrid::placeEnvironmentObjects() {
 		}
 		FVector2D gridLocation = averageCoordinates(coordinates);
 		FVector mapLocation = FVector(gridLocation.X, gridLocation.Y, 0);
+
+		//Run a line trace to place it just above the ground
+		FCollisionQueryParams cqp;	
+		FHitResult hr;
+		FVector startHeight = FVector(gridLocation.X, gridLocation.Y, 600);
+		FVector endHeight = FVector(gridLocation.X, gridLocation.Y, -600);
+		GetWorld()->LineTraceSingleByChannel(hr, startHeight, endHeight, ECC_Visibility, cqp);
+		if (hr.bBlockingHit == true && hr.GetActor() != this) {
+			mapLocation.Z = hr.ImpactPoint.Z;
+		}
 
 		//Now spawn the HarvestSource, and keep a reference to pass to neigboring tiles
 		AHarvestSource* source = nullptr;
