@@ -55,7 +55,7 @@ public:
 	bool isOccupied();
 
 	//Getter and setter for the row and column of this AGridSpace
-	void setGridLocation(int row, int column);
+	void setGridLocation(int32 row, int32 column);
 	FVector2D getGridLocation();
 
 protected:

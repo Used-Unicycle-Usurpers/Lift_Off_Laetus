@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "../GameManagement/GridSpace.h"
 #include "../Weapons/Rifle.h"
 #include "../Weapons/Launcher.h"
 #include "../PowerUps/PowerUpEffect.h"
@@ -20,12 +19,18 @@ public:
 	ACrewMember();
 
 	//changed return from int to void for suggested functions
-	void MoveTo(AGridSpace target);
+	void MoveTo(class AGridSpace * target);
 	void Shoot(FVector direction);
 	void Shove(); // what if there is more than one shove option
 	void TakeDamage(int32 damage); //excluded cause parameter 
 
+	class UStaticMeshComponent* Mesh;
 
+	//For testing 
+	//ACrewMember(int32 team);
+	class UStaticMeshComponent* SphereMesh;
+	float Speed;
+	//void SetTeam(int32 team);
 
 protected:
 	// Called when the game starts or when spawned
@@ -38,9 +43,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// Below is supposed to be the hitbox, needs testing
+	//watch video to see what he says 
+
 private:
 	// Team character belongs too
-	ACrew* crew; 
+	//ACrew* crew; 
+	class ACrew* crew;
 
 	// Character ID (index in crewMember array)
 	int32 id;
@@ -49,18 +58,17 @@ private:
 	float health;
 	int32 speed;
 	int32 damage;
-	//SkeletalMeshComponent * mesh;
-	//CapsuleCollisionComponent * hitbox;
-	//CharacterMovementComponent * movement;
-
-
 
 	// Character's connection to the world 
-	AGridSpace* gridSpace;
+	class AGridSpace* gridSpace;
 
 	//	Weapon info
 	PowerUpEffect* gunEffect;
 	//TODO: figure out how ot add weapons
-	//Rifle * rifle;
+	//ARifle * rifle;
 	//ALauncher * launcher;
+
+	//For testing 
+	//int32 team;
+	
 };

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "CrewMember.h"
 #include "Crew.generated.h"
 
 UCLASS()
@@ -15,7 +14,10 @@ class LIFT_OFF_LAETUS_API ACrew : public APawn
 public:
 	// Sets default values for this pawn's properties
 	ACrew(); 
-
+	
+	//for testing 
+	void SetTeam(int32 team);
+	void SetUp();
 
 
 protected:
@@ -31,13 +33,18 @@ public:
 
 private:
 	// Array of crew members 
-	ACrewMember* crewMembers[3] = {};
+	class ACrewMember* crewMembers[3] = {};
+	//TArray<AActor*> crewMembers; // for testing
 
 	// Index of current crew member 
 	int32 selectedCharacter;
 
 	// Number of cores in team 
 	int32 cores;
+
+	//Team color, created for testing but we might want to keep it 
+	int32 team; 
+
 
 	// Would the ActionBar component go here? 
 };

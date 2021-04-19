@@ -3,20 +3,42 @@
 
 #include "CrewMember.h"
 #include "Crew.h"
+#include "../GameManagement/GridSpace.h"
 
 // Sets default values
 ACrewMember::ACrewMember()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 
-	// Team this character belongs to 
-	//const ACrew team;
+	//Taken from tutorial
+	//SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereMesh"));
 
-	// Character id (index in crewMember array)
-	//int id;
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>SphereMeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
+	Mesh->SetStaticMesh(SphereMeshAsset.Object);
 
+	Speed = 10.f;
+
+	RootComponent = Mesh;
+	
 }
+
+// For testing 
+/*
+ void ACrewMember::SetTeam(int32 newTeam){
+	 
+	 if (newTeam) {
+		 this->team = newTeam;
+	 }
+	 else {
+		 this->team = 3; //set team to green if nullptr
+	 }
+	 
+		
+}
+*/
 
 
 // Called when the game starts or when spawned
@@ -24,6 +46,9 @@ void ACrewMember::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//TSubclassOf<AActor> ActorToSpawn;
+	//AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(FVector(-80, 122, 0), FRotator(0, 0, 0));
+	//UE_LOG(LogTemp, Warning, TEXT("Hello World!"));
 }
 
 // Called every frame
@@ -41,7 +66,7 @@ void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 }
 
 // Move to GridSpace 
-void ACrewMember::MoveTo(AGridSpace target) {
+void ACrewMember::MoveTo(AGridSpace * target) {
 	// move to target grid space 
 	// do we want it to return true or false to indicate 
 	// if it was capable of completing the action 
@@ -60,9 +85,11 @@ void ACrewMember::Shove() {
 }
 
 // Take damage 
-void ACrewMember::TakeDamage(int32 damage) {
-	health -= damage;
+void ACrewMember::TakeDamage(int32 damageTaken) {
+	health -= damageTaken;
 
-	if(health <= 0)
+	if (health <= 0) {
 		//destroy actor?
+	}
+		
 }

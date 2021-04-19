@@ -134,7 +134,7 @@ bool AGridSpace::isOccupied() {
  * @param row the row number for this AGridSpace
  * @param column the column number for this AGridSpace
  */
-void AGridSpace::setGridLocation(int row, int column) {
+void AGridSpace::setGridLocation(int32 row, int32 column) {
 	gridLocation = FVector2D(row, column);
 }
 
