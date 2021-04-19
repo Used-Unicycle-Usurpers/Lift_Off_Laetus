@@ -33,8 +33,8 @@ public:
 
 private:
 	// Array of crew members 
-	class ACrewMember* crewMembers[3] = {};
-	//TArray<AActor*> crewMembers; // for testing
+	//class ACrewMember* crewMembers[3] = {};
+	TArray<AActor*> crewMembers; // for testing
 
 	// Index of current crew member 
 	int32 selectedCharacter;

@@ -16,8 +16,8 @@ ACrewMember::ACrewMember()
 	//Taken from tutorial
 	//SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereMesh"));
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>SphereMeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
-	Mesh->SetStaticMesh(SphereMeshAsset.Object);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>CharacterMeshAsset(TEXT("StaticMesh'/Game/Characters/CHAR_Pavo_Base.CHAR_Pavo_Base'"));
+	Mesh->SetStaticMesh(CharacterMeshAsset.Object);
 
 	Speed = 10.f;
 
@@ -26,19 +26,19 @@ ACrewMember::ACrewMember()
 }
 
 // For testing 
-/*
+
  void ACrewMember::SetTeam(int32 newTeam){
 	 
 	 if (newTeam) {
-		 this->team = newTeam;
+		 team = newTeam;
 	 }
 	 else {
-		 this->team = 3; //set team to green if nullptr
+		 team = 3; //set team to green if nullptr
 	 }
 	 
 		
 }
-*/
+
 
 
 // Called when the game starts or when spawned

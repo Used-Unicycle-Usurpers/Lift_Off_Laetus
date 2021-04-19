@@ -30,7 +30,7 @@ public:
 	//ACrewMember(int32 team);
 	class UStaticMeshComponent* SphereMesh;
 	float Speed;
-	//void SetTeam(int32 team);
+	void SetTeam(int32 team);
 
 protected:
 	// Called when the game starts or when spawned
@@ -69,6 +69,6 @@ private:
 	//ALauncher * launcher;
 
 	//For testing 
-	//int32 team;
+	int32 team;
 	
 };
