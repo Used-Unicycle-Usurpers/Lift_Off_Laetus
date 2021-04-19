@@ -22,7 +22,7 @@ public:
 	void MoveTo(class AGridSpace * target);
 	void Shoot(FVector direction);
 	void Shove(); // what if there is more than one shove option
-	void TakeDamage(int32 damage); //excluded cause parameter 
+	void takeDamage(int32 damage); //excluded cause parameter 
 
 	class UStaticMeshComponent* Mesh;
 
@@ -31,6 +31,17 @@ public:
 	class UStaticMeshComponent* SphereMesh;
 	float Speed;
 	void SetTeam(int32 team);
+
+	/**
+	 * Set the AGridSpace this ACrewMember is currently standing on to the given
+	 * AGridSpace.
+	 */
+	void setGridSpace(class AGridSpace* space);
+
+	/**
+	 * Get the AGridSpace this ACrewMember is currently standing on.
+	 */
+	class AGridSpace* getGridSpace();
 
 protected:
 	// Called when the game starts or when spawned
@@ -63,7 +74,7 @@ private:
 	class AGridSpace* gridSpace;
 
 	//	Weapon info
-	PowerUpEffect* gunEffect;
+	class PowerUpEffect* gunEffect;
 	//TODO: figure out how ot add weapons
 	//ARifle * rifle;
 	//ALauncher * launcher;

@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Lift_Off_Laetus/Characters/Crew.h"
-#include "GridSpace.h"
-#include "Grid.h"
 #include "LaetusGameMode.generated.h"
 
 /**
@@ -37,7 +34,7 @@ private:
 
 	// Crew/turn parameters
 	//ACrew* crews;     // Array of crews, defined at runtime
-	TArray<AActor*> crews; // for testing
+	TArray<class ACrew*> crews; // for testing
 
 	int32 currentCrew = 0;          // Which crew is playing currently
 	// TimerHandle turnTimer;     // Keeps track of the time left in the turn
@@ -45,7 +42,7 @@ private:
 
 	//The grid representing the tiles of the map.
 	UPROPERTY(EditAnywhere, Category = MyCategory)
-		AGrid* grid;
+		class AGrid* grid;
 
 	// Private helper methods
 	void ClearTurnActionStack(); // Clears the stack of actions done on the current crew's turn
