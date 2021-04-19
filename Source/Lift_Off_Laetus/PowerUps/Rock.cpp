@@ -5,8 +5,8 @@
 #include "EnergizedOre.h"
 
 static TArray<FString> rockMeshReferences = {
-	"StaticMesh'/Game/Geometry/MapPieces/HarvestSourceMeshes/ENV_Rock1.ENV_Rock1'",
-	"StaticMesh'/Game/Geometry/MapPieces/HarvestSourceMeshes/ENV_Rock2.ENV_Rock2'",
+	"StaticMesh'/Game/Geometry/Map/HarvestSourceMeshes/ENV_Rock1.ENV_Rock1'",
+	"StaticMesh'/Game/Geometry/Map/HarvestSourceMeshes/ENV_Rock2.ENV_Rock2'",
 };
 
 ARock::ARock() {

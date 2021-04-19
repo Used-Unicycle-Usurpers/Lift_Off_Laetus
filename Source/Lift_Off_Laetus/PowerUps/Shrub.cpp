@@ -5,7 +5,7 @@
 #include "ShrubFruit.h"
 
 static TArray<FString> shrubMeshReferences = {
-	"StaticMesh'/Game/Geometry/MapPieces/HarvestSourceMeshes/ENV_Shrub.ENV_Shrub'",
+	"StaticMesh'/Game/Geometry/Map/HarvestSourceMeshes/ENV_Shrub.ENV_Shrub'",
 };
 
 AShrub::AShrub() {
