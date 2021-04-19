@@ -27,16 +27,12 @@ ACrewMember::ACrewMember()
 
 // For testing 
 
- void ACrewMember::SetTeam(int32 newTeam){
-	 
+ void ACrewMember::SetTeam(int32 newTeam) {
 	 if (newTeam) {
 		 team = newTeam;
-	 }
-	 else {
+	 } else {
 		 team = 3; //set team to green if nullptr
 	 }
-	 
-		
 }
 
 
@@ -85,7 +81,7 @@ void ACrewMember::Shove() {
 }
 
 // Take damage 
-void ACrewMember::TakeDamage(int32 damageTaken) {
+void ACrewMember::takeDamage(int32 damageTaken) {
 	health -= damageTaken;
 
 	if (health <= 0) {
@@ -93,3 +89,25 @@ void ACrewMember::TakeDamage(int32 damageTaken) {
 	}
 		
 }
+
+/**
+ * Set the AGridSpace this ACrewMember is currently standing on to the given
+ * AGridSpace.
+ * 
+ * @param space a pointer to the new AGridSpace this ACrewMember is now
+ *     standing on.
+ */
+void ACrewMember::setGridSpace(class AGridSpace* space) {
+	gridSpace = space;
+}
+
+/**
+ * Get the AGridSpace this ACrewMember is currently standing on. 
+ * 
+ * @returns a pointer to the AGridSpace this ACrewMember is currently 
+ *     standing on.
+ */
+class AGridSpace* ACrewMember::getGridSpace() {
+	return gridSpace;
+}
+

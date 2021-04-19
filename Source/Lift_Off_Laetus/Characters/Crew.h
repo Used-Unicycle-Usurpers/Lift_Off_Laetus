@@ -7,8 +7,7 @@
 #include "Crew.generated.h"
 
 UCLASS()
-class LIFT_OFF_LAETUS_API ACrew : public APawn
-{
+class LIFT_OFF_LAETUS_API ACrew : public APawn {
 	GENERATED_BODY()
 
 public:
@@ -16,9 +15,8 @@ public:
 	ACrew(); 
 	
 	//for testing 
-	void SetTeam(int32 team);
-	void SetUp();
-
+	//void SetTeam(int32 newTeam);
+	void SetUp(int32 newTeam, class AGrid* newGrid);
 
 protected:
 	// Called when the game starts or when spawned
@@ -34,7 +32,7 @@ public:
 private:
 	// Array of crew members 
 	//class ACrewMember* crewMembers[3] = {};
-	TArray<AActor*> crewMembers; // for testing
+	TArray<class ACrewMember*> crewMembers; // for testing
 
 	// Index of current crew member 
 	int32 selectedCharacter;
@@ -43,8 +41,12 @@ private:
 	int32 cores;
 
 	//Team color, created for testing but we might want to keep it 
-	int32 team; 
+	int32 team;
 
+	//Reference the map grid
+	class AGrid* grid;
 
+	//Reference to the game mode
+	class ALaetusGameMode* gameMode;
 	// Would the ActionBar component go here? 
 };

@@ -6,9 +6,9 @@
 
 //References to random meshes to pick from on construction.
 static TArray<FString> treeMeshReferences = {
-	"StaticMesh'/Game/Geometry/MapPieces/HarvestSourceMeshes/ENV_Tree1.ENV_Tree1'",
-	"StaticMesh'/Game/Geometry/MapPieces/HarvestSourceMeshes/ENV_Tree2.ENV_Tree2'",
-	"StaticMesh'/Game/Geometry/MapPieces/HarvestSourceMeshes/ENV_Tree3.ENV_Tree3'",
+	"StaticMesh'/Game/Geometry/Map/HarvestSourceMeshes/ENV_Tree1.ENV_Tree1'",
+	"StaticMesh'/Game/Geometry/Map/HarvestSourceMeshes/ENV_Tree2.ENV_Tree2'",
+	"StaticMesh'/Game/Geometry/Map/HarvestSourceMeshes/ENV_Tree3.ENV_Tree3'",
 };
 
 

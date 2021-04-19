@@ -26,6 +26,7 @@ void AGrid::BeginPlay() {
 	//Now place the harvest sources based the infomration in /Config/grid_env.txt.
 	placeEnvironmentObjects();
 
+	//Now the map is ready, place the crew members at the GridSpaces specified in grid.txt
 }
 
 /**
@@ -42,14 +43,22 @@ bool AGrid::initializeGrid() {
 	FFileHelper::LoadFileToStringArray(lines, *name);
 
 	//The first two lines should be the number of rows and columns, respectively
-	numRows = FCString::Atoi(*lines[0]);
-	numColumns = FCString::Atoi(*lines[1]);
-	tileHeight = FCString::Atoi(*lines[2]);
+	numRows = FCString::Atoi(*(lines[0].RightChop(8)));
+	numColumns = FCString::Atoi(*(lines[1].RightChop(11)));
+	tileHeight = FCString::Atoi(*(lines[2].RightChop(11)));
+	numSteps = FCString::Atoi(*(lines[3].RightChop(9)));
+
+	//Get the rows of the grid to start players out on
+	TArray<FString> startingRowsStr;
+	lines[4].RightChop(13).ParseIntoArray(startingRowsStr, *delimeter, false);
+	startingRows.Add(FCString::Atoi(*startingRowsStr[0]));
+	startingRows.Add(FCString::Atoi(*startingRowsStr[1]));
+	startingRows.Add(FCString::Atoi(*startingRowsStr[2]));
 
 	//Break the third line up into the three coordinates of the starting location
 	//(i.e. the location to place the first, top left tile).
 	TArray<FString> locationStr;
-	lines[3].ParseIntoArray(locationStr, *delimeter, false);
+	lines[5].RightChop(17).ParseIntoArray(locationStr, *delimeter, false);
 	startingLocation.X = FCString::Atoi(*locationStr[0]);
 	startingLocation.Y = FCString::Atoi(*locationStr[1]);
 	startingLocation.Z = FCString::Atoi(*locationStr[2]);
@@ -58,7 +67,7 @@ bool AGrid::initializeGrid() {
 	//numbers encode details about that space, add the number here and the 
 	//corresponding tiles will be spawned at BeginPlay.
 	for (int i = 0; i < numRows; i++) {
-		FString nextLine = lines[i + 4];
+		FString nextLine = lines[i + 6];
 		TArray<FString> rowStr;
 		nextLine.ParseIntoArray(rowStr, *delimeter, false);
 		struct FRow newRow;
@@ -109,6 +118,9 @@ void AGrid::placeGridSpaces() {
 	int tileLength = 200;
 	int numTilesLength = numColumns;
 
+	FCollisionQueryParams cqp;
+	FHitResult hr;
+
 	//One by one, place grid space according to the information contained in the
 	//config file.
 	for (int i = 0; i < numTilesWidth; i++) {
@@ -116,8 +128,15 @@ void AGrid::placeGridSpaces() {
 			int configInfo = rows[i].rowNums[j];
 
 			if (configInfo != 0 && configInfo != 5) {
-				//Calculate location of the next AGridSpace
+				//Do a line trace down to place the GridSpace just a few units above the groud.
 				FVector location = FVector(start.X + j * tileLength, start.Y + i * tileWidth, tileHeight);
+				FVector startHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, 600);
+				FVector endHeight = FVector(start.X + j * tileLength, start.Y + i * tileWidth, -600);
+				GetWorld()->LineTraceSingleByChannel(hr, startHeight, endHeight, ECC_Visibility, cqp);
+				if (hr.bBlockingHit == true && hr.GetActor() != this) {
+						location.Z = hr.ImpactPoint.Z;
+				}
+
 				FRotator rotation = FRotator(0, 0, 0);
 				AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
 				tile->setGridLocation(i, j);
@@ -165,6 +184,16 @@ void AGrid::placeEnvironmentObjects() {
 		}
 		FVector2D gridLocation = averageCoordinates(coordinates);
 		FVector mapLocation = FVector(gridLocation.X, gridLocation.Y, 0);
+
+		//Run a line trace to place it just above the ground
+		FCollisionQueryParams cqp;	
+		FHitResult hr;
+		FVector startHeight = FVector(gridLocation.X, gridLocation.Y, 600);
+		FVector endHeight = FVector(gridLocation.X, gridLocation.Y, -600);
+		GetWorld()->LineTraceSingleByChannel(hr, startHeight, endHeight, ECC_Visibility, cqp);
+		if (hr.bBlockingHit == true && hr.GetActor() != this) {
+			mapLocation.Z = hr.ImpactPoint.Z;
+		}
 
 		//Now spawn the HarvestSource, and keep a reference to pass to neigboring tiles
 		AHarvestSource* source = nullptr;
@@ -240,6 +269,35 @@ HarvestSourceType AGrid::intToHarvestSourceType(int type) {
 	default:
 		return Invalid;
 	}
+}
+
+/**
+ * Returns the array of rows to start the crew members on.
+ * 
+ * @return an array of 3 integers, representing the rows to place
+ *     the three crew members at the beginning of the game.
+ */
+TArray<int32> AGrid::getStartingRows() {
+	return startingRows;
+}
+
+/**
+ * Returns the number of steps on either side of the map (should
+ * be symetrical).
+ * 
+ * @return the number of steps on either side of the map.
+ */
+int AGrid::getNumSteps() {
+	return numSteps;
+}
+
+/**
+ * Returns the number of columns in the map grid.
+ * 
+ * @return an integer representing the number of columns in the map grid.
+ */
+int AGrid::getNumColumns() {
+	return numColumns;
 }
 
 // Called every frame

@@ -6,6 +6,8 @@
 #include "CrewMember.h"
 #include "Runtime/Engine/Classes/Engine/TargetPoint.h"
 #include "Kismet/GameplayStatics.h"
+#include "../GameManagement/LaetusGameMode.h"
+#include "../GameManagement/Grid.h"
 
 // Sets default values
 ACrew::ACrew()
@@ -15,70 +17,56 @@ ACrew::ACrew()
 
 }
 
+/*
 // Constructor for testing 
 void ACrew::SetTeam(int32 newTeam) {
 	team = newTeam;
 	
 	// Set up crew members once we have team 
-	SetUp();
+	//SetUp();
 }
+*/
 
 // Called when the game starts or when spawned
-void ACrew::BeginPlay()
-{
+void ACrew::BeginPlay() {
 	Super::BeginPlay();
 }
 
 //Setup Crew Members 
-void ACrew::SetUp() {
-	TArray<AActor*> targetPoints;
-
-	if (team == 0) {
-		UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), ATargetPoint::StaticClass(), "Red", targetPoints);
-	}
-	else {
-		UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), ATargetPoint::StaticClass(), "Blue", targetPoints);
-	}
-
-
-	//Spawn  team 
-	ACrewMember* member1 = GetWorld()->SpawnActor<ACrewMember>(targetPoints[0]->GetActorLocation(), FRotator(0, 0, 0));
-	ACrewMember* member2 = GetWorld()->SpawnActor<ACrewMember>(targetPoints[1]->GetActorLocation(), FRotator(0, 0, 0));
-	ACrewMember* member3 = GetWorld()->SpawnActor<ACrewMember>(targetPoints[2]->GetActorLocation(), FRotator(0, 0, 0));
-
-	//set team 
+void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
+	team = newTeam;
+	grid = newGrid;
+	TArray<int32> startingRows = grid->getStartingRows();
 	
-	if (team == 0) {
-		member1->SetTeam(0);
-		member2->SetTeam(0);
-		member3->SetTeam(0);
+	//Set to left side, facing right
+	int column = grid->getNumSteps();
+	FRotator rotation = FRotator(0, 270, 0);
+	if (team == 1) { // Team 1, so set to right side, facing left
+		column = grid->getNumColumns() - grid->getNumSteps() - 1;
+		rotation = FRotator(0, 90, 0);
 	}
-	else {
-		member1->SetTeam(1);
-		member2->SetTeam(1);
-		member3->SetTeam(1);
+
+	//For each crew member, spawn at the next starting point and set reference to GridSpace
+	for (int i = 0; i < 3; i++) {
+		AGridSpace* space = grid->getTile(FVector2D(startingRows[i], column));
+		FVector location = space->GetActorLocation();
+		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(FVector(location.X, location.Y, location.Z + 100), rotation);
+
+		newMember->SetTeam(newTeam);
+		crewMembers.Add(newMember);
+		space->setOccupant(newMember);
+		newMember->setGridSpace(space);
 	}
-	
-
-	crewMembers.Add(member1);
-	crewMembers.Add(member2);
-	crewMembers.Add(member3);
-
-	//crewMembers[0] = member1;
-	//crewMembers[1] = member2;
-	//crewMembers[2] = member3;
 }
 
 // Called every frame
-void ACrew::Tick(float DeltaTime)
-{
+void ACrew::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 }
 
 // Called to bind functionality to input
-void ACrew::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
+void ACrew::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
