@@ -10,8 +10,11 @@
  * 
  */
 UCLASS()
-class LIFT_OFF_LAETUS_API URifle : public UWeapon
-{
+class LIFT_OFF_LAETUS_API URifle : public UWeapon {
 	GENERATED_BODY()
 	
+public:
+	URifle();
+
+	virtual int fire(FVector2D direction) override;
 };

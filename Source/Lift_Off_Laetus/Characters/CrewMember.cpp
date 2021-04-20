@@ -3,7 +3,10 @@
 
 #include "CrewMember.h"
 #include "Crew.h"
+#include "../Weapons/Launcher.h"
+#include "../Weapons/Rifle.h"
 #include "../GameManagement/GridSpace.h"
+#include "Components/InputComponent.h"
 
 // Sets default values
 ACrewMember::ACrewMember()
@@ -23,6 +26,10 @@ ACrewMember::ACrewMember()
 
 	RootComponent = Mesh;
 	
+	rifle = CreateDefaultSubobject<URifle>("Rifle");
+	rifle->mesh->SetVisibility(false);
+	launcher = CreateDefaultSubobject<ULauncher>("Launcher");
+	launcher->mesh->SetVisibility(false);
 }
 
 // For testing 
@@ -38,8 +45,7 @@ ACrewMember::ACrewMember()
 
 
 // Called when the game starts or when spawned
-void ACrewMember::BeginPlay()
-{
+void ACrewMember::BeginPlay() {
 	Super::BeginPlay();
 
 	//TSubclassOf<AActor> ActorToSpawn;
@@ -48,17 +54,15 @@ void ACrewMember::BeginPlay()
 }
 
 // Called every frame
-void ACrewMember::Tick(float DeltaTime)
-{
+void ACrewMember::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 }
 
 // Called to bind functionality to input
-void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
+void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	PlayerInputComponent->BindKey(EKeys::A, IE_Released, this, &ACrewMember::Shove);
 }
 
 // Move to GridSpace 
@@ -71,12 +75,18 @@ void ACrewMember::MoveTo(AGridSpace * target) {
 }
 
 // Shoot in a specific direction 
-void ACrewMember::Shoot(FVector direction) {
-	// not sure if im understanding this method correctly 
+void ACrewMember::Shoot(FVector2D direction, bool useRifle) {
+	// not sure if im understanding this method correctly
+	if (useRifle) {
+		rifle->fire(direction);
+	} else {
+		launcher->fire(direction);
+	}
 }
 
 // Shove 
 void ACrewMember::Shove() {
+	UE_LOG(LogTemp, Warning, TEXT("hello"));
 	// Not sure if we are going to give them the option of what to shove
 }
 
