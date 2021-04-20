@@ -51,11 +51,16 @@ public:
 	bool initializeGrid();
 
 	/**
-	 * Returns the AGridSpace that resides at the given coordinates, where the
+	 * Returns the GridSpace that resides at the given coordinates, where the
 	 * x value of the coordinates is the row index, the y value is the column
 	 * index.
 	 */
 	AGridSpace* getTile(FVector2D coordinates);
+
+	/**
+	* Returns the GridSpace at a given location, relative to another given GridSpace.
+	*/
+	AGridSpace* getTileRelative(FVector2D coordinates, AGridSpace* origin);
 
 	/**
 	 * Returns the array of rows to start the crew members on.
@@ -132,4 +137,5 @@ private:
 	 * HarvestSourceType enum.
 	 */
 	HarvestSourceType intToHarvestSourceType(int type);
+
 };

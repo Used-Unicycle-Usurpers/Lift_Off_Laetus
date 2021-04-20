@@ -69,4 +69,68 @@ void ACrew::Tick(float DeltaTime) {
 void ACrew::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	// Character selection
+	PlayerInputComponent->BindAction("Action_CycleCrewUp", IE_Pressed, this, &ACrew::CycleSelectedCrewMemberUp);
+	PlayerInputComponent->BindAction("Action_CycleCrewDown", IE_Pressed, this, &ACrew::CycleSelectedCrewMemberDown);
+
+	// Movement
+	// TODO: Remove these! They're just for testing
+	PlayerInputComponent->BindAction("DPad_Up", IE_Pressed, this, &ACrew::MoveCurrentUp);
+	PlayerInputComponent->BindAction("DPad_Down", IE_Pressed, this, &ACrew::MoveCurrentDown);
+	PlayerInputComponent->BindAction("DPad_Right", IE_Pressed, this, &ACrew::MoveCurrentRight);
+	PlayerInputComponent->BindAction("DPad_Left", IE_Pressed, this, &ACrew::MoveCurrentLeft);
+}
+
+// Movement
+
+void ACrew::MoveCrewMember(int32 crewMember, FVector2D direction) {
+	
+	if (crewMember >= crewMembers.Num()) { return; }
+	
+	AGridSpace* adjSpace = grid->getTileRelative(direction, crewMembers[crewMember]->getGridSpace());
+	
+	if (adjSpace != nullptr && !(adjSpace->isOccupied())) {
+		crewMembers[crewMember]->MoveTo(adjSpace);
+	}
+}
+
+void ACrew::MoveCurrentRight() {
+	MoveCrewMember(selectedCharacter, FVector2D(1, 0));
+}
+
+void ACrew::MoveCurrentLeft() {
+	MoveCrewMember(selectedCharacter, FVector2D(-1, 0));
+}
+
+void ACrew::MoveCurrentUp() {
+	MoveCrewMember(selectedCharacter, FVector2D(0, 1));
+}
+
+void ACrew::MoveCurrentDown() {
+	MoveCrewMember(selectedCharacter, FVector2D(0, -1));
+}
+
+// Crew member selection
+
+void ACrew::SelectCrewMember(int32 selected) {
+	if (selected >= crewMembers.Num() || selected == selectedCharacter) { return; }
+	
+	selectedCharacter = selected;
+	// Refresh UI here, maybe?
+}
+
+void ACrew::CycleSelectedCrewMemberUp() {
+	
+	if (selectedCharacter == crewMembers.Num() - 1)
+		SelectCrewMember(0);
+	else
+		SelectCrewMember(selectedCharacter + 1);
+}
+
+void ACrew::CycleSelectedCrewMemberDown() {
+
+	if (selectedCharacter == 0)
+		SelectCrewMember(crewMembers.Num() - 1);
+	else
+		SelectCrewMember(selectedCharacter - 1);
 }

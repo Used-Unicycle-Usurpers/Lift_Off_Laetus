@@ -11,10 +11,12 @@ ALaetusGameMode::ALaetusGameMode() {
 	PlayerControllerClass = ACrewController::StaticClass();
 
 	// set default pawn class to our Blueprinted character
+	/*
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
 	if (PlayerPawnBPClass.Class != nullptr) {
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+	*/
 }
 
 /**
@@ -22,6 +24,8 @@ ALaetusGameMode::ALaetusGameMode() {
  * all the information contained in /Config/grid.txt.
  */
 void ALaetusGameMode::BeginPlay() {
+	
+	// Make grid
 	grid = GetWorld()->SpawnActor<AGrid>(FVector(0, 0, 0), FRotator(0, 0, 0));
 
 	//The code below is to test if crew and crewmember are working correctly
@@ -32,6 +36,8 @@ void ALaetusGameMode::BeginPlay() {
 	redTeam->SetUp(0, grid);
 	blueTeam->SetUp(1, grid);
 
+	//Auto-possess
+	
 	// add to crews array
 	crews.Add(redTeam);
 	crews.Add(blueTeam);

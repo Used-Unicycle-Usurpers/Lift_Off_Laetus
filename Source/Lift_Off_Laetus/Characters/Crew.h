@@ -31,8 +31,7 @@ public:
 
 private:
 	// Array of crew members 
-	//class ACrewMember* crewMembers[3] = {};
-	TArray<class ACrewMember*> crewMembers; // for testing
+	TArray<class ACrewMember*> crewMembers;
 
 	// Index of current crew member 
 	int32 selectedCharacter;
@@ -48,5 +47,27 @@ private:
 
 	//Reference to the game mode
 	class ALaetusGameMode* gameMode;
-	// Would the ActionBar component go here? 
+
+	// Would the ActionBar component go here?
+
+	///////////////
+	// Functions //
+	///////////////
+	
+	// Tries to move the given crew member in the given direction
+	void MoveCrewMember(int32 crewMember, FVector2D direction);
+
+	// Movement methods in the cardinal directions for the current player
+	void MoveCurrentLeft();
+	void MoveCurrentRight();
+	void MoveCurrentUp();
+	void MoveCurrentDown();
+
+	// Select a crew member
+	void SelectCrewMember(int32 selected);
+
+	// Cycle the crew member selection up (right button) or down (left)
+	void CycleSelectedCrewMemberUp();
+	void CycleSelectedCrewMemberDown();
+
 };

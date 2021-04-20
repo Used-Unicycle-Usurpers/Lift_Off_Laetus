@@ -105,6 +105,18 @@ AGridSpace* AGrid::getTile(FVector2D coordinates) {
 	}
 };
 
+
+/**
+* Returns the AGridSpace at a given location, relative to another given AGridSpace.
+* 
+* @param coordinates - The relative coordinates (row and column) of the desired AGridSpace
+* @param origin - The AGridSpace that the desired AGridSpace is relative to
+* @return The AGridSpace at the relative location, if present (null otherwise).
+*/
+AGridSpace* AGrid::getTileRelative(FVector2D coordinates, AGridSpace* origin) {
+	return getTile(origin->getGridLocation() + coordinates);
+}
+
 /**
  * Given the information in the TArray rows (loaded with information from 
  * /Config/grid.txt during intializeGrid()), place a GridSpace actor on each 

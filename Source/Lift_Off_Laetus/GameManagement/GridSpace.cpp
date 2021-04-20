@@ -99,7 +99,7 @@ void AGridSpace::SetToGreen() {
  *     this AGridSpace will be considered as having no occupant.
  * 
  */
-void AGridSpace::setOccupant(ACrewMember* newOccupant) {
+void AGridSpace::setOccupant(AActor* newOccupant) {
 	occupant = newOccupant;
 }
 
@@ -108,7 +108,7 @@ void AGridSpace::setOccupant(ACrewMember* newOccupant) {
  * @return pointer to the crewMember currently occupying this AGridSpace,
  *     nullptr if there is no occupant
  */
-ACrewMember* AGridSpace::getOccupant() {
+AActor* AGridSpace::getOccupant() {
 	return occupant;
 }
 

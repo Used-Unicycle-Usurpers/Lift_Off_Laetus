@@ -50,8 +50,8 @@ public:
 	void SetToGreen();
 
 	//Get and set the occupant of this AGridSpace
-	void setOccupant(ACrewMember* newOccupant);
-	ACrewMember* getOccupant();
+	void setOccupant(AActor* newOccupant);
+	AActor* getOccupant();
 
 	//Return whether or not this AGridSpace is occupied
 	bool isOccupied();
@@ -60,7 +60,7 @@ public:
 	void setGridLocation(int32 row, int32 column);
 	FVector2D getGridLocation();
 
-	//Getter and setter for harvestSource
+	//Getter and setter for AHarvestSource
 	void setHarvestSource(AHarvestSource* newSource);
 	AHarvestSource* getHarvestSource();
 
@@ -74,14 +74,14 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	//The CrewMember currently occupting this AGridSpace
-	ACrewMember* occupant;
+	//The AActor (ACrewMember, ACoreFragment, etc.) currently occupting this AGridSpace
+	AActor* occupant;
 
 	//The row and column of this AGridSpace. The X component is 
 	//the row and the Y component is the column.
 	FVector2D gridLocation;
 
-	//The HarvestSource that occupants of this tile can harvest from
+	//The AHarvestSource that occupants of this tile can harvest from
 	//during their turn.
 	AHarvestSource* harvestSource;
 
