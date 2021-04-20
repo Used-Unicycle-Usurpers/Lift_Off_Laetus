@@ -20,7 +20,7 @@ public:
 
 	//changed return from int to void for suggested functions
 	void MoveTo(class AGridSpace * target);
-	void Shoot(FVector direction);
+	void Shoot(FVector2D direction, bool useRifle);
 	void Shove(); // what if there is more than one shove option
 	void takeDamage(int32 damage); //excluded cause parameter 
 
@@ -81,5 +81,8 @@ private:
 
 	//For testing 
 	int32 team;
+
+	class URifle* rifle;
+	class ULauncher* launcher;
 	
 };

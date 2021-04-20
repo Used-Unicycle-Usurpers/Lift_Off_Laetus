@@ -9,14 +9,13 @@ UWeapon::UWeapon()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
+	mesh = CreateDefaultSubobject<UStaticMeshComponent>("WeaponMesh");
 	// ...
 }
 
 
 // Called when the game starts
-void UWeapon::BeginPlay()
-{
+void UWeapon::BeginPlay() {
 	Super::BeginPlay();
 
 	// ...
@@ -25,10 +24,13 @@ void UWeapon::BeginPlay()
 
 
 // Called every frame
-void UWeapon::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
+void UWeapon::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+int UWeapon::fire(FVector2D direction) {
+	return - 1;
 }
 

@@ -10,8 +10,11 @@
  * 
  */
 UCLASS()
-class LIFT_OFF_LAETUS_API ULauncher : public UWeapon
-{
+class LIFT_OFF_LAETUS_API ULauncher : public UWeapon {
 	GENERATED_BODY()
 	
+public:
+	ULauncher();
+
+	virtual int fire(FVector2D direction) override;
 };
