@@ -57,6 +57,22 @@ public:
 	 */
 	AGridSpace* getTile(FVector2D coordinates);
 
+	/**
+	 * Returns the array of rows to start the crew members on.
+	 */
+	TArray<int32> getStartingRows();
+
+	/**
+	 * Returns the number of steps on either side of the map (should
+	 * be symetrical).
+	 */
+	int getNumSteps();
+
+	/**
+	 * Returns the number of columns in the map grid.
+	 */
+	int getNumColumns();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -77,6 +93,14 @@ private:
 	//The number of columns in the grid i.e. the number of AGridSpaces in each FRow in rows.
 	UPROPERTY(EditAnywhere, Category = MyCategory)
 		float tileHeight;
+
+	//The number of columns in the grid i.e. the number of AGridSpaces in each FRow in rows.
+	UPROPERTY(EditAnywhere, Category = MyCategory)
+		TArray<int32> startingRows;
+
+	//The number of columns in the grid i.e. the number of AGridSpaces in each FRow in rows.
+	UPROPERTY(EditAnywhere, Category = MyCategory)
+		int numSteps;
 
 	//The point in three-dimensional space to start placing AGridSpaces (i.e. top-left 
 	//tile of the map grid). All AGridSpaces will be placed in relation to this point.
