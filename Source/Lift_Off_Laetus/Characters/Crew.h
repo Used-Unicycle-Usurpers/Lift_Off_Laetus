@@ -14,9 +14,15 @@ public:
 	// Sets default values for this pawn's properties
 	ACrew(); 
 	
-	//for testing 
 	//void SetTeam(int32 newTeam);
 	void SetUp(int32 newTeam, class AGrid* newGrid);
+
+	//Action bar stuff 
+	int32 GetActionBarStatus();
+	void UpdateActionBar(int32 update);
+
+	//Return the location of the first crewMember 
+	FVector GetStartingLocation();
 
 protected:
 	// Called when the game starts or when spawned
@@ -48,5 +54,7 @@ private:
 
 	//Reference to the game mode
 	class ALaetusGameMode* gameMode;
-	// Would the ActionBar component go here? 
+
+	// Action Bar value, Turn will take care of creating 
+	int32 actionBar; 
 };

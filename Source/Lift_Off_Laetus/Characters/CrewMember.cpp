@@ -24,7 +24,7 @@ ACrewMember::ACrewMember()
 	RootComponent = Mesh;
 	
 	//Set to blue team's (color 02) material 
-	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("Material'/Game/Characters/lambert1_2.lambert1_2'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("Material'/Game/Characters/Color_02_Blue.Color_02_Blue'"));
 	//CrewColor = CreateDefaultSubobject<UMaterial>(TEXT("UMaterial'/Game/Characters/lambert1'"));
 	BlueTeamolor = (UMaterial*)Material.Object;
 

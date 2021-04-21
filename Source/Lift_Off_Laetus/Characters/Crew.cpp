@@ -15,17 +15,10 @@ ACrew::ACrew()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-}
+	//set action bar to max number 
+	actionBar = 500; 
 
-/*
-// Constructor for testing 
-void ACrew::SetTeam(int32 newTeam) {
-	team = newTeam;
-	
-	// Set up crew members once we have team 
-	//SetUp();
 }
-*/
 
 // Called when the game starts or when spawned
 void ACrew::BeginPlay() {
@@ -57,6 +50,21 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 		space->setOccupant(newMember);
 		newMember->setGridSpace(space);
 	}
+}
+
+// Return the current status of the action bar
+int32 ACrew::GetActionBarStatus() {
+	return actionBar;
+}
+
+// Update the action bar based on the moves performed 
+void ACrew::UpdateActionBar(int32 update) {
+	actionBar += update;
+}
+
+// //Return the location of the first crewMember 
+FVector ACrew::GetStartingLocation() {
+	return crewMembers[0]->GetActorLocation();
 }
 
 // Called every frame
