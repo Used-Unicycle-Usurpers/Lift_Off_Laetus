@@ -44,7 +44,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = MyCategory)
 		class AGrid* grid;
 
+	class ACrewController* redTeamController;
+	class ACrewController* blueTeamController;
+
 	// Private helper methods
 	void ClearTurnActionStack(); // Clears the stack of actions done on the current crew's turn
 
+	virtual APawn* SpawnDefaultPawnFor(AController* NewPlayer, AActor* StartSpot);
+	virtual UClass* GetDefaultPawnClassForController(AController* InController);
 };
