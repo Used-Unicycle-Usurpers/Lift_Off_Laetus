@@ -11,7 +11,7 @@ UProjectile::UProjectile() {
 
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileMesh");
 	collision = CreateDefaultSubobject<UCapsuleComponent>("ProjectileHitbox");
-	
+	velocity = FVector(0, 0, 0);
 }
 
 
@@ -24,5 +24,6 @@ void UProjectile::BeginPlay() {
 // Called every frame
 void UProjectile::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	mesh->SetWorldLocation(mesh->GetComponentLocation() + velocity);
 }
 

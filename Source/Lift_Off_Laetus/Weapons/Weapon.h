@@ -28,5 +28,7 @@ protected:
 	virtual void BeginPlay() override;	
 
 	virtual int fire(FVector2D direction);
+
+	class AGrid* grid;
 	
 };

@@ -9,16 +9,11 @@
 #include "Components/InputComponent.h"
 
 // Sets default values
-ACrewMember::ACrewMember()
-{
+ACrewMember::ACrewMember() {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-
-	//Taken from tutorial
-	//SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereMesh"));
-
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>CharacterMeshAsset(TEXT("StaticMesh'/Game/Characters/CHAR_Pavo_Base.CHAR_Pavo_Base'"));
 	Mesh->SetStaticMesh(CharacterMeshAsset.Object);
 
@@ -28,8 +23,13 @@ ACrewMember::ACrewMember()
 	
 	rifle = CreateDefaultSubobject<URifle>("Rifle");
 	rifle->mesh->SetVisibility(false);
+	rifle->mesh->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform, "GunSocket");
+	rifle->mesh->SetRelativeLocation(FVector(0, 0, 0));
+	
 	launcher = CreateDefaultSubobject<ULauncher>("Launcher");
 	launcher->mesh->SetVisibility(false);
+	launcher->mesh->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform, "GunSocket");
+	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
 }
 
 // For testing 
@@ -41,8 +41,6 @@ ACrewMember::ACrewMember()
 		 team = 3; //set team to green if nullptr
 	 }
 }
-
-
 
 // Called when the game starts or when spawned
 void ACrewMember::BeginPlay() {
@@ -117,7 +115,10 @@ void ACrewMember::setGridSpace(class AGridSpace* space) {
  * @returns a pointer to the AGridSpace this ACrewMember is currently 
  *     standing on.
  */
-class AGridSpace* ACrewMember::getGridSpace() {
+AGridSpace* ACrewMember::getGridSpace() {
 	return gridSpace;
 }
 
+ACrew* ACrewMember::getCrew() {
+	return crew;
+}

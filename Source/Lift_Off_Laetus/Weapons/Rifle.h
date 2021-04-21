@@ -17,4 +17,9 @@ public:
 	URifle();
 
 	virtual int fire(FVector2D direction) override;
+
+private:
+	float damage;
+	int range;
+	class ALaetusGameMode* gameMode;
 };

@@ -43,6 +43,8 @@ public:
 	 */
 	class AGridSpace* getGridSpace();
 
+	class ACrew* getCrew();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
