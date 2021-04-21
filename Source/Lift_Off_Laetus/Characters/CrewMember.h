@@ -23,8 +23,13 @@ public:
 	void Shoot(FVector direction);
 	void Shove(); // what if there is more than one shove option
 	void takeDamage(int32 damage); //excluded cause parameter 
-
-	class UStaticMeshComponent* Mesh;
+	UPROPERTY(EditAnywhere)
+		class UStaticMeshComponent* Mesh;
+	
+	//Default team color is red team's, so we need to save the 
+	//other team's color in case they are assigned blue team
+	UPROPERTY(EditAnywhere)
+		class UMaterial* BlueTeamolor; //de
 
 	//For testing 
 	//ACrewMember(int32 team);

@@ -26,7 +26,7 @@ ACrewMember::ACrewMember()
 	//Set default material to color01 - red team 
 	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("Material'/Game/Characters/lambert1_2.lambert1_2'"));
 	//CrewColor = CreateDefaultSubobject<UMaterial>(TEXT("UMaterial'/Game/Characters/lambert1'"));
-	BlueTeamolor = (UMaterial*)Material.Object;
+	//BlueTeamolor = (UMaterial*)Material.Object;
 }
 
 // For testing 
@@ -41,7 +41,7 @@ ACrewMember::ACrewMember()
 	 //Blue - Color 02 - update material 
 	 if (team == 1) {
 		// CrewColor = CreateDefaultSubobject<UMaterial>(TEXT("UMaterial'/Game/Characters/lambert1_2'"));
-		Mesh->SetMaterial(0, BlueTeamolor);
+		// Mesh->SetMaterial(0, BlueTeamolor);
 	 }
 	 
 	 
