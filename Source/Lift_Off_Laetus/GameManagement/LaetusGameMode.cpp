@@ -5,6 +5,7 @@
 #include "Lift_Off_Laetus/Characters/Crew.h"
 #include "GridSpace.h"
 #include "Grid.h"
+#include "Kismet/GameplayStatics.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
@@ -29,12 +30,12 @@ void ALaetusGameMode::BeginPlay() {
 	grid = GetWorld()->SpawnActor<AGrid>(FVector(0, 0, 0), FRotator(0, 0, 0));
 
 	//The code below is to test if crew and crewmember are working correctly
+	redTeamController = Cast<ACrewController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
 	ACrew* redTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0)); 
-	redTeamController = GetWorld()->SpawnActor<ACrewController>(FVector(0, 0, 0), FRotator(0, 0, 0));
 	redTeamController->Possess(redTeam);
-
+	
+	blueTeamController = Cast<ACrewController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true));
 	ACrew* blueTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
-	blueTeamController = GetWorld()->SpawnActor<ACrewController>(FVector(0, 0, 0), FRotator(0, 0, 0));
 	blueTeamController->Possess(blueTeam);
 	
 	//set teams
