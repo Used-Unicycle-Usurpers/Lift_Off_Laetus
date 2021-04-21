@@ -10,8 +10,7 @@
 #include "../GameManagement/Grid.h"
 
 // Sets default values
-ACrew::ACrew()
-{
+ACrew::ACrew() {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -70,11 +69,9 @@ FVector ACrew::GetStartingLocation() {
 // Called every frame
 void ACrew::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
 void ACrew::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }

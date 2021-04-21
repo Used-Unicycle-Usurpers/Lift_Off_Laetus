@@ -35,10 +35,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	TArray<class ACrewMember*> crewMembers; // for testing
+
 private:
 	// Array of crew members 
 	//class ACrewMember* crewMembers[3] = {};
-	TArray<class ACrewMember*> crewMembers; // for testing
 
 	// Index of current crew member 
 	int32 selectedCharacter;
