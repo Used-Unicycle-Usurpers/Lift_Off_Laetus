@@ -24,7 +24,7 @@ void AGrid::BeginPlay() {
 	placeGridSpaces();
 
 	//Now place the harvest sources based the infomration in /Config/grid_env.txt.
-	//placeEnvironmentObjects();
+	placeEnvironmentObjects();
 
 	//Now the map is ready, place the crew members at the GridSpaces specified in grid.txt
 }
