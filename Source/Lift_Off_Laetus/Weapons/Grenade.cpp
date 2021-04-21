@@ -33,10 +33,14 @@ void AGrenade::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	float distance = FVector::Dist(GetActorLocation(), targetLocation);
 	UE_LOG(LogTemp, Warning, TEXT("Distance is: %f"), distance);
+	
+	//If not reached the end of the path, keep going
 	if (current < path.Num() && distance > 10) {
+		//Still travelling on path, keep going
 		SetActorLocation(path[current].Location);
 		current++;
 	}else {
+		//Reach end of path; at target. Damage nearby players.
 		FVector2D gridLocation = targetSpace->getGridLocation();
 		for (int row = gridLocation.X - 1; row <= gridLocation.X + 1; row++) {
 			for (int column = gridLocation.Y - 1; column <= gridLocation.Y + 1; column++) {

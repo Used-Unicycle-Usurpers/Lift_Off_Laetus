@@ -28,19 +28,23 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UProjectileMovementComponent* movement;
 
+	//The arc path to travel along
 	TArray<FPredictProjectilePathPointData> path;
 	
+	//The current point this AGrenade is located at on the path
 	int current;
+
+	//The target map location and AGridSpace this grenade is travelling to.
 	FVector targetLocation;
 	class AGridSpace* targetSpace;
+
+	//A reference to the map grid.
 	class AGrid* grid;
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 };

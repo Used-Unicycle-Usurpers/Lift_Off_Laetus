@@ -15,6 +15,13 @@ ULauncher::ULauncher() {
 	mesh->SetWorldScale3D(FVector(25.f, 25.f, 25.f));
 }
 
+/**
+ * Throws a grenade at the AGridSpace specified in direction.
+ * 
+ * @param direction a 2D vector in which the X component is the 
+ *     row of the target space, and the Y component is the column 
+ *     of the desired space.
+ */
 int ULauncher::fire(FVector2D direction) {
 	mesh->SetVisibility(true);
 
