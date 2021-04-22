@@ -42,7 +42,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 	for (int i = 0; i < 3; i++) {
 		AGridSpace* space = grid->getTile(FVector2D(startingRows[i], column));
 		FVector location = space->GetActorLocation();
-		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(FVector(location.X, location.Y, location.Z + 100), rotation);
+		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(FVector(location.X, location.Y, location.Z+20), rotation);
 
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);

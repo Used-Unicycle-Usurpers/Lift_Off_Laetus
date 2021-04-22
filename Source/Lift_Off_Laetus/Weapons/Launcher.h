@@ -20,4 +20,8 @@ public:
 	 * Throws a grenade at the AGridSpace specified in direction.
 	 */
 	virtual int fire(FVector2D direction) override;
+
+	void launch();
+
+	FVector2D targetDirection;
 };
