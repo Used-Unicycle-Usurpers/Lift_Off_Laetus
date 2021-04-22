@@ -31,15 +31,19 @@ URifle::URifle() {
 int URifle::fire(FVector2D direction) {
 	mesh->SetVisibility(true);
 	directionToShoot = direction;
+	
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
-	owner->rotateWithAnimation(Direction::Right);
+	Direction directionEnum = owner->vectorToDirectionEnum(directionToShoot);
+	owner->rotateWithAnimation(directionEnum);
+	
 	FTimerHandle timer;
-	GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shootRifle, 2.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shootRifle, 0.7f, false);
 	return 0;
 }
 
 void URifle::shootRifle() {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
+	owner->skeletalMesh->SetWorldRotation(owner->upRotation);
 	owner->playShootRifleMontage();
 	FVector2D location = owner->getGridSpace()->getGridLocation();
 	UE_LOG(LogTemp, Warning, TEXT("Current location: (%f,%f)"), location.X, location.Y);

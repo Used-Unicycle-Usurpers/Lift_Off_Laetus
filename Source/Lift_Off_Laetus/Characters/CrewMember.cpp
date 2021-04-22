@@ -104,10 +104,6 @@ ACrewMember::ACrewMember() {
 // Called when the game starts or when spawned
 void ACrewMember::BeginPlay() {
 	Super::BeginPlay();
-
-	//TSubclassOf<AActor> ActorToSpawn;
-	//AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(FVector(-80, 122, 0), FRotator(0, 0, 0));
-	//UE_LOG(LogTemp, Warning, TEXT("Hello World!"));
 }
 
 // Called every frame
@@ -207,63 +203,119 @@ ACrew* ACrewMember::getCrew() {
 	return crew;
 }
 
+/**
+ * Play the grenade throwing montage.
+ */
 void ACrewMember::playThrowMontage() {
 	skeletalMesh->GetAnimInstance()->Montage_Play(throwMontage);
-	//UE_LOG(LogTemp, Warning, TEXT("Return value was: %f"), returnVal);
 }
 
+/**
+ * Play the shooting rifle montage.
+ */
 void ACrewMember::playShootRifleMontage() {
 	skeletalMesh->GetAnimInstance()->Montage_Play(shootRifleMontage);
-	//UE_LOG(LogTemp, Warning, TEXT("Return value was: %f"), returnVal);
 }
 
+/**
+ * Rotate this ACrewMember to the given direction, and play the appropriate 
+ * animation while doing so.
+ * 
+ * @param directionToFace a Direction enum indicating which of the four
+ *     direction this ACrewMember should now face.
+ * @return 0 on success, -1 otherwise
+*/
 int ACrewMember::rotateWithAnimation(Direction directionToFace) {
 	if (facingDirection == Direction::Left) {
 		if (directionToFace == Direction::Right)
-			return playRotationMontage(2);
+			return playRotationMontage(RotationAnim::TurnAround);
 		if (directionToFace == Direction::Up)
-			return playRotationMontage(1);
+			return playRotationMontage(RotationAnim::TurnRight);
 		if (directionToFace == Direction::Down)
-			return playRotationMontage(0);
-	}
-	else if (facingDirection == Direction::Right) {
+			return playRotationMontage(RotationAnim::TurnLeft);
+	}else if (facingDirection == Direction::Right) {
 		if (directionToFace == Direction::Left)
-			return playRotationMontage(2);
+			return playRotationMontage(RotationAnim::TurnAround);
 		if (directionToFace == Direction::Up)
-			return playRotationMontage(0);
+			return playRotationMontage(RotationAnim::TurnLeft);
 		if (directionToFace == Direction::Down)
-			return playRotationMontage(1);
-	}
-	else if (facingDirection == Direction::Up) {
+			return playRotationMontage(RotationAnim::TurnRight);
+	}else if (facingDirection == Direction::Up) {
 		if (directionToFace == Direction::Left)
-			return playRotationMontage(0);
+			return playRotationMontage(RotationAnim::TurnLeft);
 		if (directionToFace == Direction::Right)
-			return playRotationMontage(1);
+			return playRotationMontage(RotationAnim::TurnRight);
 		if (directionToFace == Direction::Down)
-			return playRotationMontage(2);
-	}
-	else {
+			return playRotationMontage(RotationAnim::TurnAround);
+	}else {
 		if (directionToFace == Direction::Left)
-			return playRotationMontage(1);
+			return playRotationMontage(RotationAnim::TurnRight);
 		if (directionToFace == Direction::Right)
-			return playRotationMontage(0);
+			return playRotationMontage(RotationAnim::TurnLeft);
 		if (directionToFace == Direction::Up)
-			return playRotationMontage(2);
+			return playRotationMontage(RotationAnim::TurnAround);
 	}
 	return -1;
 }
 
-int ACrewMember::playRotationMontage(int type) {
+/**
+ * Play the given rotation animation.
+ * 
+ * @param type the type of rotation animation to play
+ * @return 0 on success, -1 otherwise
+ */
+int ACrewMember::playRotationMontage(RotationAnim type) {
+	FOnMontageEnded b;
+	b.BindUObject(this, &ACrewMember::onRotationAnimationEnd);
+
 	switch (type) {
-	case 0: //Turn left
+	case TurnLeft:
+		UE_LOG(LogTemp, Warning, TEXT("Playing turn left"));
 		skeletalMesh->GetAnimInstance()->Montage_Play(turnLeftMontage);
+		skeletalMesh->GetAnimInstance()->Montage_SetEndDelegate(b, turnLeftMontage);
 		return 0;
-	case 1: //Turn Right
+	case TurnRight:
+		UE_LOG(LogTemp, Warning, TEXT("Playing turn right"));
 		skeletalMesh->GetAnimInstance()->Montage_Play(turnRightMontage);
-		return 0;
-	case 2: //Turn around
+		skeletalMesh->GetAnimInstance()->Montage_SetEndDelegate(b, turnRightMontage);
+		return 0;	
+	case TurnAround:
+		UE_LOG(LogTemp, Warning, TEXT("Playing turn around"));
 		skeletalMesh->GetAnimInstance()->Montage_Play(turnAroundMontage);
+		skeletalMesh->GetAnimInstance()->Montage_SetEndDelegate(b, turnAroundMontage);
 		return 0;
+	default:
+		return -1;
 	}
-	return -1;
+}
+
+/**
+ * Convert the given unit direction vector to the corresponding 
+ * Direction enum value. 
+ * 
+ * @param direction the unit direction vector to convert. Must be one of:
+ *     (-1, 0) [Up], (1, 0) [Down], (0, 1) [Right], or (-1, 0) [Left]
+ * @return a valid Direction enum is a valid direction FVector2D was given,
+ *     Direction::InvalidDirection otherwise.
+ */
+Direction ACrewMember::vectorToDirectionEnum(FVector2D direction) {
+	if (direction == FVector2D(-1, 0)) {
+		return Direction::Up;
+	}else if (direction == FVector2D(1, 0)) {
+		return Direction::Down;
+	}else if (direction == FVector2D(0, 1)) {
+		return Direction::Right;
+	}else if (direction == FVector2D(0, -1)) {
+		return Direction::Left;
+	}else {
+		return Direction::InvalidDirection;
+	}
+}
+
+float ACrewMember::getSpeed() {
+	return Speed;
+}
+
+void ACrewMember::onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted) {
+	UE_LOG(LogTemp, Warning, TEXT("In callback from %s"), *montage->GetName());
 }

@@ -11,10 +11,18 @@
 
 UENUM()
 enum Direction {
+	InvalidDirection = -1,
 	Left = 180,
 	Right = 0,
 	Up = 90,
 	Down = 270
+};
+
+UENUM()
+enum RotationAnim {
+	TurnLeft,
+	TurnRight,
+	TurnAround
 };
 
 
@@ -93,18 +101,53 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	//Speed this CrewMember moves.
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditAnywhere)
 		float Speed;
 
+	/**
+	 * Play the grenade throwing montage.
+	 */
 	void playThrowMontage();
+
+	/**
+	 * Play the shooting rifle montage.
+	 */
 	void playShootRifleMontage();
+	
+	/**
+	 * Rotate this ACrewMember to the given direction, and play the appropriate
+	 * animation while doing so.
+	*/
 	int rotateWithAnimation(Direction directionToFace);
-	int playRotationMontage(int type);
+	
+	/**
+	 * Play the given rotation animation.
+	 */
+	int playRotationMontage(RotationAnim type);
 
 	Direction facingDirection;
 
+	const FRotator leftRotation = FRotator(0.f, 270.f, 0.f);
+	const FRotator rightRotation = FRotator(0.f, 90.f, 0.f);
+	const FRotator upRotation = FRotator(0.f, 180.f, 0.f);
+	const FRotator downRotation = FRotator(0.f, 0.f, 0.f);
+
+	/**
+	 * Convert the given unit direction vector to the corresponding
+	 * Direction enum value.
+	 */
+	Direction vectorToDirectionEnum(FVector2D direction);
+
 	// Below is supposed to be the hitbox, needs testing
 	//watch video to see what he says 
+
+	UFUNCTION(BlueprintCallable)
+		float getSpeed();
+
+	UFUNCTION(BlueprintCallable)
+		void onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted);
+
+	void (*action)(void);
 
 protected:
 	// Called when the game starts or when spawned
@@ -145,4 +188,5 @@ private:
 	class UAnimMontage* turnRightMontage;
 	class UAnimMontage* turnAroundMontage;
 	
+
 };

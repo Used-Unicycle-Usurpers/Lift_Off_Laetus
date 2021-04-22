@@ -16,7 +16,7 @@ void ACrewController::testBinding() {
 	ACrew* c = Cast<ACrew>(GetPawn());
 	if (c) {
 		UE_LOG(LogTemp, Warning, TEXT("%s in testBinding, pawn is: %s!"), *GetName(), *c->GetName());
-		c->crewMembers[0]->Shoot(FVector2D(-1, 0), true);
+		c->crewMembers[0]->Shoot(FVector2D(-1, 0), false);
 	}
 }
 
