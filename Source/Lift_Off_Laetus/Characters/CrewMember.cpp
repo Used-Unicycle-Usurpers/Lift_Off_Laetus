@@ -33,14 +33,8 @@ ACrewMember::ACrewMember() {
 	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
 
 	//Set to blue team's (color 02) material 
-<<<<<<< HEAD
 	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("Material'/Game/Characters/Color_02_Blue.Color_02_Blue'"));
-	//CrewColor = CreateDefaultSubobject<UMaterial>(TEXT("UMaterial'/Game/Characters/lambert1'"));
-	BlueTeamolor = (UMaterial*)Material.Object;
-=======
-	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("Material'/Game/Characters/lambert1_2.lambert1_2'"));
 	BlueTeamColor = (UMaterial*)Material.Object;
->>>>>>> dev
 
 	//physics 
 	TInlineComponentArray<UPrimitiveComponent*> Components;
