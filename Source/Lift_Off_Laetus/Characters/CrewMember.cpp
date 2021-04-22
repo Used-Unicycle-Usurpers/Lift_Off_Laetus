@@ -7,34 +7,49 @@
 #include "../Weapons/Rifle.h"
 #include "../GameManagement/GridSpace.h"
 #include "Components/InputComponent.h"
+#include "Animation/AnimMontage.h"
 
 // Sets default values
 ACrewMember::ACrewMember() {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>CharacterMeshAsset(TEXT("StaticMesh'/Game/Characters/CHAR_Pavo_Base.CHAR_Pavo_Base'"));
-	Mesh->SetStaticMesh(CharacterMeshAsset.Object);
+	//Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	//static ConstructorHelpers::FObjectFinder<UStaticMesh>CharacterMeshAsset(TEXT("StaticMesh'/Game/Characters/CHAR_Pavo_Base.CHAR_Pavo_Base'"));
+	//Mesh->SetStaticMesh(CharacterMeshAsset.Object);
 
-	Speed = 10.f;
+	skeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh>SkeletalMeshAsset(TEXT("SkeletalMesh'/Game/Characters/Animations/CHAR_Pavo_Walk.CHAR_Pavo_Walk'"));
+	skeletalMesh->SetSkeletalMesh(SkeletalMeshAsset.Object);
+	skeletalMesh->SetEnableGravity(true);
+	skeletalMesh->SetSimulatePhysics(false);
 
-	RootComponent = Mesh;
+	static ConstructorHelpers::FObjectFinder<UAnimBlueprint>AnimationBP(TEXT("AnimBlueprint'/Game/Characters/Animations/Pavo_AnimBP.Pavo_AnimBP'"));
+	skeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	skeletalMesh->SetAnimInstanceClass(AnimationBP.Object->GetAnimBlueprintGeneratedClass());
+
+	Speed = 0.f;
+
+	RootComponent = skeletalMesh;//Mesh;
 	
 	//Create and attach the rifle and grenade
 	rifle = CreateDefaultSubobject<URifle>("Rifle");
 	rifle->mesh->SetVisibility(false);
-	rifle->mesh->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform, "GunSocket");
+	rifle->mesh->AttachToComponent(skeletalMesh, FAttachmentTransformRules::KeepRelativeTransform, "GunSocket");
 	rifle->mesh->SetRelativeLocation(FVector(0, 0, 0));
 	
 	launcher = CreateDefaultSubobject<ULauncher>("Launcher");
 	launcher->mesh->SetVisibility(false);
-	launcher->mesh->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform, "GunSocket");
+	launcher->mesh->AttachToComponent(skeletalMesh, FAttachmentTransformRules::KeepRelativeTransform, "GrenadeSocket");
 	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
 
 	//Set to blue team's (color 02) material 
-	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("Material'/Game/Characters/lambert1_2.lambert1_2'"));
-	BlueTeamColor = (UMaterial*)Material.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterial>RedTeamMaterial(TEXT("Material'/Game/Characters/lambert1.lambert1'"));
+	RedTeamColor = (UMaterial*)RedTeamMaterial.Object;
+	skeletalMesh->SetMaterial(0, RedTeamColor);
+
+	static ConstructorHelpers::FObjectFinder<UMaterial>BlueTeamMaterial(TEXT("Material'/Game/Characters/lambert1_2.lambert1_2'"));
+	BlueTeamColor = (UMaterial*)BlueTeamMaterial.Object;
 
 	//physics 
 	TInlineComponentArray<UPrimitiveComponent*> Components;
@@ -43,6 +58,24 @@ ACrewMember::ACrewMember() {
 	for (UPrimitiveComponent* Component : Components) {
 		Component->SetSimulatePhysics(true);
 	}
+	skeletalMesh->SetSimulatePhysics(false);
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>ThrowAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/ThrowGrenadeMontage.ThrowGrenadeMontage'"));
+	throwMontage = ThrowAnimMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>ShootRifleAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/ShootRifleMontage.ShootRifleMontage'"));
+	shootRifleMontage = ShootRifleAnimMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>TurnLeftAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/LeftTurnMontage.LeftTurnMontage'"));
+	turnLeftMontage = TurnLeftAnimMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>TurnRightAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/RightTurnMontage.RightTurnMontage'"));
+	turnRightMontage = TurnRightAnimMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>TurnAroundAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/TurnAroundMontage1.TurnAroundMontage1'"));
+	turnAroundMontage = TurnAroundAnimMontage.Object;
+
+	facingDirection = Direction::Right;
 }
 
 /**
@@ -61,7 +94,8 @@ ACrewMember::ACrewMember() {
 	 //Blue - Color 02 - update material 
 	 if (team == 1) {
 		// CrewColor = CreateDefaultSubobject<UMaterial>(TEXT("UMaterial'/Game/Characters/lambert1_2'"));
-		Mesh->SetMaterial(0, BlueTeamColor);
+		skeletalMesh->SetMaterial(0, BlueTeamColor);
+		facingDirection = Direction::Left;
 	 }
 	 
 	 
@@ -171,4 +205,65 @@ AGridSpace* ACrewMember::getGridSpace() {
  */
 ACrew* ACrewMember::getCrew() {
 	return crew;
+}
+
+void ACrewMember::playThrowMontage() {
+	skeletalMesh->GetAnimInstance()->Montage_Play(throwMontage);
+	//UE_LOG(LogTemp, Warning, TEXT("Return value was: %f"), returnVal);
+}
+
+void ACrewMember::playShootRifleMontage() {
+	skeletalMesh->GetAnimInstance()->Montage_Play(shootRifleMontage);
+	//UE_LOG(LogTemp, Warning, TEXT("Return value was: %f"), returnVal);
+}
+
+int ACrewMember::rotateWithAnimation(Direction directionToFace) {
+	if (facingDirection == Direction::Left) {
+		if (directionToFace == Direction::Right)
+			return playRotationMontage(2);
+		if (directionToFace == Direction::Up)
+			return playRotationMontage(1);
+		if (directionToFace == Direction::Down)
+			return playRotationMontage(0);
+	}
+	else if (facingDirection == Direction::Right) {
+		if (directionToFace == Direction::Left)
+			return playRotationMontage(2);
+		if (directionToFace == Direction::Up)
+			return playRotationMontage(0);
+		if (directionToFace == Direction::Down)
+			return playRotationMontage(1);
+	}
+	else if (facingDirection == Direction::Up) {
+		if (directionToFace == Direction::Left)
+			return playRotationMontage(0);
+		if (directionToFace == Direction::Right)
+			return playRotationMontage(1);
+		if (directionToFace == Direction::Down)
+			return playRotationMontage(2);
+	}
+	else {
+		if (directionToFace == Direction::Left)
+			return playRotationMontage(1);
+		if (directionToFace == Direction::Right)
+			return playRotationMontage(0);
+		if (directionToFace == Direction::Up)
+			return playRotationMontage(2);
+	}
+	return -1;
+}
+
+int ACrewMember::playRotationMontage(int type) {
+	switch (type) {
+	case 0: //Turn left
+		skeletalMesh->GetAnimInstance()->Montage_Play(turnLeftMontage);
+		return 0;
+	case 1: //Turn Right
+		skeletalMesh->GetAnimInstance()->Montage_Play(turnRightMontage);
+		return 0;
+	case 2: //Turn around
+		skeletalMesh->GetAnimInstance()->Montage_Play(turnAroundMontage);
+		return 0;
+	}
+	return -1;
 }

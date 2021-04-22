@@ -9,6 +9,15 @@
 #include "../PowerUps/PowerUpEffect.h"
 #include "CrewMember.generated.h"
 
+UENUM()
+enum Direction {
+	Left = 180,
+	Right = 0,
+	Up = 90,
+	Down = 270
+};
+
+
 UCLASS()
 class LIFT_OFF_LAETUS_API ACrewMember : public APawn {
 	GENERATED_BODY()
@@ -38,13 +47,21 @@ public:
 	 */
 	void takeDamage(int32 damage); //excluded cause parameter 
 	
+	/*
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* Mesh;
+	*/
+
+	UPROPERTY(EditAnywhere)
+		class USkeletalMeshComponent* skeletalMesh;
 	
 	//Default team color is red team's, so we need to save the 
 	//other team's color in case they are assigned blue team
 	UPROPERTY(EditAnywhere)
-		class UMaterial* BlueTeamColor; //de
+		class UMaterial* BlueTeamColor;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* RedTeamColor;
 	
 	class UStaticMeshComponent* SphereMesh;
 
@@ -75,6 +92,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	//Speed this CrewMember moves.
+	UPROPERTY(BlueprintReadOnly)
+		float Speed;
+
+	void playThrowMontage();
+	void playShootRifleMontage();
+	int rotateWithAnimation(Direction directionToFace);
+	int playRotationMontage(int type);
+
+	Direction facingDirection;
+
 	// Below is supposed to be the hitbox, needs testing
 	//watch video to see what he says 
 
@@ -91,9 +119,6 @@ private:
 
 	// Remaining amount of heatlh
 	float health;
-	
-	//Speed this CrewMember moves.
-	float Speed;
 	
 	//Standard amount of damage that attacks deal
 	int32 damage;
@@ -112,5 +137,12 @@ private:
 	
 	//The launcher for throwing a grenade onto a set of tiles
 	class ULauncher* launcher;
+
+	class UAnimMontage* throwMontage;
+	class UAnimMontage* shootRifleMontage;
+
+	class UAnimMontage* turnLeftMontage;
+	class UAnimMontage* turnRightMontage;
+	class UAnimMontage* turnAroundMontage;
 	
 };

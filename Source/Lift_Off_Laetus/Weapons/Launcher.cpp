@@ -23,21 +23,34 @@ ULauncher::ULauncher() {
  *     of the desired space.
  */
 int ULauncher::fire(FVector2D direction) {
-	mesh->SetVisibility(true);
-
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	FVector2D location = owner->getGridSpace()->getGridLocation();
-	AGridSpace* space = grid->getTile(FVector2D(location.X+5, location.Y+20));
+	AGridSpace* space = grid->getTile(FVector2D(location.X, location.Y - 6));
+	if (space) {
+		targetDirection = direction;
+		mesh->SetVisibility(true);
+		owner->playThrowMontage();
+		FTimerHandle timerParams;
+		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, 1.8f, false);
+		return 0;
+	}
+	return -1;
+}
+
+void ULauncher::launch() {
+	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
+	FVector2D location = owner->getGridSpace()->getGridLocation();
+	AGridSpace* space = grid->getTile(FVector2D(location.X, location.Y - 10));
 	space->SetToRed();
-	
+
 	if (space) {
 		FVector start = mesh->GetComponentLocation();
 		FVector end = space->GetActorLocation();
-		
+
 		//Get the intial velocity that would be needed for the toss
 		FVector velocity = FVector(0, 0, 0);
 		UGameplayStatics::SuggestProjectileVelocity_CustomArc(GetWorld(), velocity, start, end, 0.f, 0.3f);
-		
+
 		//Get a path of points that make up the arc
 		FPredictProjectilePathParams p;
 		p.StartLocation = start;
@@ -51,7 +64,7 @@ int ULauncher::fire(FVector2D direction) {
 		p.ActorsToIgnore.Add(GetOwner());
 		FPredictProjectilePathResult r;
 		UGameplayStatics::PredictProjectilePath(GetWorld(), p, r);
-		
+
 		//Spawn the grenade and pass the path for it to traverse.
 		AGrenade* g = GetWorld()->SpawnActor<AGrenade>(mesh->GetComponentLocation(), FRotator(0, 0, 0));
 		g->path = r.PathData;
@@ -59,5 +72,5 @@ int ULauncher::fire(FVector2D direction) {
 		g->targetSpace = space;
 		g->grid = grid;
 	}
-	return -1;
+	mesh->SetVisibility(false);
 }
