@@ -10,8 +10,7 @@
 #include "../GameManagement/Grid.h"
 
 // Sets default values
-ACrew::ACrew()
-{
+ACrew::ACrew() {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -50,7 +49,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 	for (int i = 0; i < 3; i++) {
 		AGridSpace* space = grid->getTile(FVector2D(startingRows[i], column));
 		FVector location = space->GetActorLocation();
-		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(FVector(location.X, location.Y, location.Z + 100), rotation);
+		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(FVector(location.X, location.Y, location.Z+20), rotation);
 
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);
@@ -62,11 +61,9 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 // Called every frame
 void ACrew::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
 void ACrew::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }

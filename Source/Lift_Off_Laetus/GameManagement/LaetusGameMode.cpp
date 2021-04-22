@@ -5,16 +5,17 @@
 #include "Lift_Off_Laetus/Characters/Crew.h"
 #include "GridSpace.h"
 #include "Grid.h"
+#include "Kismet/GameplayStatics.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
 	PlayerControllerClass = ACrewController::StaticClass();
 
 	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
+	/*static ConstructorHelpers::FClassFinder<APawn>PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
 	if (PlayerPawnBPClass.Class != nullptr) {
 		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
+	}*/
 }
 
 /**
@@ -25,8 +26,13 @@ void ALaetusGameMode::BeginPlay() {
 	grid = GetWorld()->SpawnActor<AGrid>(FVector(0, 0, 0), FRotator(0, 0, 0));
 
 	//The code below is to test if crew and crewmember are working correctly
-	ACrew * redTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0)); 
-	ACrew * blueTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
+	redTeamController = Cast<ACrewController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
+	ACrew* redTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0)); 
+	redTeamController->Possess(redTeam);
+	
+	blueTeamController = Cast<ACrewController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true));
+	ACrew* blueTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
+	blueTeamController->Possess(blueTeam);
 	
 	//set teams
 	redTeam->SetUp(0, grid);
@@ -65,4 +71,12 @@ int ALaetusGameMode::EvaluateWin()
 void ALaetusGameMode::ClearTurnActionStack()
 {
 	// Remove all entries in turn action stack
+}
+
+APawn* ALaetusGameMode::SpawnDefaultPawnFor(AController* NewPlayer, AActor* StartSpot) {
+	return NULL;
+};
+
+UClass* ALaetusGameMode::GetDefaultPawnClassForController(AController* InController) {
+	return NULL;
 }

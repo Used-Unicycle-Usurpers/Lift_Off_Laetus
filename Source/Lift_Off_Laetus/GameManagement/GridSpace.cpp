@@ -34,6 +34,7 @@ AGridSpace::AGridSpace(){
 	collision->SetGenerateOverlapEvents(true);
 	collision->OnComponentBeginOverlap.AddDynamic(this, &AGridSpace::OnEnterGridSpace);
 	collision->OnComponentEndOverlap.AddDynamic(this, &AGridSpace::OnExitGridSpace);
+	collision->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
 }
 
 // Called when the game starts or when spawned
@@ -152,6 +153,7 @@ FVector2D AGridSpace::getGridLocation() {
  */
 void AGridSpace::setHarvestSource(AHarvestSource* newSource) {
 	harvestSource = newSource;
+	/*
 	switch (harvestSource->getHarvestSourceType()) {
 	case SlimeTree:
 		SetToRed();
@@ -163,6 +165,7 @@ void AGridSpace::setHarvestSource(AHarvestSource* newSource) {
 		SetToGreen();
 		break;
 	}
+	*/
 }
 
 /**
@@ -178,4 +181,30 @@ AHarvestSource* AGridSpace::getHarvestSource() {
 // Called every frame
 void AGridSpace::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+}
+
+
+/**
+* Set the "extra" movement cost for entities moving through this space.
+* 
+* @param cost - the new movement cost
+*/
+void AGridSpace::SetExtraMoveCost(int cost) {
+	extraMoveCost = cost;
+}
+
+/**
+* Gets the "extra" movement cost value on this space.
+* 
+* @return the cost, as an integer.
+*/
+int32 AGridSpace::GetExtraMoveCost() {
+	return extraMoveCost;
+}
+
+/**
+* Resets the "extra" movement cost on this space to zero.
+*/
+void AGridSpace::ResetExtraMoveCost() {
+	extraMoveCost = 0;
 }

@@ -16,13 +16,19 @@ public:
 	// Sets default values for this component's properties
 	UWeapon();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+	UPROPERTY(EditAnywhere)
+		class UStaticMeshComponent* mesh;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;	
+
+	virtual int fire(FVector2D direction);
+
+	//A reference to the map grid.
+	class AGrid* grid;
+	
 };
