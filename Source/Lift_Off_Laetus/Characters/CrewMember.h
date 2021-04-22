@@ -188,5 +188,6 @@ private:
 	class UAnimMontage* turnRightMontage;
 	class UAnimMontage* turnAroundMontage;
 	
-
+	UPROPERTY()
+		class USpringArmComponent cameraArm;
 };
