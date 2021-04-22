@@ -19,7 +19,6 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	//For visual debugging
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
 
@@ -28,5 +27,8 @@ protected:
 	virtual void BeginPlay() override;	
 
 	virtual int fire(FVector2D direction);
+
+	//A reference to the map grid.
+	class AGrid* grid;
 	
 };

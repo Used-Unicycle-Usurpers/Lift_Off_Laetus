@@ -9,8 +9,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class LIFT_OFF_LAETUS_API UProjectile : public UActorComponent
-{
+class LIFT_OFF_LAETUS_API UProjectile : public UActorComponent {
 	GENERATED_BODY()
 
 public:	
@@ -28,6 +27,8 @@ public:
 	//For visual debugging
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
+
+	FVector velocity;
 
 protected:
 	// Called when the game starts

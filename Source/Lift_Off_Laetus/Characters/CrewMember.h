@@ -10,26 +10,47 @@
 #include "CrewMember.generated.h"
 
 UCLASS()
-class LIFT_OFF_LAETUS_API ACrewMember : public APawn
-{
+class LIFT_OFF_LAETUS_API ACrewMember : public APawn {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this pawn's properties
 	ACrewMember();
 
-	//changed return from int to void for suggested functions
+	/**
+	 * Move this ACrewMember to the given AGridSpace
+	 */
 	void MoveTo(class AGridSpace * target);
+	
+	/**
+	 * Shoot one of this ACrewMember's weapons in the given direction
+	 */
 	void Shoot(FVector2D direction, bool useRifle);
+	
+	/**
+	 * Shove the object that was in the AGridSpace this ACrewMember just moved
+	 * into.
+	 */
 	void Shove(); // what if there is more than one shove option
+	
+	/**
+	 * Reduce this ACrewMember's health by the given damage.
+	 */
 	void takeDamage(int32 damage); //excluded cause parameter 
-
-	class UStaticMeshComponent* Mesh;
-
-	//For testing 
-	//ACrewMember(int32 team);
+	
+	UPROPERTY(EditAnywhere)
+		class UStaticMeshComponent* Mesh;
+	
+	//Default team color is red team's, so we need to save the 
+	//other team's color in case they are assigned blue team
+	UPROPERTY(EditAnywhere)
+		class UMaterial* BlueTeamColor; //de
+	
 	class UStaticMeshComponent* SphereMesh;
-	float Speed;
+
+	/**
+	 * Set this ACrewMember's team to the given team
+	 */
 	void SetTeam(int32 team);
 
 	/**
@@ -43,11 +64,11 @@ public:
 	 */
 	class AGridSpace* getGridSpace();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	/**
+	 * Returns the ACrew (team) this ACrewMember is a part of.
+	 */
+	class ACrew* getCrew();
 
-public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -57,17 +78,24 @@ public:
 	// Below is supposed to be the hitbox, needs testing
 	//watch video to see what he says 
 
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 private:
-	// Team character belongs too
-	//ACrew* crew; 
+	// The Crew (team) this CrewMember belongs too
 	class ACrew* crew;
 
 	// Character ID (index in crewMember array)
 	int32 id;
 
-	// Character properties 
+	// Remaining amount of heatlh
 	float health;
-	int32 speed;
+	
+	//Speed this CrewMember moves.
+	float Speed;
+	
+	//Standard amount of damage that attacks deal
 	int32 damage;
 
 	// Character's connection to the world 
@@ -75,14 +103,14 @@ private:
 
 	//	Weapon info
 	class PowerUpEffect* gunEffect;
-	//TODO: figure out how ot add weapons
-	//ARifle * rifle;
-	//ALauncher * launcher;
 
-	//For testing 
+	//The team this CrewMember is on. 0 = Red team, 1 = blue team 
 	int32 team;
 
+	//The rifle for shooting in a cardinal direction
 	class URifle* rifle;
+	
+	//The launcher for throwing a grenade onto a set of tiles
 	class ULauncher* launcher;
 	
 };

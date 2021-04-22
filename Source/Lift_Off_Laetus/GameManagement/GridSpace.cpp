@@ -34,6 +34,7 @@ AGridSpace::AGridSpace(){
 	collision->SetGenerateOverlapEvents(true);
 	collision->OnComponentBeginOverlap.AddDynamic(this, &AGridSpace::OnEnterGridSpace);
 	collision->OnComponentEndOverlap.AddDynamic(this, &AGridSpace::OnExitGridSpace);
+	collision->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
 }
 
 // Called when the game starts or when spawned
@@ -152,6 +153,7 @@ FVector2D AGridSpace::getGridLocation() {
  */
 void AGridSpace::setHarvestSource(AHarvestSource* newSource) {
 	harvestSource = newSource;
+	/*
 	switch (harvestSource->getHarvestSourceType()) {
 	case SlimeTree:
 		SetToRed();
@@ -163,6 +165,7 @@ void AGridSpace::setHarvestSource(AHarvestSource* newSource) {
 		SetToGreen();
 		break;
 	}
+	*/
 }
 
 /**
