@@ -47,10 +47,14 @@ void AGrenade::Tick(float DeltaTime) {
 				AGridSpace* s = grid->getTile(FVector2D(row, column));
 				if (s) {
 					s->SetToRed();
-					ACrewMember* crewMember = s->getOccupant();
-					if (crewMember) {
-						//TODO: determine damage
-						crewMember->takeDamage(10.0f);
+
+					AActor* occupant = s->getOccupant();
+					if (occupant) {
+					
+						ACrewMember* crewMember = Cast<ACrewMember>(occupant);
+						if (crewMember) {
+							crewMember->takeDamage(10.0f);
+						}
 					}
 				}
 			}

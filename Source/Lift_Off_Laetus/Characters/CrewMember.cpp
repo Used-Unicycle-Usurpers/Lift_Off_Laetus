@@ -6,7 +6,6 @@
 #include "../Weapons/Launcher.h"
 #include "../Weapons/Rifle.h"
 #include "../GameManagement/GridSpace.h"
-#include "Components/InputComponent.h"
 
 // Sets default values
 ACrewMember::ACrewMember() {
@@ -82,11 +81,6 @@ void ACrewMember::Tick(float DeltaTime) {
 
 }
 
-// Called to bind functionality to input
-void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	PlayerInputComponent->BindKey(EKeys::A, IE_Released, this, &ACrewMember::Shove);
-}
 
 /**
  * Move this ACrewMember to the given AGridSpace
@@ -95,11 +89,19 @@ void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
  *     ACrewMember to.
  */
 void ACrewMember::MoveTo(AGridSpace * target) {
-	// move to target grid space 
-	// do we want it to return true or false to indicate 
-	// if it was capable of completing the action 
+	
+	if (target->isOccupied()) {
+		return;
+	}
 
-	//will it decrease the crew's action bar?
+	gridSpace->setOccupant(nullptr);
+	target->setOccupant(this);
+	gridSpace = target;
+
+	FVector newLocation = target->GetActorLocation() + FVector(0, 0, 10);
+	UE_LOG(LogTemp, Warning, TEXT("Moving player %d of team %d to (%f, %f)"), id, team, newLocation.X, newLocation.Y);
+	FHitResult hit;
+	SetActorLocation(newLocation, false, &hit, ETeleportType::TeleportPhysics);
 }
 
 /**

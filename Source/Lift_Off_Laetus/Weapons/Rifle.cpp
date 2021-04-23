@@ -44,11 +44,14 @@ int URifle::fire(FVector2D direction) {
 		AGridSpace* space = grid->getTile(location);
 		if (space) {
 			space->SetToRed();
-			ACrewMember* occupant = space->getOccupant();
+			AActor* occupant = space->getOccupant();
 			if (occupant) {
-				UE_LOG(LogTemp, Warning, TEXT("Hit %s!"), *occupant->GetName());
-				//TODO: determine damage to deal?
-				occupant->takeDamage(damage);
+				UE_LOG(LogTemp, Warning, TEXT("Hit %s!"), *occupant->GetName());				
+				
+				ACrewMember* crewMember = Cast<ACrewMember>(occupant);
+				if (crewMember) {
+					crewMember->takeDamage(damage);
+				}
 				return 0;
 			}
 		}

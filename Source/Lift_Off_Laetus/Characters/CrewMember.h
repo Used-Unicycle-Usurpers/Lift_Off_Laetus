@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+#include "GameFramework/Actor.h"
 #include "../Weapons/Rifle.h"
 #include "../Weapons/Launcher.h"
 #include "../PowerUps/PowerUpEffect.h"
 #include "CrewMember.generated.h"
 
 UCLASS()
-class LIFT_OFF_LAETUS_API ACrewMember : public APawn {
+class LIFT_OFF_LAETUS_API ACrewMember : public AActor {
 	GENERATED_BODY()
 
 public:
@@ -71,9 +71,6 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Below is supposed to be the hitbox, needs testing
 	//watch video to see what he says 

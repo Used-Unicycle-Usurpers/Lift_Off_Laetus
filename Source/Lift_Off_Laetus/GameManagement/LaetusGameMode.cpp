@@ -10,6 +10,7 @@
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
 	PlayerControllerClass = ACrewController::StaticClass();
+	DefaultPawnClass = NULL;
 
 	// set default pawn class to our Blueprinted character
 	/*
