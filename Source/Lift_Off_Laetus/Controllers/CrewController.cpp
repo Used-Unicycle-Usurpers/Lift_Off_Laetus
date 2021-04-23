@@ -11,6 +11,11 @@ void ACrewController::SetupInputComponent() {
 	EnableInput(this);
 	InputComponent->BindAction("Fire", IE_Pressed, this, &ACrewController::testBinding);
 	InputComponent->BindAction("ToggleCrewMember", IE_Pressed, this, &ACrewController::toggleCrewMember);
+
+	InputComponent->BindAction("MoveRight", IE_Pressed, this, &ACrewController::moveCrewMemberRight);
+	InputComponent->BindAction("MoveLeft", IE_Pressed, this, &ACrewController::moveCrewMemberLeft);
+	InputComponent->BindAction("MoveToward", IE_Pressed, this, &ACrewController::moveCrewMemberTowardScreen);
+	InputComponent->BindAction("MoveAway", IE_Pressed, this, &ACrewController::moveCrewMemberAwayFromScreen);
 	PlayerCameraManagerClass = PlayerCameraManager->GetClass();
 }
 
@@ -55,3 +60,34 @@ void ACrewController::toggleCrewMember() {
 	moveCameraToCrewMember();
 }
 
+/**
+* Move the currently selected crew member in to the right
+*/
+void ACrewController::moveCrewMemberRight() {
+	ACrew* c = Cast<ACrew>(GetPawn());
+	c->moveSelectedCrewMember(FVector2D(0, 1));
+}
+
+/**
+* Move the currently selected crew member in to the right
+*/
+void ACrewController::moveCrewMemberLeft() {
+	ACrew* c = Cast<ACrew>(GetPawn());
+	c->moveSelectedCrewMember(FVector2D(0, -1));
+}
+
+/**
+* Move the currently selected crew member in to the right
+*/
+void ACrewController::moveCrewMemberTowardScreen() {
+	ACrew* c = Cast<ACrew>(GetPawn());
+	c->moveSelectedCrewMember(FVector2D(1, 0));
+}
+
+/**
+* Move the currently selected crew member in to the right
+*/
+void ACrewController::moveCrewMemberAwayFromScreen() {
+	ACrew* c = Cast<ACrew>(GetPawn());
+	c->moveSelectedCrewMember(FVector2D(-1, 0));
+}

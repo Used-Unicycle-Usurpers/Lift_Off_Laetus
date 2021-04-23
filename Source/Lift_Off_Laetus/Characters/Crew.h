@@ -47,6 +47,11 @@ public:
 	 */
 	int toggleSelectedCrewMember();
 
+	/**
+	* Move the currently selected ACrewMember relative to its current location
+	*/
+	void moveSelectedCrewMember(FVector2D direction);
+
 private:
 	// Array of crew members 
 	//class ACrewMember* crewMembers[3] = {};
@@ -68,4 +73,9 @@ private:
 
 	// Action Bar value, Turn will take care of creating 
 	int32 actionBar; 
+
+	/**
+	* Moves the currently selected ACrewMember in the given direction
+	*/
+	void moveCrewMember(int32 crewMember, FVector2D direction);
 };
