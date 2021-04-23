@@ -24,7 +24,7 @@ AShrub::AShrub() {
 		mesh->SetStaticMesh(randMesh1.Object);
 	}
 
-	mesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
+	//mesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
 	mesh->SetWorldLocation(GetActorLocation());
 	SetRootComponent(mesh);
 }

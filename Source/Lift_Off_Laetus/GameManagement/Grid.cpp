@@ -40,7 +40,7 @@ void AGrid::BeginPlay() {
  */
 bool AGrid::initializeGrid() {
 	TArray<FString> lines;
-	FString name = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Config/grid.txt"));
+	FString name = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("ConfigFiles/grid.txt"));
 	FString delimeter = ",";
 
 	//Parse the lines of the file into an array of strings
@@ -164,7 +164,7 @@ void AGrid::placeGridSpaces() {
  */
 void AGrid::placeEnvironmentObjects() {
 	TArray<FString> lines;
-	FString name = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Config/grid_env.txt"));
+	FString name = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("/ConfigFiles/grid_env.txt"));
 	FString delimeter = "|";
 
 	//Parse the lines of the file into an array of strings
@@ -233,7 +233,7 @@ void AGrid::placeEnvironmentObjects() {
 
 void AGrid::placeCoreFragments() {
 	TArray<FString> lines;
-	FString name = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Config/grid_fragments.txt"));
+	FString name = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("ConfigFiles/grid_fragments.txt"));
 	FString delimeter = ",";
 
 	FCollisionQueryParams cqp;

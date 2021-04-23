@@ -34,7 +34,7 @@ ASlimeTree::ASlimeTree() {
 		break;
 	}
 	
-	mesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
+	//mesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
 	mesh->SetWorldLocation(GetActorLocation());
 	SetRootComponent(mesh);
 }
