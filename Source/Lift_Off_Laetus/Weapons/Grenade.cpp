@@ -32,7 +32,6 @@ void AGrenade::BeginPlay() {
 void AGrenade::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	float distance = FVector::Dist(GetActorLocation(), targetLocation);
-	UE_LOG(LogTemp, Warning, TEXT("Distance is: %f"), distance);
 	
 	//If not reached the end of the path, keep going
 	if (current < path.Num() && distance > 10) {

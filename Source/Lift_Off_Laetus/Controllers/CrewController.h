@@ -20,4 +20,24 @@ public:
 	UFUNCTION()
 		void testBinding();
 
+	/**
+	 * Sets up the APlayerCameraManager reference so all controllers affect the
+	 * same camera manager.
+	 */
+	void moveCameraToCrewMember();
+
+	/**
+	 * Moves the camera to the current ACrewMember.
+	 */
+	void toggleCrewMember();
+	
+	/**
+	 * Toggle the currently selected crew member and focus the camera
+	 * on them.
+	 */
+	void initCamera();
+
+	//The PlayerCameraManager that both Crews refernce to move the 
+	//shared camera.
+	class APlayerCameraManager* cameraManager;
 };

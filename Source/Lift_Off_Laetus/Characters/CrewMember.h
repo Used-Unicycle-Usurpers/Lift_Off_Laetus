@@ -9,6 +9,23 @@
 #include "../PowerUps/PowerUpEffect.h"
 #include "CrewMember.generated.h"
 
+UENUM()
+enum Direction {
+	InvalidDirection = -1,
+	Left = 180,
+	Right = 0,
+	Up = 90,
+	Down = 270
+};
+
+UENUM()
+enum RotationAnim {
+	TurnLeft,
+	TurnRight,
+	TurnAround
+};
+
+
 UCLASS()
 class LIFT_OFF_LAETUS_API ACrewMember : public AActor {
 	GENERATED_BODY()
@@ -38,13 +55,21 @@ public:
 	 */
 	void takeDamage(int32 damage); //excluded cause parameter 
 	
+	/*
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* Mesh;
+	*/
+
+	UPROPERTY(EditAnywhere)
+		class USkeletalMeshComponent* skeletalMesh;
 	
 	//Default team color is red team's, so we need to save the 
 	//other team's color in case they are assigned blue team
 	UPROPERTY(EditAnywhere)
-		class UMaterial* BlueTeamColor; //de
+		class UMaterial* BlueTeamColor;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* RedTeamColor;
 	
 	class UStaticMeshComponent* SphereMesh;
 
@@ -72,8 +97,62 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	//Speed this CrewMember moves.
+	UPROPERTY(EditAnywhere)
+		float Speed;
+
+	/**
+	 * Play the grenade throwing montage.
+	 */
+	void playThrowMontage();
+
+	/**
+	 * Play the shooting rifle montage.
+	 */
+	void playShootRifleMontage();
+	
+	/**
+	 * Rotate this ACrewMember to the given direction, and play the appropriate
+	 * animation while doing so.
+	*/
+	int rotateWithAnimation(Direction directionToFace);
+	
+	/**
+	 * Play the given rotation animation.
+	 */
+	int playRotationMontage(RotationAnim type);
+
+	Direction facingDirection;
+
+	const FRotator leftRotation = FRotator(0.f, 270.f, 0.f);
+	const FRotator rightRotation = FRotator(0.f, 90.f, 0.f);
+	const FRotator upRotation = FRotator(0.f, 180.f, 0.f);
+	const FRotator downRotation = FRotator(0.f, 0.f, 0.f);
+
+	/**
+	 * Convert the given unit direction vector to the corresponding
+	 * Direction enum value.
+	 */
+	Direction vectorToDirectionEnum(FVector2D direction);
+
 	// Below is supposed to be the hitbox, needs testing
 	//watch video to see what he says 
+
+	UFUNCTION(BlueprintCallable)
+		float getSpeed();
+
+	UFUNCTION(BlueprintCallable)
+		void onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted);
+
+	void (*action)(void);
+
+	//The sprint arm that holds the camera
+	UPROPERTY(EditAnywhere)
+		class USpringArmComponent* cameraArm;
+
+	//The camera that follows this crew member
+	UPROPERTY(EditAnywhere)
+		class UCameraComponent* camera;
 
 protected:
 	// Called when the game starts or when spawned
@@ -88,9 +167,6 @@ private:
 
 	// Remaining amount of heatlh
 	float health;
-	
-	//Speed this CrewMember moves.
-	float Speed;
 	
 	//Standard amount of damage that attacks deal
 	int32 damage;
@@ -109,5 +185,12 @@ private:
 	
 	//The launcher for throwing a grenade onto a set of tiles
 	class ULauncher* launcher;
+
+	class UAnimMontage* throwMontage;
+	class UAnimMontage* shootRifleMontage;
+
+	class UAnimMontage* turnLeftMontage;
+	class UAnimMontage* turnRightMontage;
+	class UAnimMontage* turnAroundMontage;
 	
 };

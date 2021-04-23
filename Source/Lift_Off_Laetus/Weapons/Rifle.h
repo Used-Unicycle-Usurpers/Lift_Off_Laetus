@@ -31,4 +31,8 @@ private:
 
 	//Reference to the game mode
 	class ALaetusGameMode* gameMode;
+
+	FVector2D directionToShoot;
+	
+	void shootRifle();
 };
