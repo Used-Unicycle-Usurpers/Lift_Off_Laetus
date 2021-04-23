@@ -26,9 +26,10 @@ ACrewMember::ACrewMember() {
 	skeletalMesh->SetEnableGravity(true);
 	skeletalMesh->SetSimulatePhysics(false);
 
-	static ConstructorHelpers::FObjectFinder<UAnimBlueprint>AnimationBP(TEXT("AnimBlueprint'/Game/Characters/Animations/Pavo_AnimBP.Pavo_AnimBP'"));
+	static ConstructorHelpers::FObjectFinder<UClass>AnimationBP(TEXT("AnimBlueprint'/Game/Characters/Animations/Pavo_AnimBP.Pavo_AnimBP_C'"));
 	skeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	skeletalMesh->SetAnimInstanceClass(AnimationBP.Object->GetAnimBlueprintGeneratedClass());
+	skeletalMesh->AnimClass = AnimationBP.Object;
+	//skeletalMesh->SetAnimInstanceClass(AnimationBP.Object->GetAnimBlueprintGeneratedClass());
 
 	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
 	cameraArm->SetupAttachment(skeletalMesh);
