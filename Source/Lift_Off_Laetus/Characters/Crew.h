@@ -14,9 +14,15 @@ public:
 	// Sets default values for this pawn's properties
 	ACrew(); 
 	
-	//for testing 
 	//void SetTeam(int32 newTeam);
 	void SetUp(int32 newTeam, class AGrid* newGrid);
+
+	//Action bar stuff 
+	int32 GetActionBarStatus();
+	void UpdateActionBar(int32 update);
+
+	//Return the location of the first crewMember 
+	FVector GetStartingLocation();
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,6 +36,16 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	TArray<class ACrewMember*> crewMembers; // for testing
+
+	/**
+	 * Returns a reference to the currently selected ACrewMember.
+	 */
+	ACrewMember* getCurrentCrewMember();
+
+	/**
+	 * Toggles the currently selected ACrewMember
+	 */
+	int toggleSelectedCrewMember();
 
 private:
 	// Array of crew members 
@@ -49,5 +65,7 @@ private:
 
 	//Reference to the game mode
 	class ALaetusGameMode* gameMode;
-	// Would the ActionBar component go here? 
+
+	// Action Bar value, Turn will take care of creating 
+	int32 actionBar; 
 };

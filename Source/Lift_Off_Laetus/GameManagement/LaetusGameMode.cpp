@@ -6,10 +6,17 @@
 #include "GridSpace.h"
 #include "Grid.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Camera/CameraActor.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
 	PlayerControllerClass = ACrewController::StaticClass();
+	DefaultPawnClass = NULL;
+
+	camera = CreateDefaultSubobject<UCameraComponent>("MainCamera");
 
 	// set default pawn class to our Blueprinted character
 	/*static ConstructorHelpers::FClassFinder<APawn>PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
@@ -41,6 +48,9 @@ void ALaetusGameMode::BeginPlay() {
 	// add to crews array
 	crews.Add(redTeam);
 	crews.Add(blueTeam);
+
+	//Begin first turn 
+	BeginNewTurn();
 }
 
 
@@ -57,6 +67,20 @@ void ALaetusGameMode::ChangeTurn()
 	// TODO - Do something with 'crews[currentCrew]', i.e. indicate it's the next crew's turn
 }
 
+//Begin new turn
+void ALaetusGameMode::BeginNewTurn() {
+	//CHANGE CAMERA FOCUS TO NEW CREW
+	//Get location of first crew member in new team 
+	ACrew* newCrew = crews[currentCrew];
+	FVector newCameraLoc = newCrew->GetStartingLocation();
+	//APlayerCameraManager * camera = ;
+	//camera->SetActorLocation(newCameraLoc);
+
+	//update action bar 
+
+	//restart timer 
+
+}
 
 int ALaetusGameMode::EvaluateWin()
 {
