@@ -8,6 +8,8 @@
 #include "../GameManagement/GridSpace.h"
 #include "Components/InputComponent.h"
 #include "Animation/AnimMontage.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 ACrewMember::ACrewMember() {
@@ -27,6 +29,14 @@ ACrewMember::ACrewMember() {
 	static ConstructorHelpers::FObjectFinder<UAnimBlueprint>AnimationBP(TEXT("AnimBlueprint'/Game/Characters/Animations/Pavo_AnimBP.Pavo_AnimBP'"));
 	skeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	skeletalMesh->SetAnimInstanceClass(AnimationBP.Object->GetAnimBlueprintGeneratedClass());
+
+	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
+	cameraArm->SetupAttachment(skeletalMesh);
+	cameraArm->SetWorldRotation(FRotator(-45.f, 0.f, 0.f));
+	cameraArm->TargetArmLength = 1150.f;
+
+	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	camera->AttachToComponent(cameraArm, FAttachmentTransformRules::KeepRelativeTransform, USpringArmComponent::SocketName);
 
 	Speed = 0.f;
 

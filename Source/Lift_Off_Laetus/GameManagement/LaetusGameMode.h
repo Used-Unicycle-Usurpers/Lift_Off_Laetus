@@ -28,6 +28,11 @@ public:
 	void BeginNewTurn();
 	// ?? GetValidMoves(GridSpace);
 
+	class APlayerCameraManager* cameraManager;
+
+	UPROPERTY(EditAnywhere)
+		class UCameraComponent* camera;
+
 private:
 
 	// Game rule parameters

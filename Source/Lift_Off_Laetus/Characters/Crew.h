@@ -37,6 +37,16 @@ public:
 
 	TArray<class ACrewMember*> crewMembers; // for testing
 
+	/**
+	 * Returns a reference to the currently selected ACrewMember.
+	 */
+	ACrewMember* getCurrentCrewMember();
+
+	/**
+	 * Toggles the currently selected ACrewMember
+	 */
+	int toggleSelectedCrewMember();
+
 private:
 	// Array of crew members 
 	//class ACrewMember* crewMembers[3] = {};

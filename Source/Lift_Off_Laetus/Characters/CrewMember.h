@@ -149,6 +149,14 @@ public:
 
 	void (*action)(void);
 
+	//The sprint arm that holds the camera
+	UPROPERTY(EditAnywhere)
+		class USpringArmComponent* cameraArm;
+
+	//The camera that follows this crew member
+	UPROPERTY(EditAnywhere)
+		class UCameraComponent* camera;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -188,6 +196,4 @@ private:
 	class UAnimMontage* turnRightMontage;
 	class UAnimMontage* turnAroundMontage;
 	
-	UPROPERTY()
-		class USpringArmComponent cameraArm;
 };

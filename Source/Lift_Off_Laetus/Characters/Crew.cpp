@@ -8,15 +8,17 @@
 #include "Kismet/GameplayStatics.h"
 #include "../GameManagement/LaetusGameMode.h"
 #include "../GameManagement/Grid.h"
+#include "../Controllers/CrewController.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 ACrew::ACrew() {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bFindCameraComponentWhenViewTarget = true;
 
 	//set action bar to max number 
-	actionBar = 500; 
-
+	actionBar = 500;
 }
 
 // Called when the game starts or when spawned
@@ -49,6 +51,12 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 		space->setOccupant(newMember);
 		newMember->setGridSpace(space);
 	}
+	
+	//Set up the refernce to the PlayerCameraManager and move camera to the
+	//first crew member of the first crew.
+	ACrewController* controller = Cast<ACrewController>(GetController());
+	controller->initCamera();
+	controller->moveCameraToCrewMember();
 }
 
 // Return the current status of the action bar
@@ -74,4 +82,22 @@ void ACrew::Tick(float DeltaTime) {
 // Called to bind functionality to input
 void ACrew::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+/**
+ * Returns a reference to the currently selected ACrewMember.
+ */
+ACrewMember* ACrew::getCurrentCrewMember() {
+	return crewMembers[selectedCharacter];
+}
+
+/**
+ * Toggles the currently selected ACrewMember
+ */
+int ACrew::toggleSelectedCrewMember() {
+	selectedCharacter++;
+	if (selectedCharacter > 2) {
+		selectedCharacter = 0;
+	}
+	return selectedCharacter;
 }

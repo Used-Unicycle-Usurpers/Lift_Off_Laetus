@@ -7,11 +7,16 @@
 #include "Grid.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
-
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Camera/CameraActor.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
 	PlayerControllerClass = ACrewController::StaticClass();
+	DefaultPawnClass = NULL;
+
+	camera = CreateDefaultSubobject<UCameraComponent>("MainCamera");
 
 	// set default pawn class to our Blueprinted character
 	/*static ConstructorHelpers::FClassFinder<APawn>PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
