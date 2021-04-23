@@ -25,6 +25,12 @@ public:
 
 	void endTurn();
 
+	void shootUp();
+	void shootLeft();
+	void shootRight();
+	void shootDown();
+	void shoot(FVector2D direction);
+
 	/**
 	 * Sets up the APlayerCameraManager reference so all controllers affect the
 	 * same camera manager.

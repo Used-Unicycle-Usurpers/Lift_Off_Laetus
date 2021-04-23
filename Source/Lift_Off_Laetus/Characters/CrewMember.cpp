@@ -32,7 +32,8 @@ ACrewMember::ACrewMember() {
 
 	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
 	cameraArm->SetupAttachment(skeletalMesh);
-	cameraArm->SetWorldRotation(FRotator(-45.f, 0.f, 0.f));
+	cameraArm->SetAbsolute(false, true, false);
+	cameraArm->SetWorldRotation(FRotator(320.f, 270.f, 0.f));
 	cameraArm->TargetArmLength = 1150.f;
 
 	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
@@ -84,6 +85,9 @@ ACrewMember::ACrewMember() {
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>TurnAroundAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/TurnAroundMontage1.TurnAroundMontage1'"));
 	turnAroundMontage = TurnAroundAnimMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>StumbleAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/StumbleMontage.StumbleMontage'"));
+	stumbleMontage = StumbleAnimMontage.Object;
 
 	facingDirection = Direction::Right;
 }
@@ -180,7 +184,7 @@ void ACrewMember::takeDamage(int32 damageTaken) {
 	if (health <= 0) {
 		//destroy actor?
 	}
-		
+	playStumbleMontage();		
 }
 
 /**
@@ -328,4 +332,47 @@ float ACrewMember::getSpeed() {
 
 void ACrewMember::onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted) {
 	UE_LOG(LogTemp, Warning, TEXT("In callback from %s"), *montage->GetName());
+}
+
+
+void ACrewMember::rotateToDirection(Direction direction) {
+	facingDirection = direction;
+	switch (direction) {
+	case Up:
+		rotateUp();
+		break;
+	case Left:
+		rotateLeft();
+		break;
+	case Right:
+		rotateRight();
+		break;
+	case Down:
+		rotateDown();
+		break;
+	}
+}
+
+void ACrewMember::rotateUp() {
+	skeletalMesh->SetWorldRotation(upRotation);
+}
+
+void ACrewMember::rotateLeft() {
+	skeletalMesh->SetWorldRotation(leftRotation);
+}
+
+void ACrewMember::rotateRight() {
+	skeletalMesh->SetWorldRotation(rightRotation);
+}
+
+void ACrewMember::rotateDown() {
+	skeletalMesh->SetWorldRotation(downRotation);
+}
+
+int ACrewMember::getTeam() {
+	return team;
+}
+
+int ACrewMember::playStumbleMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(stumbleMontage);
 }

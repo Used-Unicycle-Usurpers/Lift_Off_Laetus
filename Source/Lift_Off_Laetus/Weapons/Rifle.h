@@ -33,6 +33,7 @@ private:
 	class ALaetusGameMode* gameMode;
 
 	FVector2D directionToShoot;
+	enum Direction directionToShootEnum;
 	
 	void shootRifle();
 };

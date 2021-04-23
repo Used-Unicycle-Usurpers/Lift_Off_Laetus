@@ -14,6 +14,13 @@ void ACrewController::SetupInputComponent() {
 	InputComponent->BindAction("Fire", IE_Pressed, this, &ACrewController::testBinding);
 	InputComponent->BindAction("ToggleCrewMember", IE_Pressed, this, &ACrewController::toggleCrewMember);
 	InputComponent->BindAction("EndTurn", IE_Pressed, this, &ACrewController::endTurn);
+
+	//Shoot rifle in one of 4 directions
+	InputComponent->BindAction("ShootUp", IE_Pressed, this, &ACrewController::shootUp);
+	InputComponent->BindAction("ShootLeft", IE_Pressed, this, &ACrewController::shootLeft);
+	InputComponent->BindAction("ShootRight", IE_Pressed, this, &ACrewController::shootRight);
+	InputComponent->BindAction("ShootDown", IE_Pressed, this, &ACrewController::shootDown);
+
 	PlayerCameraManagerClass = PlayerCameraManager->GetClass();
 }
 
@@ -27,11 +34,11 @@ void ACrewController::disable() {
 
 void ACrewController::testBinding() {
 	//TODO: Change to have the currently selected crew member shoot
-	ACrew* c = Cast<ACrew>(GetPawn());
-	if (c) {
-		UE_LOG(LogTemp, Warning, TEXT("%s in testBinding, pawn is: %s!"), *GetName(), *c->GetName());
-		c->crewMembers[0]->Shoot(FVector2D(-1, 0), false);
-	}
+	//ACrew* c = Cast<ACrew>(GetPawn());
+	//if (c) {
+	//	UE_LOG(LogTemp, Warning, TEXT("%s in testBinding, pawn is: %s!"), *GetName(), *c->GetName());
+	//	c->crewMembers[0]->Shoot(FVector2D(-1, 0), false);
+	//}
 }
 
 /**
@@ -69,4 +76,25 @@ void ACrewController::toggleCrewMember() {
 void ACrewController::endTurn() {
 	ALaetusGameMode* gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	gameMode->ChangeTurn();
+}
+
+void ACrewController::shootUp() {
+	shoot(FVector2D(-1, 0));
+}
+
+void ACrewController::shootLeft() {
+	shoot(FVector2D(0, -1));
+}
+
+void ACrewController::shootRight() {
+	shoot(FVector2D(0, 1));
+}
+
+void ACrewController::shootDown() {
+	shoot(FVector2D(1, 0));
+}
+
+void ACrewController::shoot(FVector2D direction) {
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	crew->getCurrentCrewMember()->Shoot(direction, true);
 }
