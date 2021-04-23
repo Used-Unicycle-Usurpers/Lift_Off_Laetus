@@ -20,6 +20,11 @@ public:
 	UFUNCTION()
 		void testBinding();
 
+	void enable();
+	void disable();
+
+	void endTurn();
+
 	/**
 	 * Sets up the APlayerCameraManager reference so all controllers affect the
 	 * same camera manager.

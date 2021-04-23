@@ -56,7 +56,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 	//first crew member of the first crew.
 	ACrewController* controller = Cast<ACrewController>(GetController());
 	controller->initCamera();
-	controller->moveCameraToCrewMember();
+	//controller->moveCameraToCrewMember();
 }
 
 // Return the current status of the action bar
@@ -100,4 +100,12 @@ int ACrew::toggleSelectedCrewMember() {
 		selectedCharacter = 0;
 	}
 	return selectedCharacter;
+}
+
+void ACrew::setSelectedCrewMember(int current) {
+	selectedCharacter = current;
+	ACrewController* controller = Cast<ACrewController>(GetController());
+	if (controller) {
+		controller->moveCameraToCrewMember();
+	}
 }

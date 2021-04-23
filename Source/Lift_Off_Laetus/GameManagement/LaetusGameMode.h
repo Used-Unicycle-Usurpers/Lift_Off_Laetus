@@ -25,7 +25,6 @@ public:
 
 	void ChangeTurn();
 	int32 EvaluateWin();
-	void BeginNewTurn();
 	// ?? GetValidMoves(GridSpace);
 
 	class APlayerCameraManager* cameraManager;

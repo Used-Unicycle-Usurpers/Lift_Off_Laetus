@@ -47,6 +47,8 @@ public:
 	 */
 	int toggleSelectedCrewMember();
 
+	void setSelectedCrewMember(int current);
+
 private:
 	// Array of crew members 
 	//class ACrewMember* crewMembers[3] = {};

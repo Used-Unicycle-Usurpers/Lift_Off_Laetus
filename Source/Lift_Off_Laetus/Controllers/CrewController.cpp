@@ -5,13 +5,24 @@
 #include "../Characters/CrewMember.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
+#include "../GameManagement/LaetusGameMode.h"
 
 void ACrewController::SetupInputComponent() {
 	Super::SetupInputComponent();
-	EnableInput(this);
+	//EnableInput(this);
+	disable();
 	InputComponent->BindAction("Fire", IE_Pressed, this, &ACrewController::testBinding);
 	InputComponent->BindAction("ToggleCrewMember", IE_Pressed, this, &ACrewController::toggleCrewMember);
+	InputComponent->BindAction("EndTurn", IE_Pressed, this, &ACrewController::endTurn);
 	PlayerCameraManagerClass = PlayerCameraManager->GetClass();
+}
+
+void ACrewController::enable() {
+	EnableInput(this);
+}
+
+void ACrewController::disable() {
+	DisableInput(this);
 }
 
 void ACrewController::testBinding() {
@@ -55,3 +66,7 @@ void ACrewController::toggleCrewMember() {
 	moveCameraToCrewMember();
 }
 
+void ACrewController::endTurn() {
+	ALaetusGameMode* gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	gameMode->ChangeTurn();
+}
