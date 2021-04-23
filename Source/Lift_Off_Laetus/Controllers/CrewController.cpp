@@ -50,7 +50,8 @@ void ACrewController::moveCameraToCrewMember() {
  */
 void ACrewController::toggleCrewMember() {
 	ACrew* c = Cast<ACrew>(GetPawn());
-	c->toggleSelectedCrewMember();
+	//c->toggleSelectedCrewMember();
+	//c->
 	moveCameraToCrewMember();
 }
 

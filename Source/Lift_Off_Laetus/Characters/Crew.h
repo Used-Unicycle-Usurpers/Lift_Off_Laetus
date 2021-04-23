@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "CrewMember.h"
+#include "../GameManagement/Grid.h"
+#include "../GameManagement/LaetusGameMode.h"
 #include "Crew.generated.h"
 
 UCLASS()
@@ -59,7 +62,7 @@ private:
 	//Reference to the game mode
 	class ALaetusGameMode* gameMode;
 	// Action Bar value, Turn will take care of creating 
-	int32 actionBar; 
+	int32 actionBar;
 
 	///////////////
 	// Functions //

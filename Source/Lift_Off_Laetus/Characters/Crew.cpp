@@ -3,11 +3,8 @@
 #pragma once
 
 #include "Crew.h"
-#include "CrewMember.h"
 #include "Runtime/Engine/Classes/Engine/TargetPoint.h"
 #include "Kismet/GameplayStatics.h"
-#include "../GameManagement/LaetusGameMode.h"
-#include "../GameManagement/Grid.h"
 #include "../Controllers/CrewController.h"
 #include "Camera/CameraComponent.h"
 
@@ -130,6 +127,7 @@ void ACrew::SelectCrewMember(int32 selected) {
 	if (selected >= crewMembers.Num() || selected == selectedCharacter) { return; }
 	
 	selectedCharacter = selected;
+	moveCameraToCrewMember();
 	// Refresh UI here, maybe?
 }
 
@@ -154,15 +152,4 @@ void ACrew::CycleSelectedCrewMemberDown() {
  */
 ACrewMember* ACrew::getCurrentCrewMember() {
 	return crewMembers[selectedCharacter];
-}
-
-/**
- * Toggles the currently selected ACrewMember
- */
-int ACrew::toggleSelectedCrewMember() {
-	selectedCharacter++;
-	if (selectedCharacter > 2) {
-		selectedCharacter = 0;
-	}
-	return selectedCharacter;
 }
