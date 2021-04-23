@@ -43,17 +43,21 @@ void AGrenade::Tick(float DeltaTime) {
 		FVector2D gridLocation = targetSpace->getGridLocation();
 		for (int row = gridLocation.X - 1; row <= gridLocation.X + 1; row++) {
 			for (int column = gridLocation.Y - 1; column <= gridLocation.Y + 1; column++) {
-				AGridSpace* s = grid->getTile(FVector2D(row, column));
-				if (s) {
-					s->SetToRed();
-					ACrewMember* crewMember = s->getOccupant();
-					if (crewMember) {
-						//TODO: determine damage
-						crewMember->takeDamage(10.0f);
+				AGridSpace* space = grid->getTile(FVector2D(row, column));
+				if (space) {
+					space->SetToRed();
+					AActor* occupant = space->getOccupant();
+					if (occupant) {
+						ACrewMember* crewMember = Cast<ACrewMember>(occupant);
+						if (crewMember) {
+							//TODO: determine damage
+							crewMember->takeDamage(10.0f);
+						}
 					}
 				}
 			}
 		}
+		GetWorld()->DestroyActor(this);
 	}
 }
 

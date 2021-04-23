@@ -10,6 +10,7 @@
 #include "../GameManagement/Grid.h"
 #include "../Controllers/CrewController.h"
 #include "Camera/CameraComponent.h"
+#include "../Characters/CoreFragment.h"
 
 // Sets default values
 ACrew::ACrew() {
@@ -48,15 +49,13 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);
-		space->setOccupant(newMember);
 		newMember->setGridSpace(space);
 	}
 	
 	//Set up the refernce to the PlayerCameraManager and move camera to the
 	//first crew member of the first crew.
 	ACrewController* controller = Cast<ACrewController>(GetController());
-	controller->initCamera();
-	controller->moveCameraToCrewMember();
+	controller->init();
 }
 
 // Return the current status of the action bar
@@ -101,3 +100,49 @@ int ACrew::toggleSelectedCrewMember() {
 	}
 	return selectedCharacter;
 }
+
+void ACrew::setSelectedCrewMember(int current) {
+	selectedCharacter = current;
+	ACrewController* controller = Cast<ACrewController>(GetController());
+	if (controller) {
+		controller->moveCameraToCrewMember();
+	}
+}
+
+/**
+* Moves the given ACrewMember (by array index) in the given direction
+*/
+void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
+	if (crewMemberID >= crewMembers.Num()) { return; }
+
+	FVector2D crewMemberGridLocation = crewMembers[selectedCharacter]->getGridSpace()->getGridLocation();
+	AGridSpace* destination = grid->getTile(crewMemberGridLocation + direction);
+
+	if (destination && !(destination->isOccupied())) {
+		crewMembers[selectedCharacter]->MoveTo(destination);
+	}else {
+
+		if (destination && destination->containsFragment()) {
+
+			//Check where the fragment will go
+			AGridSpace* fragmentDest = grid->getTile(crewMemberGridLocation + (2 * direction));
+			if (fragmentDest && !fragmentDest->isOccupied()) {
+				
+				//Can move, push core fragment first
+				ACoreFragment* fragment = Cast<ACoreFragment>(destination->getOccupant());
+				if (fragment) {
+					fragment->moveTo(fragmentDest);
+					crewMembers[selectedCharacter]->MoveTo(destination);
+				}
+			}
+		}
+	}
+}
+
+/**
+* Moves the currently selected ACrewMember in the given direction
+*/
+void ACrew::moveSelectedCrewMember(FVector2D direction) {
+	moveCrewMember(selectedCharacter, direction);
+}
+

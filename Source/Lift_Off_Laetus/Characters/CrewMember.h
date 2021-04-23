@@ -125,12 +125,20 @@ public:
 	 */
 	int playRotationMontage(RotationAnim type);
 
+	int playStumbleMontage();
+
 	Direction facingDirection;
 
-	const FRotator leftRotation = FRotator(0.f, 270.f, 0.f);
-	const FRotator rightRotation = FRotator(0.f, 90.f, 0.f);
+	const FRotator leftRotation = FRotator(0.f, 90.f, 0.f);
+	const FRotator rightRotation = FRotator(0.f, 270.f, 0.f);
 	const FRotator upRotation = FRotator(0.f, 180.f, 0.f);
 	const FRotator downRotation = FRotator(0.f, 0.f, 0.f);
+
+	void rotateToDirection(Direction direction);
+	void rotateUp();
+	void rotateLeft();
+	void rotateRight();
+	void rotateDown();
 
 	/**
 	 * Convert the given unit direction vector to the corresponding
@@ -156,6 +164,8 @@ public:
 	//The camera that follows this crew member
 	UPROPERTY(EditAnywhere)
 		class UCameraComponent* camera;
+
+	int getTeam();
 
 protected:
 	// Called when the game starts or when spawned
@@ -195,5 +205,7 @@ private:
 	class UAnimMontage* turnLeftMontage;
 	class UAnimMontage* turnRightMontage;
 	class UAnimMontage* turnAroundMontage;
+
+	class UAnimMontage* stumbleMontage;
 	
 };

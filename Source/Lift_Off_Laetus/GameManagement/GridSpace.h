@@ -50,11 +50,13 @@ public:
 	void SetToGreen();
 
 	//Get and set the occupant of this AGridSpace
-	void setOccupant(ACrewMember* newOccupant);
-	ACrewMember* getOccupant();
+	void setOccupant(AActor* newOccupant);
+	AActor* getOccupant();
 
 	//Return whether or not this AGridSpace is occupied
 	bool isOccupied();
+
+	bool containsFragment();
 
 	//Getter and setter for the row and column of this AGridSpace
 	void setGridLocation(int32 row, int32 column);
@@ -75,7 +77,7 @@ protected:
 
 private:
 	//The CrewMember currently occupting this AGridSpace
-	ACrewMember* occupant;
+	AActor* occupant;
 
 	//The row and column of this AGridSpace. The X component is 
 	//the row and the Y component is the column.

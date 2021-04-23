@@ -32,8 +32,10 @@ ACrewMember::ACrewMember() {
 
 	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
 	cameraArm->SetupAttachment(skeletalMesh);
-	cameraArm->SetWorldRotation(FRotator(-45.f, 0.f, 0.f));
+	cameraArm->SetAbsolute(false, true, false);
+	cameraArm->SetWorldRotation(FRotator(320.f, 270.f, 0.f));
 	cameraArm->TargetArmLength = 1150.f;
+	cameraArm->bDoCollisionTest = false;
 
 	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	camera->AttachToComponent(cameraArm, FAttachmentTransformRules::KeepRelativeTransform, USpringArmComponent::SocketName);
@@ -85,6 +87,9 @@ ACrewMember::ACrewMember() {
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>TurnAroundAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/TurnAroundMontage1.TurnAroundMontage1'"));
 	turnAroundMontage = TurnAroundAnimMontage.Object;
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>StumbleAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/StumbleMontage.StumbleMontage'"));
+	stumbleMontage = StumbleAnimMontage.Object;
+
 	facingDirection = Direction::Right;
 }
 
@@ -135,11 +140,16 @@ void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
  *     ACrewMember to.
  */
 void ACrewMember::MoveTo(AGridSpace * target) {
-	// move to target grid space 
-	// do we want it to return true or false to indicate 
-	// if it was capable of completing the action 
+	
+	if (target == nullptr || target->isOccupied()) {
+		return;
+	}
 
-	//will it decrease the crew's action bar?
+	// Reset pointers/references
+	setGridSpace(target);
+
+	FVector newLocation = target->GetActorLocation() + FVector(0,0,20);
+	SetActorLocation(newLocation);
 }
 
 /**
@@ -180,7 +190,7 @@ void ACrewMember::takeDamage(int32 damageTaken) {
 	if (health <= 0) {
 		//destroy actor?
 	}
-		
+	playStumbleMontage();		
 }
 
 /**
@@ -191,7 +201,16 @@ void ACrewMember::takeDamage(int32 damageTaken) {
  *     standing on.
  */
 void ACrewMember::setGridSpace(class AGridSpace* space) {
-	gridSpace = space;
+	
+	if (space && !space->isOccupied()) {
+
+		if (gridSpace) {
+			gridSpace->setOccupant(nullptr);
+		}
+
+		space->setOccupant(this);
+		gridSpace = space;
+	}
 }
 
 /**
@@ -328,4 +347,46 @@ float ACrewMember::getSpeed() {
 
 void ACrewMember::onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted) {
 	UE_LOG(LogTemp, Warning, TEXT("In callback from %s"), *montage->GetName());
+}
+
+void ACrewMember::rotateToDirection(Direction direction) {
+	facingDirection = direction;
+	switch (direction) {
+	case Up:
+		rotateUp();
+		break;
+	case Left:
+		rotateLeft();
+		break;
+	case Right:
+		rotateRight();
+		break;
+	case Down:
+		rotateDown();
+		break;
+	}
+}
+
+void ACrewMember::rotateUp() {
+	skeletalMesh->SetWorldRotation(upRotation);
+}
+
+void ACrewMember::rotateLeft() {
+	skeletalMesh->SetWorldRotation(leftRotation);
+}
+
+void ACrewMember::rotateRight() {
+	skeletalMesh->SetWorldRotation(rightRotation);
+}
+
+void ACrewMember::rotateDown() {
+	skeletalMesh->SetWorldRotation(downRotation);
+}
+
+int ACrewMember::getTeam() {
+	return team;
+}
+
+int ACrewMember::playStumbleMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(stumbleMontage);
 }

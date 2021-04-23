@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GridSpace.h"
+#include "../Characters/CoreFragment.h"
 
 static UMaterial* redMaterial;
 static UMaterial* blueMaterial;
@@ -100,7 +101,7 @@ void AGridSpace::SetToGreen() {
  *     this AGridSpace will be considered as having no occupant.
  * 
  */
-void AGridSpace::setOccupant(ACrewMember* newOccupant) {
+void AGridSpace::setOccupant(AActor* newOccupant) {
 	occupant = newOccupant;
 }
 
@@ -109,7 +110,7 @@ void AGridSpace::setOccupant(ACrewMember* newOccupant) {
  * @return pointer to the crewMember currently occupying this AGridSpace,
  *     nullptr if there is no occupant
  */
-ACrewMember* AGridSpace::getOccupant() {
+AActor* AGridSpace::getOccupant() {
 	return occupant;
 }
 
@@ -121,6 +122,14 @@ ACrewMember* AGridSpace::getOccupant() {
 */
 bool AGridSpace::isOccupied() {
 	return (occupant != nullptr) && IsValid(occupant);
+}
+
+bool AGridSpace::containsFragment() {
+	if (isOccupied()) {
+		ACoreFragment* fragment = Cast<ACoreFragment>(occupant);
+		return IsValid(fragment);
+	}
+	return false;
 }
 
 /**

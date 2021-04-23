@@ -33,8 +33,8 @@ int URifle::fire(FVector2D direction) {
 	directionToShoot = direction;
 	
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
-	Direction directionEnum = owner->vectorToDirectionEnum(directionToShoot);
-	owner->rotateWithAnimation(directionEnum);
+	directionToShootEnum = owner->vectorToDirectionEnum(directionToShoot);
+	owner->rotateWithAnimation(directionToShootEnum);
 	
 	FTimerHandle timer;
 	GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shootRifle, 0.7f, false);
@@ -43,7 +43,7 @@ int URifle::fire(FVector2D direction) {
 
 void URifle::shootRifle() {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
-	owner->skeletalMesh->SetWorldRotation(owner->upRotation);
+	owner->rotateToDirection(directionToShootEnum);
 	owner->playShootRifleMontage();
 	FVector2D location = owner->getGridSpace()->getGridLocation();
 	UE_LOG(LogTemp, Warning, TEXT("Current location: (%f,%f)"), location.X, location.Y);
@@ -57,12 +57,15 @@ void URifle::shootRifle() {
 		AGridSpace* space = grid->getTile(location);
 		if (space) {
 			space->SetToRed();
-			ACrewMember* occupant = space->getOccupant();
+			AActor* occupant = space->getOccupant();
 			if (occupant) {
-				UE_LOG(LogTemp, Warning, TEXT("Hit %s!"), *occupant->GetName());
-				//TODO: determine damage to deal?
-				occupant->takeDamage(damage);
-				return;
+				ACrewMember* crewMember = Cast<ACrewMember>(occupant);
+				if (crewMember) {
+					UE_LOG(LogTemp, Warning, TEXT("Hit %s!"), *occupant->GetName());
+					//TODO: determine damage to deal?
+					crewMember->takeDamage(damage);
+					return;
+				}
 			}
 		}
 	}
