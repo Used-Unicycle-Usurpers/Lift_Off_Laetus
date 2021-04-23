@@ -57,13 +57,18 @@ public:
 	bool isOccupied();
 
 	//Getter and setter for the row and column of this AGridSpace
-	void setGridLocation(int row, int column);
+	void setGridLocation(int32 row, int32 column);
 	FVector2D getGridLocation();
 
 	//Getter and setter for harvestSource
 	void setHarvestSource(AHarvestSource* newSource);
 	AHarvestSource* getHarvestSource();
-	
+
+	//Apply/get/remove extra movement cost for this space
+	void SetExtraMoveCost(int cost);
+	int32 GetExtraMoveCost();
+	void ResetExtraMoveCost();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -79,4 +84,7 @@ private:
 	//The HarvestSource that occupants of this tile can harvest from
 	//during their turn.
 	AHarvestSource* harvestSource;
+
+	//The additional cost of moving through this space
+	int32 extraMoveCost = 0;
 };

@@ -2,16 +2,27 @@
 
 #include "LaetusGameMode.h"
 #include "../Controllers/CrewController.h"
+#include "Lift_Off_Laetus/Characters/Crew.h"
+#include "GridSpace.h"
+#include "Grid.h"
+#include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Camera/CameraActor.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
 	PlayerControllerClass = ACrewController::StaticClass();
+	DefaultPawnClass = NULL;
+
+	camera = CreateDefaultSubobject<UCameraComponent>("MainCamera");
 
 	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
+	/*static ConstructorHelpers::FClassFinder<APawn>PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
 	if (PlayerPawnBPClass.Class != nullptr) {
 		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
+	}*/
 }
 
 /**
@@ -20,6 +31,26 @@ ALaetusGameMode::ALaetusGameMode() {
  */
 void ALaetusGameMode::BeginPlay() {
 	grid = GetWorld()->SpawnActor<AGrid>(FVector(0, 0, 0), FRotator(0, 0, 0));
+
+	//The code below is to test if crew and crewmember are working correctly
+	redTeamController = Cast<ACrewController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
+	ACrew* redTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0)); 
+	redTeamController->Possess(redTeam);
+	
+	blueTeamController = Cast<ACrewController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true));
+	ACrew* blueTeam = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
+	blueTeamController->Possess(blueTeam);
+	
+	//set teams
+	redTeam->SetUp(0, grid);
+	blueTeam->SetUp(1, grid);
+
+	// add to crews array
+	crews.Add(redTeam);
+	crews.Add(blueTeam);
+
+	//Begin first turn 
+	BeginNewTurn();
 }
 
 
@@ -36,6 +67,20 @@ void ALaetusGameMode::ChangeTurn()
 	// TODO - Do something with 'crews[currentCrew]', i.e. indicate it's the next crew's turn
 }
 
+//Begin new turn
+void ALaetusGameMode::BeginNewTurn() {
+	//CHANGE CAMERA FOCUS TO NEW CREW
+	//Get location of first crew member in new team 
+	ACrew* newCrew = crews[currentCrew];
+	FVector newCameraLoc = newCrew->GetStartingLocation();
+	//APlayerCameraManager * camera = ;
+	//camera->SetActorLocation(newCameraLoc);
+
+	//update action bar 
+
+	//restart timer 
+
+}
 
 int ALaetusGameMode::EvaluateWin()
 {
@@ -50,4 +95,12 @@ int ALaetusGameMode::EvaluateWin()
 void ALaetusGameMode::ClearTurnActionStack()
 {
 	// Remove all entries in turn action stack
+}
+
+APawn* ALaetusGameMode::SpawnDefaultPawnFor(AController* NewPlayer, AActor* StartSpot) {
+	return NULL;
+};
+
+UClass* ALaetusGameMode::GetDefaultPawnClassForController(AController* InController) {
+	return NULL;
 }
