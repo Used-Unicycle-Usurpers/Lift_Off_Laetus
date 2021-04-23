@@ -140,11 +140,16 @@ void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
  *     ACrewMember to.
  */
 void ACrewMember::MoveTo(AGridSpace * target) {
-	// move to target grid space 
-	// do we want it to return true or false to indicate 
-	// if it was capable of completing the action 
+	
+	if (target == nullptr || target->isOccupied()) {
+		return;
+	}
 
-	//will it decrease the crew's action bar?
+	// Reset pointers/references
+	setGridSpace(target);
+
+	FVector newLocation = target->GetActorLocation() + FVector(0,0,20);
+	SetActorLocation(newLocation);
 }
 
 /**
@@ -196,7 +201,16 @@ void ACrewMember::takeDamage(int32 damageTaken) {
  *     standing on.
  */
 void ACrewMember::setGridSpace(class AGridSpace* space) {
-	gridSpace = space;
+	
+	if (space && !space->isOccupied()) {
+
+		if (gridSpace) {
+			gridSpace->setOccupant(nullptr);
+		}
+
+		space->setOccupant(this);
+		gridSpace = space;
+	}
 }
 
 /**

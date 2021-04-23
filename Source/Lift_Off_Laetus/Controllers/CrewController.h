@@ -58,4 +58,10 @@ public:
 	//The PlayerCameraManager that both Crews refernce to move the 
 	//shared camera.
 	class APlayerCameraManager* cameraManager;
+
+	// Each moves the selected character in the corresponding direction
+	void moveCrewMemberRight();
+	void moveCrewMemberLeft();
+	void moveCrewMemberTowardScreen();
+	void moveCrewMemberAwayFromScreen();
 };

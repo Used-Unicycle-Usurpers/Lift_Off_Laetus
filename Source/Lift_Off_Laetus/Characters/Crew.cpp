@@ -48,7 +48,6 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);
-		space->setOccupant(newMember);
 		newMember->setGridSpace(space);
 	}
 	
@@ -108,3 +107,25 @@ void ACrew::setSelectedCrewMember(int current) {
 		controller->moveCameraToCrewMember();
 	}
 }
+
+/**
+* Moves the given ACrewMember (by array index) in the given direction
+*/
+void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
+	if (crewMemberID >= crewMembers.Num()) { return; }
+
+	FVector2D crewMemberGridLocation = crewMembers[selectedCharacter]->getGridSpace()->getGridLocation();
+	AGridSpace* destination = grid->getTile(crewMemberGridLocation + direction);
+
+	if (destination && !(destination->isOccupied())) {
+		crewMembers[selectedCharacter]->MoveTo(destination);
+	}
+}
+
+/**
+* Moves the currently selected ACrewMember in the given direction
+*/
+void ACrew::moveSelectedCrewMember(FVector2D direction) {
+	moveCrewMember(selectedCharacter, direction);
+}
+

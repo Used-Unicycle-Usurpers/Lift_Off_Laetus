@@ -30,6 +30,12 @@ void ACrewController::SetupInputComponent() {
 	InputComponent->BindAction("LaunchRight", IE_Pressed, this, &ACrewController::launchRight);
 	InputComponent->BindAction("LaunchDown", IE_Pressed, this, &ACrewController::launchDown);
 
+	//Move currently selected ACrewMember with WASD
+	InputComponent->BindAction("MoveRight", IE_Pressed, this, &ACrewController::moveCrewMemberRight);
+	InputComponent->BindAction("MoveLeft", IE_Pressed, this, &ACrewController::moveCrewMemberLeft);
+	InputComponent->BindAction("MoveToward", IE_Pressed, this, &ACrewController::moveCrewMemberTowardScreen);
+	InputComponent->BindAction("MoveAway", IE_Pressed, this, &ACrewController::moveCrewMemberAwayFromScreen);
+
 	PlayerCameraManagerClass = PlayerCameraManager->GetClass();
 }
 
@@ -136,4 +142,36 @@ void ACrewController::launch(FVector2D direction) {
 	}else {
 		UE_LOG(LogTemp, Warning, TEXT("Tried to launch a grenade, but controlled Crew pawn was null for controller %s"), *GetName());
 	}
+}
+
+/**
+* Move the currently selected crew member in to the right
+*/
+void ACrewController::moveCrewMemberRight() {
+	ACrew* c = Cast<ACrew>(GetPawn());
+	c->moveSelectedCrewMember(FVector2D(0, 1));
+}
+
+/**
+* Move the currently selected crew member in to the right
+*/
+void ACrewController::moveCrewMemberLeft() {
+	ACrew* c = Cast<ACrew>(GetPawn());
+	c->moveSelectedCrewMember(FVector2D(0, -1));
+}
+
+/**
+* Move the currently selected crew member in to the right
+*/
+void ACrewController::moveCrewMemberTowardScreen() {
+	ACrew* c = Cast<ACrew>(GetPawn());
+	c->moveSelectedCrewMember(FVector2D(1, 0));
+}
+
+/**
+* Move the currently selected crew member in to the right
+*/
+void ACrewController::moveCrewMemberAwayFromScreen() {
+	ACrew* c = Cast<ACrew>(GetPawn());
+	c->moveSelectedCrewMember(FVector2D(-1, 0));
 }
