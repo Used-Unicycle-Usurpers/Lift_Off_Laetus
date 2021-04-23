@@ -349,7 +349,6 @@ void ACrewMember::onRotationAnimationEnd(UAnimMontage* montage, bool wasInterupp
 	UE_LOG(LogTemp, Warning, TEXT("In callback from %s"), *montage->GetName());
 }
 
-
 void ACrewMember::rotateToDirection(Direction direction) {
 	facingDirection = direction;
 	switch (direction) {

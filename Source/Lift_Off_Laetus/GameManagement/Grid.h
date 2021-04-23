@@ -121,6 +121,8 @@ private:
 	 */
 	void placeEnvironmentObjects();
 
+	void placeCoreFragments();
+
 	/**
 	 * With the given array of (row, column) coordinates, average together all the
 	 * row (x) components and all the column (y) components in world coordinates.
