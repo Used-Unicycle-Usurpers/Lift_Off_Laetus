@@ -21,7 +21,15 @@ public:
 	 */
 	virtual int fire(FVector2D direction) override;
 
+	void readyLaunch();
 	void launch();
 
 	FVector2D targetDirection;
+
+	FVector2D directionToThow;
+
+	enum Direction directionToFaceEnum;
+
+private:
+	int range;
 };

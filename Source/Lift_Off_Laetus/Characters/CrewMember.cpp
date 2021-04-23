@@ -35,6 +35,7 @@ ACrewMember::ACrewMember() {
 	cameraArm->SetAbsolute(false, true, false);
 	cameraArm->SetWorldRotation(FRotator(320.f, 270.f, 0.f));
 	cameraArm->TargetArmLength = 1150.f;
+	cameraArm->bDoCollisionTest = false;
 
 	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	camera->AttachToComponent(cameraArm, FAttachmentTransformRules::KeepRelativeTransform, USpringArmComponent::SocketName);

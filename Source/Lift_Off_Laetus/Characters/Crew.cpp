@@ -55,8 +55,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 	//Set up the refernce to the PlayerCameraManager and move camera to the
 	//first crew member of the first crew.
 	ACrewController* controller = Cast<ACrewController>(GetController());
-	controller->initCamera();
-	//controller->moveCameraToCrewMember();
+	controller->init();
 }
 
 // Return the current status of the action bar

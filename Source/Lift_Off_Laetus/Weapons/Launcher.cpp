@@ -13,6 +13,7 @@ ULauncher::ULauncher() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>launcherMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/grenade.grenade'"));
 	mesh->SetStaticMesh(launcherMesh.Object);
 	mesh->SetWorldScale3D(FVector(25.f, 25.f, 25.f));
+	range = 2;
 }
 
 /**
@@ -24,26 +25,31 @@ ULauncher::ULauncher() {
  */
 int ULauncher::fire(FVector2D direction) {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
-	FVector2D location = owner->getGridSpace()->getGridLocation();
-	AGridSpace* space = grid->getTile(FVector2D(location.X, location.Y - 6));
-	if (space) {
-		targetDirection = direction;
-		mesh->SetVisibility(true);
-		owner->playThrowMontage();
-		FTimerHandle timerParams;
-		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, 1.8f, false);
-		return 0;
-	}
-	return -1;
+	directionToFaceEnum = owner->vectorToDirectionEnum(direction);
+	owner->rotateWithAnimation(directionToFaceEnum);
+	targetDirection = direction;
+
+	FTimerHandle timerParams;
+	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::readyLaunch, 0.7f, false);
+	return 0;
+}
+
+void ULauncher::readyLaunch() {
+	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
+	owner->rotateToDirection(directionToFaceEnum);
+	mesh->SetVisibility(true);
+	owner->playThrowMontage();
+	FTimerHandle timerParams;
+	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, 1.8f, false);
 }
 
 void ULauncher::launch() {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	FVector2D location = owner->getGridSpace()->getGridLocation();
-	AGridSpace* space = grid->getTile(FVector2D(location.X, location.Y - 10));
-	space->SetToRed();
+	AGridSpace* space = grid->getTile(FVector2D(FVector2D(location.X + (targetDirection.X * range), location.Y + (targetDirection.Y * range))));
 
 	if (space) {
+		space->SetToRed();
 		FVector start = mesh->GetComponentLocation();
 		FVector end = space->GetActorLocation();
 
@@ -55,8 +61,8 @@ void ULauncher::launch() {
 		FPredictProjectilePathParams p;
 		p.StartLocation = start;
 		p.LaunchVelocity = velocity;
-		p.DrawDebugType = EDrawDebugTrace::Persistent;
-		p.DrawDebugTime = 100.f;
+		//p.DrawDebugType = EDrawDebugTrace::Persistent;
+		//p.DrawDebugTime = 100.f;
 		p.SimFrequency = 15;
 		p.MaxSimTime = 20.f;
 		p.bTraceWithCollision = true;

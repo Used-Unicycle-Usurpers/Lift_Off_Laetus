@@ -11,6 +11,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraActor.h"
 #include "Engine/Engine.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
@@ -18,6 +19,9 @@ ALaetusGameMode::ALaetusGameMode() {
 	DefaultPawnClass = NULL;
 
 	camera = CreateDefaultSubobject<UCameraComponent>("MainCamera");
+
+	static ConstructorHelpers::FClassFinder<UUserWidget>HUDBlueprintWidgetClass(TEXT("WidgetBlueprintGeneratedClass'/Game/UI/HUD.HUD_C'"));
+	HUDWidgetClass = HUDBlueprintWidgetClass.Class;
 
 	// set default pawn class to our Blueprinted character
 	/*static ConstructorHelpers::FClassFinder<APawn>PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
@@ -32,6 +36,9 @@ ALaetusGameMode::ALaetusGameMode() {
  */
 void ALaetusGameMode::BeginPlay() {
 	grid = GetWorld()->SpawnActor<AGrid>(FVector(0, 0, 0), FRotator(0, 0, 0));
+
+	hud = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+	hud->AddToViewport();
 
 	//The code below is to test if crew and crewmember are working correctly
 	redTeamController = Cast<ACrewController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
@@ -75,6 +82,12 @@ void ALaetusGameMode::ChangeTurn() {
 		blueTeamController->enable();
 		redTeamController->disable();
 	}
+
+	FsetTeamParams p;
+	p.teamIndex = currentCrew;
+	UFunction* setTeamFunction = hud->FindFunction(FName("setTeam"));
+	hud->ProcessEvent(setTeamFunction, &p);
+
 }
 
 int ALaetusGameMode::EvaluateWin()

@@ -6,6 +6,12 @@
 #include "GameFramework/GameModeBase.h"
 #include "LaetusGameMode.generated.h"
 
+USTRUCT()
+struct FsetTeamParams {
+	GENERATED_BODY()
+	int teamIndex;
+};
+
 /**
  * 
  */
@@ -31,6 +37,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		class UCameraComponent* camera;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
+		TSubclassOf<class UUserWidget> HUDWidgetClass;
+
+	UPROPERTY()
+		class UUserWidget* hud;
 
 private:
 
