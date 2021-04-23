@@ -4,6 +4,7 @@
 #include "../PowerUps/SlimeTree.h"
 #include "../PowerUps/Rock.h"
 #include "../PowerUps/Shrub.h"
+#include "../Characters/CoreFragment.h"
 
 // Sets default values
 AGrid::AGrid() {
@@ -25,6 +26,9 @@ void AGrid::BeginPlay() {
 
 	//Now place the harvest sources based the infomration in /Config/grid_env.txt.
 	placeEnvironmentObjects();
+
+	//Now place all the core fragments specified in /Config/grid_fragments.txt
+	placeCoreFragments();
 
 	//Now the map is ready, place the crew members at the GridSpaces specified in grid.txt
 }
@@ -227,6 +231,46 @@ void AGrid::placeEnvironmentObjects() {
 	}
 }
 
+void AGrid::placeCoreFragments() {
+	TArray<FString> lines;
+	FString name = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Config/grid_fragments.txt"));
+	FString delimeter = ",";
+
+	FCollisionQueryParams cqp;
+	FHitResult hr;
+
+	//Parse the lines of the file into an array of strings
+	FFileHelper::LoadFileToStringArray(lines, *name);
+	for (FString nextLine : lines) {
+		TArray<FString> rowStr;
+		nextLine.ParseIntoArray(rowStr, *delimeter, false);//Divide into tokens by "|"
+
+		for (int i = 0; i < rowStr.Num(); i += 2) {
+			int row = FCString::Atoi(*rowStr[i]);
+			int column = FCString::Atoi(*rowStr[i+1]);
+			AGridSpace* space = getTile(FVector2D(row, column));
+
+			//FVector coordinates = FVector(0.f, 0.f, );
+			//coordinates.X = startingLocation.X + (column * 200);
+			//coordinates.Y = startingLocation.Y + (row * 200);
+			ACoreFragment* fragment = GetWorld()->SpawnActor<ACoreFragment>(space->GetActorLocation(), FRotator(0.f, 0.f, 0.f));
+
+			/*
+			FVector startHeight = FVector(coordinates.X, coordinates.Y, 600);
+			FVector endHeight = FVector(coordinates.X, coordinates.Y, -600);
+			GetWorld()->LineTraceSingleByChannel(hr, startHeight, endHeight, ECC_Visibility, cqp);
+			if (hr.bBlockingHit == true && hr.GetActor() != this) {
+				coordinates.Z = hr.ImpactPoint.Z + (fragment->mesh->GetStaticMesh()->GetBounds().BoxExtent.Y);
+			}
+			*/
+			
+			
+			fragment->setGridSpace(space);
+		}
+	}
+
+}
+
 /**
  * With the given array of (row, column) coordinates, average together all the 
  * row (x) components and all the column (y) components in world coordinates.
@@ -242,7 +286,7 @@ FVector2D AGrid::averageCoordinates(TArray<FVector2D> coordinates) {
 	int columnSum = 0;
 	for (int i = 0; i < coordinates.Num(); i++) {
 		//Confusing, but for coordinates, X is the offset by row, which means we need
-		//to move along the Y axis in world coordaintes, and vice versa for column
+		//to move along the Y axis in world coordinates, and vice versa for column
 		rowSum += (startingLocation.X + coordinates[i].Y * 200);
 		columnSum += (startingLocation.Y + coordinates[i].X * 200);
 	}

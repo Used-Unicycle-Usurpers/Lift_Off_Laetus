@@ -57,12 +57,15 @@ void URifle::shootRifle() {
 		AGridSpace* space = grid->getTile(location);
 		if (space) {
 			space->SetToRed();
-			ACrewMember* occupant = space->getOccupant();
+			AActor* occupant = space->getOccupant();
 			if (occupant) {
-				UE_LOG(LogTemp, Warning, TEXT("Hit %s!"), *occupant->GetName());
-				//TODO: determine damage to deal?
-				occupant->takeDamage(damage);
-				return;
+				ACrewMember* crewMember = Cast<ACrewMember>(occupant);
+				if (crewMember) {
+					UE_LOG(LogTemp, Warning, TEXT("Hit %s!"), *occupant->GetName());
+					//TODO: determine damage to deal?
+					crewMember->takeDamage(damage);
+					return;
+				}
 			}
 		}
 	}

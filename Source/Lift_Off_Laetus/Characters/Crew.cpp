@@ -10,6 +10,7 @@
 #include "../GameManagement/Grid.h"
 #include "../Controllers/CrewController.h"
 #include "Camera/CameraComponent.h"
+#include "../Characters/CoreFragment.h"
 
 // Sets default values
 ACrew::ACrew() {
@@ -119,6 +120,22 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 
 	if (destination && !(destination->isOccupied())) {
 		crewMembers[selectedCharacter]->MoveTo(destination);
+	}else {
+
+		if (destination && destination->containsFragment()) {
+
+			//Check where the fragment will go
+			AGridSpace* fragmentDest = grid->getTile(crewMemberGridLocation + (2 * direction));
+			if (fragmentDest && !fragmentDest->isOccupied()) {
+				
+				//Can move, push core fragment first
+				ACoreFragment* fragment = Cast<ACoreFragment>(destination->getOccupant());
+				if (fragment) {
+					fragment->moveTo(fragmentDest);
+					crewMembers[selectedCharacter]->MoveTo(destination);
+				}
+			}
+		}
 	}
 }
 
