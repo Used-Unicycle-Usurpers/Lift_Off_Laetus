@@ -33,8 +33,8 @@ int URifle::fire(FVector2D direction) {
 	directionToShoot = direction;
 	
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
-	Direction directionEnum = owner->vectorToDirectionEnum(directionToShoot);
-	owner->rotateWithAnimation(directionEnum);
+	directionToShootEnum = owner->vectorToDirectionEnum(directionToShoot);
+	owner->rotateWithAnimation(directionToShootEnum);
 	
 	FTimerHandle timer;
 	GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shootRifle, 0.7f, false);
@@ -43,7 +43,7 @@ int URifle::fire(FVector2D direction) {
 
 void URifle::shootRifle() {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
-	owner->skeletalMesh->SetWorldRotation(owner->upRotation);
+	owner->rotateToDirection(directionToShootEnum);
 	owner->playShootRifleMontage();
 	FVector2D location = owner->getGridSpace()->getGridLocation();
 	UE_LOG(LogTemp, Warning, TEXT("Current location: (%f,%f)"), location.X, location.Y);

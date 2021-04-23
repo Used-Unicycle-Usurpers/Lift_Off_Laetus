@@ -47,6 +47,8 @@ public:
 	 */
 	int toggleSelectedCrewMember();
 
+	void setSelectedCrewMember(int current);
+
 	/**
 	* Move the currently selected ACrewMember relative to its current location
 	*/

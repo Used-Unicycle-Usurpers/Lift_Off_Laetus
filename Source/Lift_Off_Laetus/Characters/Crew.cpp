@@ -54,8 +54,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 	//Set up the refernce to the PlayerCameraManager and move camera to the
 	//first crew member of the first crew.
 	ACrewController* controller = Cast<ACrewController>(GetController());
-	controller->initCamera();
-	controller->moveCameraToCrewMember();
+	controller->init();
 }
 
 // Return the current status of the action bar
@@ -101,6 +100,14 @@ int ACrew::toggleSelectedCrewMember() {
 	return selectedCharacter;
 }
 
+void ACrew::setSelectedCrewMember(int current) {
+	selectedCharacter = current;
+	ACrewController* controller = Cast<ACrewController>(GetController());
+	if (controller) {
+		controller->moveCameraToCrewMember();
+	}
+}
+
 /**
 * Moves the given ACrewMember (by array index) in the given direction
 */
@@ -121,3 +128,4 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 void ACrew::moveSelectedCrewMember(FVector2D direction) {
 	moveCrewMember(selectedCharacter, direction);
 }
+

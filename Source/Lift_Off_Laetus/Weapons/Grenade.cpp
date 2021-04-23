@@ -54,6 +54,7 @@ void AGrenade::Tick(float DeltaTime) {
 				}
 			}
 		}
+		GetWorld()->DestroyActor(this);
 	}
 }
 
