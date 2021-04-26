@@ -34,10 +34,14 @@ int URifle::fire(FVector2D direction) {
 	
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	directionToShootEnum = owner->vectorToDirectionEnum(directionToShoot);
-	owner->rotateWithAnimation(directionToShootEnum);
+	float montageLength = owner->rotateWithAnimation(directionToShootEnum);
 	
-	FTimerHandle timer;
-	GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shootRifle, 0.7f, false);
+	if (montageLength > 0) {
+		FTimerHandle timer;
+		GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shootRifle, montageLength - 0.2f, false);
+	}else {
+		shootRifle();
+	}
 	return 0;
 }
 

@@ -24,6 +24,8 @@ public:
 	//Return the location of the first crewMember 
 	FVector GetStartingLocation();
 
+	void setController(class ACrewController* newController);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -80,4 +82,6 @@ private:
 	* Moves the currently selected ACrewMember in the given direction
 	*/
 	void moveCrewMember(int32 crewMember, FVector2D direction);
+
+	class ACrewController* controller;
 };

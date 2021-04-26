@@ -250,21 +250,8 @@ void AGrid::placeCoreFragments() {
 			int column = FCString::Atoi(*rowStr[i+1]);
 			AGridSpace* space = getTile(FVector2D(row, column));
 
-			//FVector coordinates = FVector(0.f, 0.f, );
-			//coordinates.X = startingLocation.X + (column * 200);
-			//coordinates.Y = startingLocation.Y + (row * 200);
 			ACoreFragment* fragment = GetWorld()->SpawnActor<ACoreFragment>(space->GetActorLocation(), FRotator(0.f, 0.f, 0.f));
 
-			/*
-			FVector startHeight = FVector(coordinates.X, coordinates.Y, 600);
-			FVector endHeight = FVector(coordinates.X, coordinates.Y, -600);
-			GetWorld()->LineTraceSingleByChannel(hr, startHeight, endHeight, ECC_Visibility, cqp);
-			if (hr.bBlockingHit == true && hr.GetActor() != this) {
-				coordinates.Z = hr.ImpactPoint.Z + (fragment->mesh->GetStaticMesh()->GetBounds().BoxExtent.Y);
-			}
-			*/
-			
-			
 			fragment->setGridSpace(space);
 		}
 	}
@@ -347,4 +334,10 @@ int AGrid::getNumColumns() {
 // Called every frame
 void AGrid::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+}
+
+FVector2D AGrid::getUnitDifference(AGridSpace* source, AGridSpace* dest) {
+	FVector2D sourceGridLocation = source->getGridLocation();
+	FVector2D destGridLocation = dest->getGridLocation();
+	return destGridLocation - sourceGridLocation;
 }

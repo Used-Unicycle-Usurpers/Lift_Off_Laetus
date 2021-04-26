@@ -118,12 +118,12 @@ public:
 	 * Rotate this ACrewMember to the given direction, and play the appropriate
 	 * animation while doing so.
 	*/
-	int rotateWithAnimation(Direction directionToFace);
+	float rotateWithAnimation(Direction directionToFace);
 	
 	/**
 	 * Play the given rotation animation.
 	 */
-	int playRotationMontage(RotationAnim type);
+	float playRotationMontage(RotationAnim type);
 
 	int playStumbleMontage();
 
@@ -155,8 +155,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted);
 
-	void (*action)(void);
-
 	//The sprint arm that holds the camera
 	UPROPERTY(EditAnywhere)
 		class USpringArmComponent* cameraArm;
@@ -166,6 +164,8 @@ public:
 		class UCameraComponent* camera;
 
 	int getTeam();
+
+	void setController(class ACrewController* newController);
 
 protected:
 	// Called when the game starts or when spawned
@@ -199,6 +199,7 @@ private:
 	//The launcher for throwing a grenade onto a set of tiles
 	class ULauncher* launcher;
 
+	//Animation montages to play for character actions
 	class UAnimMontage* throwMontage;
 	class UAnimMontage* shootRifleMontage;
 
@@ -208,4 +209,17 @@ private:
 
 	class UAnimMontage* stumbleMontage;
 	
+	//A reference to the game map grid.
+	AGrid* grid;
+
+	//Used to rotate before moving and then to animate movement forward
+	FVector newLocation;
+	FVector moveIncrement;
+	FTimerHandle moveTimerHandle;
+	Direction directionToFaceEnum;
+	class AGridSpace* targetLocation;
+	void moveForward();
+	void incrementMoveForward();
+
+	class ACrewController* controller;
 };

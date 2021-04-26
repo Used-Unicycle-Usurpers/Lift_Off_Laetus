@@ -44,6 +44,8 @@ public:
 	UPROPERTY()
 		class UUserWidget* hud;
 
+	class AGrid* getGameGrid();
+
 private:
 
 	// Game rule parameters

@@ -175,3 +175,11 @@ void ACrewController::moveCrewMemberAwayFromScreen() {
 	ACrew* c = Cast<ACrew>(GetPawn());
 	c->moveSelectedCrewMember(FVector2D(-1, 0));
 }
+
+void ACrewController::OnPossess(APawn* InPawn) {
+	Super::OnPossess(InPawn);
+	ACrew* c = Cast<ACrew>(InPawn);
+	if (c) {
+		c->setController(this);
+	}
+}

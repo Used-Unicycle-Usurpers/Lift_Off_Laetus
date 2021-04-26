@@ -112,3 +112,7 @@ APawn* ALaetusGameMode::SpawnDefaultPawnFor(AController* NewPlayer, AActor* Star
 UClass* ALaetusGameMode::GetDefaultPawnClassForController(AController* InController) {
 	return NULL;
 }
+
+AGrid* ALaetusGameMode::getGameGrid() {
+	return grid;
+}
