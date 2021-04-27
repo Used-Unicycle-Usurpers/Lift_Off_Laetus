@@ -146,3 +146,7 @@ void ACrew::moveSelectedCrewMember(FVector2D direction) {
 void ACrew::setController(ACrewController* newController) {
 	controller = newController;
 }
+
+int32 ACrew::getSelectedCrewMemberIndex() {
+	return selectedCharacter;
+}

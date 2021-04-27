@@ -56,6 +56,8 @@ public:
 	*/
 	void moveSelectedCrewMember(FVector2D direction);
 
+	int32 getSelectedCrewMemberIndex();
+
 private:
 	// Array of crew members 
 	//class ACrewMember* crewMembers[3] = {};

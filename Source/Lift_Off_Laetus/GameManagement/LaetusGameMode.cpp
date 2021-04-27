@@ -83,11 +83,14 @@ void ALaetusGameMode::ChangeTurn() {
 		redTeamController->disable();
 	}
 
-	FsetTeamParams p;
-	p.teamIndex = currentCrew;
-	UFunction* setTeamFunction = hud->FindFunction(FName("setTeam"));
-	hud->ProcessEvent(setTeamFunction, &p);
+	callHUDSetPlayer(-1);
 
+	FsetTeamParams params1;
+	params1.teamIndex = currentCrew;
+	UFunction* setTeamFunction = hud->FindFunction(FName("setTeam"));
+	hud->ProcessEvent(setTeamFunction, &params1);
+
+	callHUDSetPlayer(0);
 }
 
 int ALaetusGameMode::EvaluateWin()
@@ -115,4 +118,11 @@ UClass* ALaetusGameMode::GetDefaultPawnClassForController(AController* InControl
 
 AGrid* ALaetusGameMode::getGameGrid() {
 	return grid;
+}
+
+void ALaetusGameMode::callHUDSetPlayer(int newPlayerIndex) {
+	FsetPlayerParams params;
+	params.playerIndex = newPlayerIndex;
+	UFunction* setPlayerFunction = hud->FindFunction(FName("setPlayer"));
+	hud->ProcessEvent(setPlayerFunction, &params);
 }

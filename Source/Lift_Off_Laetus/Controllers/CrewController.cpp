@@ -8,70 +8,75 @@
 #include "../GameManagement/LaetusGameMode.h"
 
 ACrewController::ACrewController() {
+	currentTurnState = Movement;
+}
 
+void ACrewController::BeginPlay() {
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 void ACrewController::SetupInputComponent() {
 	Super::SetupInputComponent();
-	//EnableInput(this);
-	disable();
+	disable();//Let game mode enable input based on whose turn it is.
+
+	//Inputs for swithcing between crew members and turns
 	InputComponent->BindAction("ToggleCrewMember", IE_Pressed, this, &ACrewController::toggleCrewMember);
 	InputComponent->BindAction("EndTurn", IE_Pressed, this, &ACrewController::endTurn);
 
-	//Shoot rifle in one of 4 directions
-	InputComponent->BindAction("ShootUp", IE_Pressed, this, &ACrewController::shootUp);
-	InputComponent->BindAction("ShootLeft", IE_Pressed, this, &ACrewController::shootLeft);
-	InputComponent->BindAction("ShootRight", IE_Pressed, this, &ACrewController::shootRight);
-	InputComponent->BindAction("ShootDown", IE_Pressed, this, &ACrewController::shootDown);
+	//These are the basic 4 controls for moving and attacking. They will be interpreteed differently 
+	//depending on what turn state the player is currently in.
+	InputComponent->BindAction("Up", IE_Pressed, this, &ACrewController::handleUp);
+	InputComponent->BindAction("Left", IE_Pressed, this, &ACrewController::handleLeft);
+	InputComponent->BindAction("Right", IE_Pressed, this, &ACrewController::handleRight);
+	InputComponent->BindAction("Down", IE_Pressed, this, &ACrewController::handleDown);
 
-	//Launch a grenade in one of 4 directions
-	InputComponent->BindAction("LaunchUp", IE_Pressed, this, &ACrewController::launchUp);
-	InputComponent->BindAction("LaunchLeft", IE_Pressed, this, &ACrewController::launchLeft);
-	InputComponent->BindAction("LaunchRight", IE_Pressed, this, &ACrewController::launchRight);
-	InputComponent->BindAction("LaunchDown", IE_Pressed, this, &ACrewController::launchDown);
-
-	//Move currently selected ACrewMember with WASD
-	InputComponent->BindAction("MoveRight", IE_Pressed, this, &ACrewController::moveCrewMemberRight);
-	InputComponent->BindAction("MoveLeft", IE_Pressed, this, &ACrewController::moveCrewMemberLeft);
-	InputComponent->BindAction("MoveToward", IE_Pressed, this, &ACrewController::moveCrewMemberTowardScreen);
-	InputComponent->BindAction("MoveAway", IE_Pressed, this, &ACrewController::moveCrewMemberAwayFromScreen);
+	//For debugging, these keybinds allow you to manually set the state, rather then selecting move, 
+	//attack, or collect on the UI
+	InputComponent->BindAction("SetToMovement", IE_Pressed, this, &ACrewController::setStateToMovement);
+	InputComponent->BindAction("SetToRifleAttack", IE_Pressed, this, &ACrewController::setStateToRifleAttack);
+	InputComponent->BindAction("SetToGrenadeAttack", IE_Pressed, this, &ACrewController::setStateToGrenadeAttack);
+	InputComponent->BindAction("SetToHarvest", IE_Pressed, this, &ACrewController::setStateToHarvest);
 
 	PlayerCameraManagerClass = PlayerCameraManager->GetClass();
 }
 
+/**
+ * Sets up the APlayerCameraManager reference so all controllers affect the
+ * same camera manager.
+ */
+void ACrewController::init() {
+	cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+}
+
+/** 
+ * Enable input on this controller.
+ */
 void ACrewController::enable() {
 	EnableInput(this);
 }
 
+/**
+ * Disable input on this controller.
+ */
 void ACrewController::disable() {
 	DisableInput(this);
 }
 
 /**
- * Sets up the APlayerCameraManager reference so all controllers affect the 
- * same camera manager.
+ * Tell the game mode to end this players turn and switch control over to 
+ * the other player.
  */
-void ACrewController::init() {
-	cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-
-	/*
-	TArray<UUserWidget*> results;
-	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), results, HUDWidgetClass);
-	if (results[0]) {
-		hud = results[0];
-	}else {
-		UE_LOG(LogTemp, Warning, TEXT("Couldn't find hud in world"));
-	}
-	*/
+void ACrewController::endTurn() {
+	gameMode->ChangeTurn();
 }
 
 /**
  * Moves the camera to the current ACrewMember.
  */
 void ACrewController::moveCameraToCrewMember() {
-	ACrew* c = Cast<ACrew>(GetPawn());
-	if (c) {
-		ACrewMember* current = c->getCurrentCrewMember();
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew) {
+		ACrewMember* current = crew->getCurrentCrewMember();
 		FViewTargetTransitionParams p;
 		p.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
 		p.BlendTime = 1.f;
@@ -84,14 +89,173 @@ void ACrewController::moveCameraToCrewMember() {
  * on them
  */
 void ACrewController::toggleCrewMember() {
+	//Remove the yellow highlight on the HUD for the crew member that 
+	//is no longer selected.
+	gameMode->callHUDSetPlayer(-1);
+
+	//Toggle and highlight character portrait on the HUD
 	ACrew* c = Cast<ACrew>(GetPawn());
 	c->toggleSelectedCrewMember();
+	gameMode->callHUDSetPlayer(c->getSelectedCrewMemberIndex());
+
+	//Now move the camera to focus on this crew member.
 	moveCameraToCrewMember();
 }
 
-void ACrewController::endTurn() {
-	ALaetusGameMode* gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	gameMode->ChangeTurn();
+/**
+ * Set the state of the turn this player is in to the given state.
+ * 
+ * @param newState the turn state this player is now entering.
+ */
+void ACrewController::setTurnState(enum FTurnState newState) {
+	currentTurnState = newState;
+}
+
+void ACrewController::setStateToMovement() {
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN MOVEMENT MODE"));
+	setTurnState(Movement);
+}
+
+void ACrewController::setStateToRifleAttack() {
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN RIFLE ATTACK MODE"));
+	setTurnState(RifleAttack);
+}
+
+void ACrewController::setStateToGrenadeAttack() {
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN GRENADE ATTACK MODE"));
+	setTurnState(GrenadeAttack);
+}
+
+void ACrewController::setStateToHarvest() {
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN HARVEST MODE"));
+	setTurnState(Harvest);
+}
+
+/**
+ * Handle the "Up" key based on the current turn state this player is in.
+ */
+void ACrewController::handleUp() {
+	switch (currentTurnState) {
+	case Idle:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Idle state"));
+		break;
+	case CameraMovement:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Camera state"));
+		break;
+	case Movement:
+		moveCrewMemberAwayFromScreen();
+		break;
+	case RifleAttack:
+		shootUp();
+		break;
+	case GrenadeAttack:
+		launchUp();
+		break;
+	case Harvest:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Harvest state"));
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in default state"));
+	}
+}
+
+/**
+ * Handle the "Left" input based on the current turn state this player is in.
+ */
+void ACrewController::handleLeft() {
+	switch (currentTurnState) {
+	case Idle:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Idle state"));
+		break;
+	case CameraMovement:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Camera state"));
+		break;
+	case Movement:
+		moveCrewMemberLeft();
+		break;
+	case RifleAttack:
+		shootLeft();
+		break;
+	case GrenadeAttack:
+		launchLeft();
+		break;
+	case Harvest:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Harvest state"));
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in default state"));
+	}
+}
+
+/**
+ * Handle the "Right" input based on the current turn state this player is in.
+ */
+void ACrewController::handleRight() {
+	switch (currentTurnState) {
+	case Idle:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Idle state"));
+		break;
+	case CameraMovement:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Camera state"));
+		break;
+	case Movement:
+		moveCrewMemberRight();
+		break;
+	case RifleAttack:
+		shootRight();
+		break;
+	case GrenadeAttack:
+		launchRight();
+		break;
+	case Harvest:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Harvest state"));
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in default state"));
+	}
+}
+
+/**
+ * Handle the "Down" input based on the current turn state this player is in.
+ */
+void ACrewController::handleDown() {
+	switch (currentTurnState) {
+	case Idle:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Idle state"));
+		break;
+	case CameraMovement:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Camera state"));
+		break;
+	case Movement:
+		moveCrewMemberTowardScreen();
+		break;
+	case RifleAttack:
+		shootDown();
+		break;
+	case GrenadeAttack:
+		launchDown();
+		break;
+	case Harvest:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Harvest state"));
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in default state"));
+	}
+}
+
+/**
+ * Have the currently selected crew member shoot their rifle in the given direction.
+ * 
+ * @param direction the carindal direction for the currently selected ACrewMember 
+ *     to fire their rifle towards.
+ */
+void ACrewController::shoot(FVector2D direction) {
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew) {
+		crew->getCurrentCrewMember()->Shoot(direction, true);
+	}else {
+		UE_LOG(LogTemp, Warning, TEXT("Tried to shoot rifle, but controlled Crew pawn was null for controller %s"), *GetName());
+	}
 }
 
 void ACrewController::shootUp() {
@@ -110,12 +274,18 @@ void ACrewController::shootDown() {
 	shoot(FVector2D(1, 0));
 }
 
-void ACrewController::shoot(FVector2D direction) {
+/**
+ * Have the currently selected crew member launch a grenade in the given direction.
+ *
+ * @param direction the carindal direction for the currently selected ACrewMember
+ *     to launch a grenade towards.
+ */
+void ACrewController::launch(FVector2D direction) {
 	ACrew* crew = Cast<ACrew>(GetPawn());
 	if (crew) {
-		crew->getCurrentCrewMember()->Shoot(direction, true);
+		crew->getCurrentCrewMember()->Shoot(direction, false);
 	}else {
-		UE_LOG(LogTemp, Warning, TEXT("Tried to shoot rifle, but controlled Crew pawn was null for controller %s"), *GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Tried to launch a grenade, but controlled Crew pawn was null for controller %s"), *GetName());
 	}
 }
 
@@ -133,15 +303,6 @@ void ACrewController::launchRight() {
 
 void ACrewController::launchDown() {
 	launch(FVector2D(1, 0));
-}
-
-void ACrewController::launch(FVector2D direction) {
-	ACrew* crew = Cast<ACrew>(GetPawn());
-	if (crew) {
-		crew->getCurrentCrewMember()->Shoot(direction, false);
-	}else {
-		UE_LOG(LogTemp, Warning, TEXT("Tried to launch a grenade, but controlled Crew pawn was null for controller %s"), *GetName());
-	}
 }
 
 /**
