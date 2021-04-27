@@ -18,9 +18,9 @@ public:
 
 	/**
 	 * Fires a bullet (i.e. line trace) in the cardinal direction specified in
-	 * direction and damages the first player it finds (if any).
+	 * target and damages the first player it finds (if any).
 	 */
-	virtual int fire(FVector2D direction) override;
+	virtual int fire(FVector2D target) override;
 
 private:
 	//The amount of damage a shot typically deals.
@@ -35,5 +35,9 @@ private:
 	FVector2D directionToShoot;
 	enum Direction directionToShootEnum;
 	
+	/**
+	 * Fire the rifle in the current target direction up to range number of
+	 * tiles. Stop either at max range or when the first ACrewMember gets hit.
+	 */
 	void shootRifle();
 };

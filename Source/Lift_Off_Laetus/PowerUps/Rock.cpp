@@ -13,8 +13,6 @@ ARock::ARock() {
 	setHarvestSourceType(HarvestSourceType::Rock);
 
 	//Pick a random mesh
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>("TreeMesh");
-
 	int randomIdx = FMath::RandRange(0, rockMeshReferences.Num() - 1);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh1(*rockMeshReferences[0]);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh2(*rockMeshReferences[1]);
