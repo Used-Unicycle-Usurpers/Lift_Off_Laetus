@@ -14,6 +14,7 @@ ACrewController::ACrewController() {
 }
 
 void ACrewController::BeginPlay() {
+	Super::BeginPlay();
 	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
@@ -31,6 +32,8 @@ void ACrewController::SetupInputComponent() {
 	InputComponent->BindAction("Left", IE_Pressed, this, &ACrewController::handleLeft);
 	InputComponent->BindAction("Right", IE_Pressed, this, &ACrewController::handleRight);
 	InputComponent->BindAction("Down", IE_Pressed, this, &ACrewController::handleDown);
+
+	InputComponent->BindAction("Confirm", IE_Pressed, this, &ACrewController::handleConfirm);
 
 	//For debugging, these keybinds allow you to manually set the state, rather then selecting move, 
 	//attack, or collect on the UI
@@ -69,6 +72,9 @@ void ACrewController::disable() {
  * the other player.
  */
 void ACrewController::endTurn() {
+	if (currentlySelectedTile) {
+		currentlySelectedTile->SetToRegularMaterial();
+	}
 	gameMode->ChangeTurn();
 }
 
@@ -180,7 +186,7 @@ void ACrewController::handleUp() {
 		shootUp();
 		break;
 	case GrenadeAttack:
-		moveCameraToTile(FVector2D(-1, 0));
+		moveCameraToTile(Direction::Up);
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Harvest state"));
@@ -208,13 +214,13 @@ void ACrewController::handleLeft() {
 		shootLeft();
 		break;
 	case GrenadeAttack:
-		moveCameraToTile(FVector2D(0, -1));
+		moveCameraToTile(Direction::Left);
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Harvest state"));
 		break;
 	default:
-		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in default state"));
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in default state"));
 	}
 }
 
@@ -236,13 +242,13 @@ void ACrewController::handleRight() {
 		shootRight();
 		break;
 	case GrenadeAttack:
-		moveCameraToTile(FVector2D(0, 1));
+		moveCameraToTile(Direction::Right);
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Harvest state"));
 		break;
 	default:
-		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in default state"));
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in default state"));
 	}
 }
 
@@ -264,13 +270,41 @@ void ACrewController::handleDown() {
 		shootDown();
 		break;
 	case GrenadeAttack:
-		moveCameraToTile(FVector2D(1, 0));
+		moveCameraToTile(Direction::Down);
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Harvest state"));
 		break;
 	default:
-		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in default state"));
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in default state"));
+	}
+}
+
+/**
+ * Handle the "Confim" input based on the current turn state this player is in.
+ */
+void ACrewController::handleConfirm() {
+	switch (currentTurnState) {
+	case Idle:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in Idle state"));
+		break;
+	case CameraMovement:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in Camera state"));
+		break;
+	case Movement:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in Movement state"));
+		break;
+	case RifleAttack:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in RifleAttack state"));
+		break;
+	case GrenadeAttack:
+		launch();
+		break;
+	case Harvest:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in Harvest state"));
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in default state"));
 	}
 }
 
@@ -289,18 +323,30 @@ void ACrewController::shoot(FVector2D direction) {
 	}
 }
 
+/**
+ * Shoot the rifle upwards on the game grid.
+ */
 void ACrewController::shootUp() {
 	shoot(FVector2D(-1, 0));
 }
 
+/**
+ * Shoot the rifle to the left on the game grid.
+ */
 void ACrewController::shootLeft() {
 	shoot(FVector2D(0, -1));
 }
 
+/**
+ * Shoot the rifle to the right on the game grid.
+ */
 void ACrewController::shootRight() {
 	shoot(FVector2D(0, 1));
 }
 
+/**
+ * Shoot the rifle downwards on the game grid.
+ */
 void ACrewController::shootDown() {
 	shoot(FVector2D(1, 0));
 }
@@ -311,29 +357,14 @@ void ACrewController::shootDown() {
  * @param direction the carindal direction for the currently selected ACrewMember
  *     to launch a grenade towards.
  */
-void ACrewController::launch(FVector2D direction) {
+void ACrewController::launch() {
 	ACrew* crew = Cast<ACrew>(GetPawn());
 	if (crew) {
-		crew->getCurrentCrewMember()->Shoot(direction, false);
+		moveCameraSmoothly(crew->getCurrentCrewMember());
+		crew->getCurrentCrewMember()->Shoot(currentlySelectedTile->getGridLocation(), false);
 	}else {
 		UE_LOG(LogTemp, Warning, TEXT("Tried to launch a grenade, but controlled Crew pawn was null for controller %s"), *GetName());
 	}
-}
-
-void ACrewController::launchUp() {
-	launch(FVector2D(-1, 0));
-}
-
-void ACrewController::launchLeft() {
-	launch(FVector2D(0, -1));
-}
-
-void ACrewController::launchRight() {
-	launch(FVector2D(0, 1));
-}
-
-void ACrewController::launchDown() {
-	launch(FVector2D(1, 0));
 }
 
 /**
@@ -376,11 +407,34 @@ void ACrewController::OnPossess(APawn* InPawn) {
 	}
 }
 
-void ACrewController::moveCameraToTile(FVector2D direction) {
+/**
+ * Move camera to the next AGridSpace in the specified direction.
+ * 
+ * @param direction a Direction enum specifying the direction of 
+ *     the next tile to move the camera to.
+ */
+void ACrewController::moveCameraToTile(Direction direction) {
 	AGrid* grid = gameMode->getGameGrid();
 
+	FVector2D directionVector = FVector2D(0, 0);
+	switch (direction) {
+	case Up:
+		directionVector = FVector2D(-1, 0);
+		break;
+	case Left:
+		directionVector = FVector2D(0, -1);
+		break;
+	case Right:
+		directionVector = FVector2D(0, 1);
+		break;
+	case Down:
+		directionVector = FVector2D(1, 0);
+		break;
+	default:
+		return;
+	}
 	FVector2D currentLocation = currentlySelectedTile->getGridLocation();
-	FVector2D newLocation = currentLocation + direction;
+	FVector2D newLocation = currentLocation + directionVector;
 
 	AGridSpace* newSpace = grid->getTile(newLocation);
 	if (newSpace) {
@@ -392,6 +446,11 @@ void ACrewController::moveCameraToTile(FVector2D direction) {
 	}
 }
 
+/**
+ * Move the camera smoothly from its current location to the target actor.
+ * 
+ * @param target the actor to smoothly move the camera to.
+ */
 void ACrewController::moveCameraSmoothly(AActor* target) {
 	FViewTargetTransitionParams p;
 	p.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;

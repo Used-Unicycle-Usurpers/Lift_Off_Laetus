@@ -12,8 +12,6 @@ AShrub::AShrub() {
 	setHarvestSourceType(HarvestSourceType::Shrub);
 
 	//Pick a random mesh
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>("TreeMesh");
-
 	int randomIdx = FMath::RandRange(0, shrubMeshReferences.Num() - 1);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh1(*shrubMeshReferences[0]);
 	

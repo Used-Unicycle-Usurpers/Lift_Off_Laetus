@@ -45,7 +45,7 @@ public:
 	/**
 	 * Shoot one of this ACrewMember's weapons in the given direction
 	 */
-	void Shoot(FVector2D direction, bool useRifle);
+	void Shoot(FVector2D target, bool useRifle);
 	
 	/**
 	 * Shove the object that was in the AGridSpace this ACrewMember just moved
@@ -181,6 +181,12 @@ public:
 	 * controller is directly possessing any of the ACrewMembers.
 	 */
 	void setController(class ACrewController* newController);
+
+	/**
+	 * Get a refernce the controller that possess the ACrew this ACrewMember is a 
+	 * part of.
+	 */
+	class ACrewController* getCrewController();
 
 protected:
 	// Called when the game starts or when spawned

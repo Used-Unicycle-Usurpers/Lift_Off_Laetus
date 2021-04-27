@@ -42,7 +42,7 @@ AGridSpace::AGridSpace(){
 	collision->OnComponentBeginOverlap.AddDynamic(this, &AGridSpace::OnEnterGridSpace);
 	collision->OnComponentEndOverlap.AddDynamic(this, &AGridSpace::OnExitGridSpace);
 	collision->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
-
+	
 	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
 	cameraArm->SetupAttachment(mesh);
 	cameraArm->SetAbsolute(false, true, false);
@@ -105,6 +105,12 @@ void AGridSpace::SetToRegularMaterial() {
  */
 void AGridSpace::SetToRed() {
 	mesh->SetMaterial(0, redMaterial);
+}
+
+void AGridSpace::SetToRedOnTimer() {
+	SetToRed();
+	FTimerHandle f;
+	GetWorld()->GetTimerManager().SetTimer(f, this, &AGridSpace::SetToRegularMaterial, 2.0f, false);
 }
 
 void AGridSpace::SetToBlue() {

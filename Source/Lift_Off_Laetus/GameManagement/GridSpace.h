@@ -48,6 +48,7 @@ public:
 
 	//For visual debugging
 	void SetToRed();
+	void SetToRedOnTimer();
 	void SetToBlue();
 	void SetToGreen();
 

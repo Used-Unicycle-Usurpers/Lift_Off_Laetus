@@ -64,6 +64,11 @@ public:
 	void handleDown();
 
 	/**
+	 * Handle the "Confim" input based on the current turn state this player is in.
+	 */
+	void handleConfirm();
+
+	/**
 	 * Have the currently selected crew member shoot their rifle in the given direction.
 	 */
 	void shoot(FVector2D direction);
@@ -77,7 +82,7 @@ public:
 	/**
 	 * Have the currently selected crew member launch a grenade in the given direction.
 	 */
-	void launch(FVector2D direction);
+	void launch();
 
 	//Helper functions for launch, to specify the direction to throw 
 	//a grenade in.
@@ -126,9 +131,18 @@ public:
 	//A reference to the game mode for quick access.
 	class ALaetusGameMode* gameMode;
 
-	void moveCameraToTile(FVector2D direction);
+	/**
+	 * Move camera to the next AGridSpace in the specified direction.
+	 */
+	void moveCameraToTile(enum Direction direction);
 
+	/**
+	 * The tile that is currently being highlighted in GrenadeAttack mode.
+	 */
 	class AGridSpace* currentlySelectedTile;
 
+	/**
+	 * Move the camera smoothly from its current location to the target actor.
+	 */
 	void moveCameraSmoothly(AActor* target);
 };
