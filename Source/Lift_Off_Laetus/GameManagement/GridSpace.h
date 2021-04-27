@@ -44,6 +44,8 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
 
+	void SetToRegularMaterial();
+
 	//For visual debugging
 	void SetToRed();
 	void SetToBlue();
@@ -70,6 +72,14 @@ public:
 	void SetExtraMoveCost(int cost);
 	int32 GetExtraMoveCost();
 	void ResetExtraMoveCost();
+
+	//The sprint arm that holds the camera
+	UPROPERTY(EditAnywhere)
+		class USpringArmComponent* cameraArm;
+
+	//The camera that follows this crew member
+	UPROPERTY(EditAnywhere)
+		class UCameraComponent* camera;
 
 protected:
 	// Called when the game starts or when spawned

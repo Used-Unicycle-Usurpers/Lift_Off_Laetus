@@ -125,4 +125,10 @@ public:
 
 	//A reference to the game mode for quick access.
 	class ALaetusGameMode* gameMode;
+
+	void moveCameraToTile(FVector2D direction);
+
+	class AGridSpace* currentlySelectedTile;
+
+	void moveCameraSmoothly(AActor* target);
 };

@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
 #include "../GameManagement/LaetusGameMode.h"
+#include "../GameManagement/GridSpace.h"
+#include "../GameManagement/Grid.h"
 
 ACrewController::ACrewController() {
 	currentTurnState = Movement;
@@ -113,22 +115,51 @@ void ACrewController::setTurnState(enum FTurnState newState) {
 
 void ACrewController::setStateToMovement() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN MOVEMENT MODE"));
-	setTurnState(Movement);
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew) {
+		if (currentlySelectedTile) {
+			currentlySelectedTile->SetToRegularMaterial();
+		}
+		moveCameraSmoothly(crew->getCurrentCrewMember());
+		setTurnState(Movement);
+	}
 }
 
 void ACrewController::setStateToRifleAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN RIFLE ATTACK MODE"));
-	setTurnState(RifleAttack);
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew) {
+		if (currentlySelectedTile) {
+			currentlySelectedTile->SetToRegularMaterial();
+		}
+		moveCameraSmoothly(crew->getCurrentCrewMember());
+		setTurnState(RifleAttack);
+	}
 }
 
 void ACrewController::setStateToGrenadeAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN GRENADE ATTACK MODE"));
-	setTurnState(GrenadeAttack);
+	
+	//Start by focusing on current tile. WASD will now move highlighted so player can select 
+	//where to throw the grenade.
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew) {
+		currentlySelectedTile = crew->getCurrentCrewMember()->getGridSpace();
+		moveCameraSmoothly(currentlySelectedTile);
+		setTurnState(GrenadeAttack);
+	}
 }
 
 void ACrewController::setStateToHarvest() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN HARVEST MODE"));
-	setTurnState(Harvest);
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew) {
+		if (currentlySelectedTile) {
+			currentlySelectedTile->SetToRegularMaterial();
+		}
+		moveCameraSmoothly(crew->getCurrentCrewMember());
+		setTurnState(Harvest);
+	}
 }
 
 /**
@@ -149,7 +180,7 @@ void ACrewController::handleUp() {
 		shootUp();
 		break;
 	case GrenadeAttack:
-		launchUp();
+		moveCameraToTile(FVector2D(-1, 0));
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Harvest state"));
@@ -177,7 +208,7 @@ void ACrewController::handleLeft() {
 		shootLeft();
 		break;
 	case GrenadeAttack:
-		launchLeft();
+		moveCameraToTile(FVector2D(0, -1));
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Harvest state"));
@@ -205,7 +236,7 @@ void ACrewController::handleRight() {
 		shootRight();
 		break;
 	case GrenadeAttack:
-		launchRight();
+		moveCameraToTile(FVector2D(0, 1));
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Harvest state"));
@@ -233,7 +264,7 @@ void ACrewController::handleDown() {
 		shootDown();
 		break;
 	case GrenadeAttack:
-		launchDown();
+		moveCameraToTile(FVector2D(1, 0));
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Harvest state"));
@@ -343,4 +374,27 @@ void ACrewController::OnPossess(APawn* InPawn) {
 	if (c) {
 		c->setController(this);
 	}
+}
+
+void ACrewController::moveCameraToTile(FVector2D direction) {
+	AGrid* grid = gameMode->getGameGrid();
+
+	FVector2D currentLocation = currentlySelectedTile->getGridLocation();
+	FVector2D newLocation = currentLocation + direction;
+
+	AGridSpace* newSpace = grid->getTile(newLocation);
+	if (newSpace) {
+		currentlySelectedTile->SetToRegularMaterial();
+		currentlySelectedTile = newSpace;
+		currentlySelectedTile->SetToGreen();
+
+		moveCameraSmoothly(currentlySelectedTile);
+	}
+}
+
+void ACrewController::moveCameraSmoothly(AActor* target) {
+	FViewTargetTransitionParams p;
+	p.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
+	p.BlendTime = 0.1f;
+	cameraManager->SetViewTarget(target, p);
 }
