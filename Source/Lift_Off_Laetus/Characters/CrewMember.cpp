@@ -238,11 +238,11 @@ void ACrewMember::incrementMoveForward() {
  * @param useRifle true if shooting with a rifle, false  if throwing a 
  *     grenade.
  */
-void ACrewMember::Shoot(FVector2D direction, bool useRifle) {
+void ACrewMember::Shoot(FVector2D target, bool useRifle) {
 	if (useRifle) {
-		rifle->fire(direction);
+		rifle->fire(target);
 	} else {
-		launcher->fire(direction);
+		launcher->fire(target);
 	}
 }
 
@@ -499,4 +499,15 @@ void ACrewMember::rotateDown() {
  */
 void ACrewMember::setController(ACrewController* newController) {
 	controller = newController;
+}
+
+/**
+ * Get a refernce the controller that possess the ACrew this ACrewMember is a
+ * part of.
+ * 
+ * @return a pointer to the ACrewController that possesses the ACrew this 
+ *     ACrewMember is a part of.
+ */
+ACrewController* ACrewMember::getCrewController() {
+	return controller;
 }

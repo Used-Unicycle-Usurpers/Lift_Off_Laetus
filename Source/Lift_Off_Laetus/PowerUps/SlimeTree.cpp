@@ -16,8 +16,6 @@ ASlimeTree::ASlimeTree() {
 	setHarvestSourceType(HarvestSourceType::SlimeTree);
 	
 	//Pick a random mesh
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>("TreeMesh");
-
 	int randomIdx = FMath::RandRange(0, treeMeshReferences.Num() - 1);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh1(*treeMeshReferences[0]);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh2(*treeMeshReferences[1]);

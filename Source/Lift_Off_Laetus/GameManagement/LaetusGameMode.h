@@ -6,10 +6,28 @@
 #include "GameFramework/GameModeBase.h"
 #include "LaetusGameMode.generated.h"
 
+
+//Params used to call the setTeam() function in the UI
 USTRUCT()
 struct FsetTeamParams {
 	GENERATED_BODY()
 	int teamIndex;
+};
+
+//Params used to call the setTeam() function in the UI
+USTRUCT()
+struct FsetPlayerParams {
+	GENERATED_BODY()
+		int playerIndex;
+};
+
+enum FTurnState {
+	Idle,
+	CameraMovement,
+	Movement,
+	RifleAttack,
+	GrenadeAttack,
+	Harvest
 };
 
 /**
@@ -45,6 +63,8 @@ public:
 		class UUserWidget* hud;
 
 	class AGrid* getGameGrid();
+
+	void callHUDSetPlayer(int newPlayerIndex);
 
 private:
 
