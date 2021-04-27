@@ -120,10 +120,18 @@ ACrewMember::ACrewMember() {
 		// CrewColor = CreateDefaultSubobject<UMaterial>(TEXT("UMaterial'/Game/Characters/lambert1_2'"));
 		skeletalMesh->SetMaterial(0, BlueTeamColor);
 		facingDirection = Direction::Left;
-	 }
-	 
-	 
+	 } 
 }
+
+ /**
+  * Return the team this ACrewMember is a part of.
+  *
+  * @return 0 if this ACrewMember is on the red team,
+  *     1 if on the blue team.
+  */
+ int ACrewMember::getTeam() {
+	 return team;
+ }
 
 // Called when the game starts or when spawned
 void ACrewMember::BeginPlay() {
@@ -170,6 +178,10 @@ void ACrewMember::MoveTo(AGridSpace * target) {
 	}
 }
 
+/**
+ * Play the walking animation and inch the ACrewMember forward to 
+ * the AGridSpace they're moving to.
+ */
 void ACrewMember::moveForward() {
 	rotateToDirection(directionToFaceEnum);
 	if (targetLocation == nullptr || targetLocation->isOccupied()) {
@@ -190,6 +202,10 @@ void ACrewMember::moveForward() {
 	GetWorld()->GetTimerManager().SetTimer(moveTimerHandle, this, &ACrewMember::incrementMoveForward, 0.01, true);
 }
 
+/**
+ * Called by the looping timer in moveForward. A single call to this 
+ * function moves the ACrewMember forward by the amount in moveIncrement.
+ */
 void ACrewMember::incrementMoveForward() {
 	if (Speed < 500) {
 		Speed += 50;
@@ -197,12 +213,17 @@ void ACrewMember::incrementMoveForward() {
 
 	FVector currentLocation = GetActorLocation();
 	float distance = FVector::Dist(currentLocation, newLocation);
+
+	//If in a certain distance tolerance of the actual location, consider 
+	//the movement completed. This handles cases where moveIncrement does 
+	//not add up to exactly the destination location.
 	if (FMath::Abs(distance) > 5) {
+		//Destination has not been reached, increment position
 		SetActorLocation(currentLocation + moveIncrement);
-	}
-	else {
+	}else {
+		//Desination has been reached! Stop timer.
 		Speed = 0;
-		SetActorLocation(newLocation);
+		SetActorLocation(newLocation);//Snap to the exact location
 		GetWorld()->GetTimerManager().ClearTimer(moveTimerHandle);
 		controller->enable();
 	}
@@ -303,6 +324,13 @@ void ACrewMember::playShootRifleMontage() {
 }
 
 /**
+ * Play the stumble montage (used when taking damage).
+ */
+int ACrewMember::playStumbleMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(stumbleMontage);
+}
+
+/**
  * Rotate this ACrewMember to the given direction, and play the appropriate 
  * animation while doing so.
  * 
@@ -398,14 +426,34 @@ Direction ACrewMember::vectorToDirectionEnum(FVector2D direction) {
 	}
 }
 
+/**
+ * Returns the current value of the Speed variable.
+ * 
+ * NOTE: Currently this variable is not used during movement, so it
+ * is only used to tell the animation blueprint that this ACrewMember
+ * is currently moving or not.
+ * 
+ * TODO: Switch to a boolean if we never end up using this for anything else.
+ */
 float ACrewMember::getSpeed() {
 	return Speed;
 }
 
+/**
+ * Callback for when an animation montage ends. Currently not being used, but
+ * might be used in the near future. If not, this can be taken out.
+ */
 void ACrewMember::onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted) {
 	UE_LOG(LogTemp, Warning, TEXT("In callback from %s"), *montage->GetName());
 }
 
+/**
+ * Rotates this ACrewMember in world space to given direction.
+ * 
+ * @param direction the new direction this ACrewMember should face. If 
+ *     this is not one of the four cardinal directions, then the 
+ *     ACrewMember will not be rotated.
+ */
 void ACrewMember::rotateToDirection(Direction direction) {
 	facingDirection = direction;
 	switch (direction) {
@@ -440,14 +488,15 @@ void ACrewMember::rotateDown() {
 	skeletalMesh->SetWorldRotation(downRotation);
 }
 
-int ACrewMember::getTeam() {
-	return team;
-}
-
-int ACrewMember::playStumbleMontage() {
-	return skeletalMesh->GetAnimInstance()->Montage_Play(stumbleMontage);
-}
-
+/**
+ * Set the reference to the controller for the ACrew that this ACrewMember is a 
+ * part of.
+ * NOTE: this is a reference to the controller that is possessing the ACrew. No
+ * controller is directly possessing any of the ACrewMembers.
+ * 
+ * @param newController a reference to the controller for the ACrew that this 
+ *     ACrewMember is a part of.
+ */
 void ACrewMember::setController(ACrewController* newController) {
 	controller = newController;
 }
