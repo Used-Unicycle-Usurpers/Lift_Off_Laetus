@@ -10,7 +10,7 @@
 /**
  * Base class for effects applied to ground tiles
  */
-UCLASS(Abstract)
+UCLASS(Abstract, BlueprintType)
 class LIFT_OFF_LAETUS_API UTilePowerUpEffect : public UBasePowerUpEffectComponent
 {
 	GENERATED_BODY()

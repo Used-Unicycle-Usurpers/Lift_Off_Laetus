@@ -188,7 +188,7 @@ private:
 	class AGridSpace* gridSpace;
 
 	//	Weapon info
-	class PowerUpEffect* gunEffect;
+	class PowerupEffectData* gunEffect;
 
 	//The team this CrewMember is on. 0 = Red team, 1 = blue team 
 	int32 team;
@@ -207,5 +207,4 @@ private:
 	class UAnimMontage* turnAroundMontage;
 
 	class UAnimMontage* stumbleMontage;
-	
 };
