@@ -73,6 +73,8 @@ public:
 	 */
 	int getNumColumns();
 
+	FVector2D getUnitDifference(AGridSpace* source, AGridSpace* dest);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

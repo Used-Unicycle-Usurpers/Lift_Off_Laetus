@@ -46,6 +46,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 		AGridSpace* space = grid->getTile(FVector2D(startingRows[i], column));
 		FVector location = space->GetActorLocation();
 		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(FVector(location.X, location.Y, location.Z+20), rotation);
+		newMember->setController(controller);
 
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);
@@ -54,7 +55,6 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 	
 	//Set up the refernce to the PlayerCameraManager and move camera to the
 	//first crew member of the first crew.
-	ACrewController* controller = Cast<ACrewController>(GetController());
 	controller->init();
 }
 
@@ -103,10 +103,7 @@ int ACrew::toggleSelectedCrewMember() {
 
 void ACrew::setSelectedCrewMember(int current) {
 	selectedCharacter = current;
-	ACrewController* controller = Cast<ACrewController>(GetController());
-	if (controller) {
-		controller->moveCameraToCrewMember();
-	}
+	controller->moveCameraToCrewMember();
 }
 
 /**
@@ -146,3 +143,6 @@ void ACrew::moveSelectedCrewMember(FVector2D direction) {
 	moveCrewMember(selectedCharacter, direction);
 }
 
+void ACrew::setController(ACrewController* newController) {
+	controller = newController;
+}

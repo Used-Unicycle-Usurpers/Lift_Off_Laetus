@@ -10,9 +10,9 @@ ACoreFragment::ACoreFragment() {
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>CubeMeshAsset(TEXT("StaticMesh'/Game/Geometry/Meshes/1M_Cube.1M_Cube'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>CubeMeshAsset(TEXT("StaticMesh'/Game/Geometry/Meshes/TEAM_CoreFragment__2_.TEAM_CoreFragment__2_'"));
 	mesh->SetStaticMesh(CubeMeshAsset.Object);
-	mesh->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
+	//mesh->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
 }
 
 // Called when the game starts or when spawned

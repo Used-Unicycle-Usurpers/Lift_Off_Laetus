@@ -26,11 +26,15 @@ ULauncher::ULauncher() {
 int ULauncher::fire(FVector2D direction) {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	directionToFaceEnum = owner->vectorToDirectionEnum(direction);
-	owner->rotateWithAnimation(directionToFaceEnum);
+	float montageLength = owner->rotateWithAnimation(directionToFaceEnum);
 	targetDirection = direction;
 
-	FTimerHandle timerParams;
-	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::readyLaunch, 0.7f, false);
+	if (montageLength > 0) {
+		FTimerHandle timerParams;
+		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::readyLaunch, montageLength - 0.2f, false);
+	}else {
+		readyLaunch();
+	}
 	return 0;
 }
 

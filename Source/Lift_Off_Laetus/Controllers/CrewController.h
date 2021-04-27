@@ -64,4 +64,6 @@ public:
 	void moveCrewMemberLeft();
 	void moveCrewMemberTowardScreen();
 	void moveCrewMemberAwayFromScreen();
+
+	virtual void OnPossess(APawn* InPawn) override;
 };
