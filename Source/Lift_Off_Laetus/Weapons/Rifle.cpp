@@ -16,7 +16,7 @@ URifle::URifle() {
 	mesh->SetWorldScale3D(FVector(10.f, 10.f, 10.f));
 
 	range = 5;
-	damage = 5;
+	damage = 1;
 }
 
 /**

@@ -119,7 +119,7 @@ public:
 	/**
 	 * Play the stumble montage (used when taking damage).
 	 */
-	int playStumbleMontage();
+	float playStumbleMontage();
 
 	/**
 	 * Rotate this ACrewMember to the given direction, and play the appropriate
@@ -263,4 +263,6 @@ private:
 	void rotateLeft();
 	void rotateRight();
 	void rotateDown();
+
+	void die();
 };

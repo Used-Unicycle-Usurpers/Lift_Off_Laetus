@@ -341,3 +341,21 @@ FVector2D AGrid::getUnitDifference(AGridSpace* source, AGridSpace* dest) {
 	FVector2D destGridLocation = dest->getGridLocation();
 	return destGridLocation - sourceGridLocation;
 }
+
+AGridSpace* AGrid::getValidRespawnSpace(ACrewMember* crewMember) {
+	int column = numSteps;
+	if (crewMember->getTeam() == 1) {
+		column = numColumns - numSteps - 1;
+	}
+
+	bool spaceFound = false;
+	while (!spaceFound) {
+		int randRow = FMath::RandRange(0, numRows - 1);
+		AGridSpace* space = getTile(FVector2D(randRow, column));
+		if (!space->isOccupied()) {
+			spaceFound = true;
+			return space;
+		}
+	}
+	return nullptr;
+}

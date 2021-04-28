@@ -69,7 +69,7 @@ void AGrenade::Tick(float DeltaTime) {
 						ACrewMember* crewMember = Cast<ACrewMember>(occupant);
 						if (crewMember) {
 							//TODO: determine damage
-							crewMember->takeDamage(10.0f);
+							crewMember->takeDamage(1.0f);
 						}
 					}
 				}
