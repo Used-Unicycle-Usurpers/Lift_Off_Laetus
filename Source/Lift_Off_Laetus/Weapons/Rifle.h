@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "../GameManagement/GameEnums.h"
 #include "Weapon.h"
 #include "Rifle.generated.h"
 
@@ -33,7 +34,7 @@ private:
 	class ALaetusGameMode* gameMode;
 
 	FVector2D directionToShoot;
-	enum Direction directionToShootEnum;
+	Direction directionToShootEnum;
 	
 	void shootRifle();
 };

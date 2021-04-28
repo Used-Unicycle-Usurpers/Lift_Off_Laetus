@@ -7,23 +7,8 @@
 #include "../Weapons/Rifle.h"
 #include "../Weapons/Launcher.h"
 #include "../PowerUps/PowerUpEffect.h"
+#include "../GameManagement/GameEnums.h"
 #include "CrewMember.generated.h"
-
-UENUM()
-enum Direction {
-	InvalidDirection = -1,
-	Left = 180,
-	Right = 0,
-	Up = 90,
-	Down = 270
-};
-
-UENUM()
-enum RotationAnim {
-	TurnLeft,
-	TurnRight,
-	TurnAround
-};
 
 
 UCLASS()

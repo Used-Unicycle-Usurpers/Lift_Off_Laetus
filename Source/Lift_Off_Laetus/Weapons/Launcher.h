@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Weapon.h"
+#include "../GameManagement/GameEnums.h"
 #include "Launcher.generated.h"
 
 /**
@@ -28,7 +29,7 @@ public:
 
 	FVector2D directionToThow;
 
-	enum Direction directionToFaceEnum;
+	Direction directionToFaceEnum;
 
 private:
 	int range;
