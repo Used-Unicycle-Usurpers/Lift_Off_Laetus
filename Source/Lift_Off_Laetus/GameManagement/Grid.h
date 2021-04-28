@@ -75,6 +75,8 @@ public:
 
 	FVector2D getUnitDifference(AGridSpace* source, AGridSpace* dest);
 
+	AGridSpace* getValidRespawnSpace(ACrewMember* crewMember);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

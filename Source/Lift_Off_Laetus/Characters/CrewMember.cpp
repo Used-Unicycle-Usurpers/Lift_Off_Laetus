@@ -141,6 +141,8 @@ void ACrewMember::BeginPlay() {
 	if (gameMode) {
 		grid = gameMode->getGameGrid();
 	}
+
+	health = 3.f;
 	
 }
 
@@ -266,8 +268,18 @@ void ACrewMember::takeDamage(int32 damageTaken) {
 
 	if (health <= 0) {
 		//destroy actor?
+		UE_LOG(LogTemp, Warning, TEXT("Player died!"));
 	}
-	playStumbleMontage();		
+	float montageLength = playStumbleMontage();
+	FTimerHandle f;
+	GetWorld()->GetTimerManager().SetTimer(f, this, &ACrewMember::die, montageLength);
+}
+
+void ACrewMember::die() {
+	AGridSpace* newSpace = grid->getValidRespawnSpace(this);
+	SetActorLocation(newSpace->GetActorLocation() + FVector(0, 0, 20));
+	setGridSpace(newSpace);
+	health = 3;
 }
 
 /**
@@ -326,7 +338,7 @@ void ACrewMember::playShootRifleMontage() {
 /**
  * Play the stumble montage (used when taking damage).
  */
-int ACrewMember::playStumbleMontage() {
+float ACrewMember::playStumbleMontage() {
 	return skeletalMesh->GetAnimInstance()->Montage_Play(stumbleMontage);
 }
 
