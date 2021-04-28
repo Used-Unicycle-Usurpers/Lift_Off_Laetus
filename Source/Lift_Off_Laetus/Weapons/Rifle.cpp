@@ -34,6 +34,7 @@ int URifle::fire(FVector2D target) {
 	directionToShoot = target;
 	
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
+	owner->getCrewController()->disable();
 	directionToShootEnum = owner->vectorToDirectionEnum(directionToShoot);
 	float montageLength = owner->rotateWithAnimation(directionToShootEnum);
 	
@@ -75,4 +76,7 @@ void URifle::shootRifle() {
 			}
 		}
 	}
+
+	owner->getCrewController()->enable();
+	owner->getCrewController()->setStateToIdle();
 }
