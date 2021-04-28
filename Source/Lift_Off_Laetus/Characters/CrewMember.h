@@ -188,6 +188,9 @@ public:
 	 */
 	class ACrewController* getCrewController();
 
+	// The Crew (team) this CrewMember belongs too
+	class ACrew* crew;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -195,9 +198,6 @@ protected:
 private:
 	//The controller for the ACrew that this ACrewMember belongs to.
 	class ACrewController* controller;
-
-	// The Crew (team) this CrewMember belongs too
-	class ACrew* crew;
 
 	// Character ID (index in crewMember array)
 	int32 id;

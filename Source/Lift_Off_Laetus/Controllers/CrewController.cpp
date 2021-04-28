@@ -172,6 +172,10 @@ void ACrewController::setStateToHarvest() {
  * Handle the "Up" key based on the current turn state this player is in.
  */
 void ACrewController::handleUp() {
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew && crew->actionBar <= 0) {
+		return;
+	}
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Idle state"));
@@ -200,6 +204,10 @@ void ACrewController::handleUp() {
  * Handle the "Left" input based on the current turn state this player is in.
  */
 void ACrewController::handleLeft() {
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew && crew->actionBar <= 0) {
+		return;
+	}
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Idle state"));
@@ -228,6 +236,10 @@ void ACrewController::handleLeft() {
  * Handle the "Right" input based on the current turn state this player is in.
  */
 void ACrewController::handleRight() {
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew && crew->actionBar <= 0) {
+		return;
+	}
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Idle state"));
@@ -256,6 +268,10 @@ void ACrewController::handleRight() {
  * Handle the "Down" input based on the current turn state this player is in.
  */
 void ACrewController::handleDown() {
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew && crew->actionBar <= 0) {
+		return;
+	}
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Idle state"));

@@ -58,6 +58,9 @@ public:
 
 	int32 getSelectedCrewMemberIndex();
 
+	// Action Bar value, Turn will take care of creating 
+	int32 actionBar;
+
 private:
 	// Array of crew members 
 	//class ACrewMember* crewMembers[3] = {};
@@ -77,8 +80,6 @@ private:
 	//Reference to the game mode
 	class ALaetusGameMode* gameMode;
 
-	// Action Bar value, Turn will take care of creating 
-	int32 actionBar; 
 
 	/**
 	* Moves the currently selected ACrewMember in the given direction

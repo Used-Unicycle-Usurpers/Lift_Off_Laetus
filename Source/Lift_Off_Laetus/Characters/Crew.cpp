@@ -25,6 +25,7 @@ ACrew::ACrew() {
 // Called when the game starts or when spawned
 void ACrew::BeginPlay() {
 	Super::BeginPlay();
+	actionBar = 10;
 }
 
 //Setup Crew Members 
@@ -49,6 +50,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 		newMember->setController(controller);
 
 		newMember->SetTeam(newTeam);
+		newMember->crew = this;
 		crewMembers.Add(newMember);
 		newMember->setGridSpace(space);
 	}
@@ -56,6 +58,8 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 	//Set up the refernce to the PlayerCameraManager and move camera to the
 	//first crew member of the first crew.
 	controller->init();
+
+	actionBar = 10;
 }
 
 // Return the current status of the action bar

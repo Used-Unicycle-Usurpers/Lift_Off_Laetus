@@ -166,6 +166,8 @@ void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
  *     ACrewMember to.
  */
 void ACrewMember::MoveTo(AGridSpace * target) {
+	crew->actionBar--;
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString::Printf(TEXT("Action Points left: %d"), crew->actionBar));
 	controller->disable();
 	targetLocation = target;
 	FVector2D unitDirection = grid->getUnitDifference(gridSpace, target);
@@ -241,6 +243,8 @@ void ACrewMember::incrementMoveForward() {
  *     grenade.
  */
 void ACrewMember::Shoot(FVector2D target, bool useRifle) {
+	crew->actionBar--;
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString::Printf(TEXT("Action Points left: %d"), crew->actionBar));
 	if (useRifle) {
 		rifle->fire(target);
 	} else {
