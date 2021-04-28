@@ -26,6 +26,7 @@ ULauncher::ULauncher() {
  */
 int ULauncher::fire(FVector2D target) {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
+	owner->getCrewController()->disable();
 	directionToFaceEnum = getDirectionToThrow(target);
 	float montageLength = owner->rotateWithAnimation(directionToFaceEnum);
 	targetSpace = target;

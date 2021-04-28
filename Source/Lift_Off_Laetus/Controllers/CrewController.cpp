@@ -168,6 +168,18 @@ void ACrewController::setStateToHarvest() {
 	}
 }
 
+void ACrewController::setStateToIdle() {
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN IDLE MODE"));
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew) {
+		if (currentlySelectedTile) {
+			currentlySelectedTile->SetToRegularMaterial();
+		}
+		moveCameraSmoothly(crew->getCurrentCrewMember());
+		setTurnState(Idle);
+	}
+}
+
 /**
  * Handle the "Up" key based on the current turn state this player is in.
  */

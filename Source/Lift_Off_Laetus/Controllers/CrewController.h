@@ -127,6 +127,7 @@ public:
 	void setStateToRifleAttack();
 	void setStateToGrenadeAttack();
 	void setStateToHarvest();
+	void setStateToIdle();
 
 	//A reference to the game mode for quick access.
 	class ALaetusGameMode* gameMode;
