@@ -5,6 +5,7 @@
 #include "../PowerUps/Rock.h"
 #include "../PowerUps/Shrub.h"
 #include "../Characters/CoreFragment.h"
+#include "CoreFragmentReceiver.h"
 
 // Sets default values
 AGrid::AGrid() {
@@ -125,6 +126,9 @@ void AGrid::placeGridSpaces() {
 	FCollisionQueryParams cqp;
 	FHitResult hr;
 
+	// Find the midpoint of the board along y-axis
+	int halfWidth = numTilesWidth / 2;
+
 	//One by one, place grid space according to the information contained in the
 	//config file.
 	for (int i = 0; i < numTilesWidth; i++) {
@@ -142,7 +146,24 @@ void AGrid::placeGridSpaces() {
 				}
 
 				FRotator rotation = FRotator(0, 0, 0);
-				AGridSpace* tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
+
+				AGridSpace* tile;
+
+				if (i == halfWidth && (j == 0 || j == numTilesLength - 1)) {
+					
+					ACoreFragmentReceiver* coreRec = GetWorld()->SpawnActor<ACoreFragmentReceiver>(location, rotation);
+					tile = coreRec; // Cast<AGridSpace>(coreRec);
+
+					if (j == 0) {
+						receiver0 = coreRec;
+					} else {
+						receiver1 = coreRec;
+					}
+
+				} else {
+					tile = GetWorld()->SpawnActor<AGridSpace>(location, rotation);
+				}
+
 				tile->setGridLocation(i, j);
 
 				//Finally, store the reference in the grid for easy access later
@@ -155,6 +176,11 @@ void AGrid::placeGridSpaces() {
 			}
 		}
 	}
+}
+
+void AGrid::assignCoreFragmentReceivers(ACrew* crew0, ACrew* crew1) {
+	receiver0->SetCrew(crew0);
+	receiver1->SetCrew(crew1);
 }
 
 /**

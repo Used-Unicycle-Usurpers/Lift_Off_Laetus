@@ -3,6 +3,7 @@
 
 #include "CoreFragment.h"
 #include "../GameManagement/GridSpace.h"
+#include "../GameManagement/CoreFragmentReceiver.h"
 
 // Sets default values
 ACoreFragment::ACoreFragment() {
@@ -35,8 +36,14 @@ void ACoreFragment::moveTo(AGridSpace* target) {
 	// Reset pointers/references
 	setGridSpace(target);
 
+	// Actually move actor to the position
 	FVector newLocation = target->GetActorLocation();
 	SetActorLocation(newLocation);
+
+	// Check if the core fragment has been pushed into a receiver
+	if (target->getGridLocation().X == 0) {
+		
+	}
 }
 
 void ACoreFragment::setGridSpace(AGridSpace* space) {
@@ -48,6 +55,12 @@ void ACoreFragment::setGridSpace(AGridSpace* space) {
 
 		space->setOccupant(this);
 		gridSpace = space;
+
+		ACoreFragmentReceiver* receiver = Cast<ACoreFragmentReceiver>(space);
+
+		if (receiver != nullptr) {
+			receiver->OnCoreFragmentReceived(this);
+		}
 	}
 }
 

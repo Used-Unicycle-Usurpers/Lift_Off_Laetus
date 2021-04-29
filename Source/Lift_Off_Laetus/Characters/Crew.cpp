@@ -150,3 +150,11 @@ void ACrew::setController(ACrewController* newController) {
 int32 ACrew::getSelectedCrewMemberIndex() {
 	return selectedCharacter;
 }
+
+int32 ACrew::getCoreCount() {
+	return cores;
+}
+
+void ACrew::incrementCores() {
+	cores += 1;
+}

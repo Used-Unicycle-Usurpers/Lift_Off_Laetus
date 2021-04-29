@@ -16,6 +16,8 @@
 #define ROCK 6
 #define SHRUB 7
 
+class ACrew;
+
 /**
  * Struct representing a single row of AGridSpaces in an FGrid.
  */
@@ -49,6 +51,11 @@ public:
 	 * actors until BeginPlay.
 	 */
 	bool initializeGrid();
+
+	/**
+	* Initialize the ACoreFragmentReceiver grid spaces with their respective crew identity.
+	*/
+	void assignCoreFragmentReceivers(ACrew* crew0, ACrew* crew1);
 
 	/**
 	 * Returns the AGridSpace that resides at the given coordinates, where the
@@ -117,6 +124,9 @@ private:
 	 * tile of the map.
 	 */
 	void placeGridSpaces();
+
+	class ACoreFragmentReceiver* receiver0;
+	class ACoreFragmentReceiver* receiver1;
 
 	/**
 	 * Given the infomation in /Config/grid_env.txt, place each of the specified
