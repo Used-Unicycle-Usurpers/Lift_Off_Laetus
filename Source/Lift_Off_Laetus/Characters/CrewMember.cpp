@@ -99,6 +99,9 @@ ACrewMember::ACrewMember() {
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>StumbleAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/StumbleMontage.StumbleMontage'"));
 	stumbleMontage = StumbleAnimMontage.Object;
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>PushAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/PushMontage.PushMontage'"));
+	pushMontage = PushAnimMontage.Object;
+
 	facingDirection = Direction::Right;
 }
 
@@ -165,9 +168,10 @@ void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
  * @param target a pointer to the AGridSpace to move this
  *     ACrewMember to.
  */
-void ACrewMember::MoveTo(AGridSpace * target) {
+void ACrewMember::MoveTo(AGridSpace * target, bool pushingCoreFragment) {
 	controller->disable();
 	targetLocation = target;
+	pushing = pushingCoreFragment;
 	FVector2D unitDirection = grid->getUnitDifference(gridSpace, target);
 	directionToFaceEnum = vectorToDirectionEnum(unitDirection);
 	float montageLength = rotateWithAnimation(directionToFaceEnum);
@@ -190,7 +194,11 @@ void ACrewMember::moveForward() {
 		return;
 	}
 
-	Speed = 0;
+	if (pushing) {
+		playPushMontage();
+	}else {
+		Speed = 0;
+	}
 
 	//Calculate how much to increment movement by in each iteration of the timer.
 	newLocation = targetLocation->GetActorLocation() + FVector(0, 0, 20);
@@ -341,6 +349,13 @@ void ACrewMember::playShootRifleMontage() {
  */
 float ACrewMember::playStumbleMontage() {
 	return skeletalMesh->GetAnimInstance()->Montage_Play(stumbleMontage);
+}
+
+/**
+ * Play the push montage (used when pushing a core fragment).
+ */
+float ACrewMember::playPushMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(pushMontage);
 }
 
 /**
@@ -523,4 +538,9 @@ void ACrewMember::setController(ACrewController* newController) {
  */
 ACrewController* ACrewMember::getCrewController() {
 	return controller;
+}
+
+bool ACrewMember::needToRotate(FVector2D newDirection) {
+	Direction newDirectionEnum = vectorToDirectionEnum(newDirection);
+	return facingDirection != newDirectionEnum;
 }
