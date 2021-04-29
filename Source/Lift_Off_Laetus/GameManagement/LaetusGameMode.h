@@ -48,7 +48,7 @@ public:
 		int32 crewCount = 2;
 
 	void ChangeTurn();
-	int32 EvaluateWin();
+	void EvaluateWin();
 	// ?? GetValidMoves(GridSpace);
 
 	class APlayerCameraManager* cameraManager;
@@ -69,7 +69,7 @@ public:
 private:
 
 	// Game rule parameters
-	int32 coresToWin = 3;  // Number of cores needed to win
+	int32 coresToWin = 1;  // Number of cores needed to win
 
 	// Crew/turn parameters
 	//ACrew* crews;     // Array of crews, defined at runtime
@@ -91,4 +91,6 @@ private:
 
 	virtual APawn* SpawnDefaultPawnFor(AController* NewPlayer, AActor* StartSpot);
 	virtual UClass* GetDefaultPawnClassForController(AController* InController);
+
+	void OnGameEnd(int32 winner);
 };
