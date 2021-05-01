@@ -75,7 +75,9 @@ void ACrewController::endTurn() {
 	if (currentlySelectedTile) {
 		currentlySelectedTile->SetToRegularMaterial();
 	}
-	gameMode->ChangeTurn();
+
+	gameMode->EvaluateWin();  // Check for winner + change turn if no one won (order subject to change)
+	// gameMode->ChangeTurn();
 }
 
 /**

@@ -7,6 +7,7 @@
 #include "../GameManagement/LaetusGameMode.h"
 #include "../Characters/CrewMember.h"
 #include "Kismet/GameplayStatics.h"
+#include "../GameManagement/CoreFragmentReceiver.h"
 
 // Sets default values
 ACoreFragment::ACoreFragment() {
@@ -77,14 +78,19 @@ void ACoreFragment::incrementMoveForward() {
 	//If in a certain distance tolerance of the actual location, consider 
 	//the movement completed. This handles cases where moveIncrement does 
 	//not add up to exactly the destination location.
-	if (FMath::Abs(distance) > 20) {
+	if (FMath::Abs(distance) > 30) {
 		//Destination has not been reached, increment position
 		SetActorLocation(currentLocation + moveIncrement);
 	}
 	else {
-		//Desination has been reached! Stop timer.
+		//Destination has been reached! Stop timer.
 		SetActorLocation(newLocation);//Snap to the exact location
 		GetWorld()->GetTimerManager().ClearTimer(moveTimerHandle);
+
+	// Check if the core fragment has been pushed into a receiver
+		if (targetLocation->getGridLocation().X == 0) {
+		}
+
 	}
 }
 
@@ -97,6 +103,12 @@ void ACoreFragment::setGridSpace(AGridSpace* space) {
 
 		space->setOccupant(this);
 		gridSpace = space;
+
+		ACoreFragmentReceiver* receiver = Cast<ACoreFragmentReceiver>(space);
+
+		if (receiver != nullptr) {
+			receiver->OnCoreFragmentReceived(this);
+		}
 	}
 	UE_LOG(LogTemp, Warning, TEXT("TEMP"));
 }

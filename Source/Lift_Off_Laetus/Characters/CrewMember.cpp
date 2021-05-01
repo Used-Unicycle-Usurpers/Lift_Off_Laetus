@@ -236,7 +236,6 @@ void ACrewMember::incrementMoveForward() {
 		SetActorLocation(newLocation);//Snap to the exact location
 		GetWorld()->GetTimerManager().ClearTimer(moveTimerHandle);
 		controller->enable();
-		controller->setStateToIdle();
 	}
 }
 

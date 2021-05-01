@@ -58,6 +58,10 @@ public:
 
 	int32 getSelectedCrewMemberIndex();
 
+	int32 getCoreCount();
+
+	void incrementCores();
+
 private:
 	// Array of crew members 
 	//class ACrewMember* crewMembers[3] = {};

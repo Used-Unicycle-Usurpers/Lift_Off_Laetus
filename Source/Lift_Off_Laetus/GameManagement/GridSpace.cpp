@@ -15,7 +15,8 @@ AGridSpace::AGridSpace(){
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GridMesh"));
-	collision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+	mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//collision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 
 	//Get the color materials for visual debugging of the grid spaces
 	static ConstructorHelpers::FObjectFinder<UMaterial>regular(TEXT("Material'/Game/Geometry/Meshes/ENV_Tile/ENV_tile_mat.ENV_tile_mat'"));
@@ -33,6 +34,7 @@ AGridSpace::AGridSpace(){
 	mesh->SetRelativeScale3D(FVector(2.f, 2.f, 0.1f));
 	SetToRegularMaterial();
 
+	/*
 	//Set up box collision component, which will be used to keep track of the current
 	//occupant of this AGridSpace, if any.
 	collision->SetRelativeScale3D(FVector(1.55f, 1.55f, 5.f));
@@ -42,7 +44,8 @@ AGridSpace::AGridSpace(){
 	collision->OnComponentBeginOverlap.AddDynamic(this, &AGridSpace::OnEnterGridSpace);
 	collision->OnComponentEndOverlap.AddDynamic(this, &AGridSpace::OnExitGridSpace);
 	collision->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
-	
+	*/
+
 	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
 	cameraArm->SetupAttachment(mesh);
 	cameraArm->SetAbsolute(false, true, false);

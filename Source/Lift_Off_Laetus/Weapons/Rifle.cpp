@@ -78,5 +78,5 @@ void URifle::shootRifle() {
 	}
 
 	owner->getCrewController()->enable();
-	owner->getCrewController()->setStateToIdle();
+	//owner->getCrewController()->setStateToIdle();
 }
