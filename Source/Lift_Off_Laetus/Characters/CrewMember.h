@@ -40,7 +40,7 @@ public:
 	/**
 	 * Move this ACrewMember to the given AGridSpace
 	 */
-	void MoveTo(class AGridSpace * target);
+	void MoveTo(class AGridSpace * target, bool pushingCoreFragment);
 	
 	/**
 	 * Shoot one of this ACrewMember's weapons in the given direction
@@ -132,6 +132,11 @@ public:
 	 */
 	float playRotationMontage(RotationAnim type);
 
+	/**
+	 * Play the push montage (used when pushing a core fragment).
+	 */
+	float playPushMontage();
+
 	//The current direction this ACrewMember is facing.
 	Direction facingDirection;
 
@@ -188,6 +193,8 @@ public:
 	 */
 	class ACrewController* getCrewController();
 
+	bool needToRotate(FVector2D newDirection);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -234,6 +241,9 @@ private:
 
 	//Animation montage for taking damage
 	class UAnimMontage* stumbleMontage;
+
+	//Animation montage for push core fragment
+	class UAnimMontage* pushMontage;
 	
 	//A reference to the game map grid.
 	AGrid* grid;
@@ -265,4 +275,6 @@ private:
 	void rotateDown();
 
 	void die();
+
+	bool pushing;
 };

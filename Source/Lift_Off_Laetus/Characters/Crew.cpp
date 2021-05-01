@@ -116,7 +116,7 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 	AGridSpace* destination = grid->getTile(crewMemberGridLocation + direction);
 
 	if (destination && !(destination->isOccupied())) {
-		crewMembers[selectedCharacter]->MoveTo(destination);
+		crewMembers[selectedCharacter]->MoveTo(destination, false);
 	}else {
 
 		if (destination && destination->containsFragment()) {
@@ -128,8 +128,10 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 				//Can move, push core fragment first
 				ACoreFragment* fragment = Cast<ACoreFragment>(destination->getOccupant());
 				if (fragment) {
-					fragment->moveTo(fragmentDest);
-					crewMembers[selectedCharacter]->MoveTo(destination);
+					//Move the core fragment first so that space is no longer occupired and thus
+					//the crew member can move as well.
+					fragment->moveTo(fragmentDest, crewMembers[selectedCharacter]);
+					crewMembers[selectedCharacter]->MoveTo(destination, true);
 				}
 			}
 		}

@@ -18,7 +18,7 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
 
-	void moveTo(class AGridSpace* target);
+	void moveTo(class AGridSpace* target, class ACrewMember* pusher);
 
 	void setGridSpace(class AGridSpace* space);
 	class AGridSpace* getGridSpace();
@@ -33,4 +33,16 @@ public:
 
 	class AGridSpace* gridSpace;
 
+private:
+	void moveForward();
+	void incrementMoveForward();
+
+	class AGrid* grid;
+	class ALaetusGameMode* gameMode;
+
+	class AGridSpace* targetLocation;
+	FVector newLocation;
+	FVector oldLocation;
+	FVector moveIncrement;
+	FTimerHandle moveTimerHandle;
 };
