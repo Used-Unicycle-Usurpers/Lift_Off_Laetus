@@ -18,8 +18,8 @@ public:
 	void SetUp(int32 newTeam, class AGrid* newGrid);
 
 	//Action bar stuff 
-	int32 GetActionBarStatus();
-	void UpdateActionBar(int32 update);
+	float GetActionBarStatus();
+	void UpdateActionBar(float update);
 
 	//Return the location of the first crewMember 
 	FVector GetStartingLocation();
@@ -78,7 +78,7 @@ private:
 	class ALaetusGameMode* gameMode;
 
 	// Action Bar value, Turn will take care of creating 
-	int32 actionBar; 
+	float actionBar; 
 
 	/**
 	* Moves the currently selected ACrewMember in the given direction

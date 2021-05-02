@@ -56,6 +56,12 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UCameraComponent* camera;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		//class UProgressBar* ActionBar;
+	
+	UPROPERTY(VisibleAnywhere)
+		class UWidgetComponent* ActionBarComp; //for action bar
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
 		TSubclassOf<class UUserWidget> HUDWidgetClass;
 
@@ -63,6 +69,7 @@ public:
 		class UUserWidget* hud;
 
 	class AGrid* getGameGrid();
+	//class UTheActionBar* actionBar;
 
 	void callHUDSetPlayer(int newPlayerIndex);
 

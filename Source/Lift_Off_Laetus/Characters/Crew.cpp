@@ -59,12 +59,12 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 }
 
 // Return the current status of the action bar
-int32 ACrew::GetActionBarStatus() {
+float ACrew::GetActionBarStatus() {
 	return actionBar;
 }
 
 // Update the action bar based on the moves performed 
-void ACrew::UpdateActionBar(int32 update) {
+void ACrew::UpdateActionBar(float update) {
 	actionBar += update;
 }
 

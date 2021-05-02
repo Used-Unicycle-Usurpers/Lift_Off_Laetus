@@ -12,6 +12,10 @@
 #include "Camera/CameraActor.h"
 #include "Engine/Engine.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "TheActionBar.h"
+#include "Components/WidgetComponent.h"
+#include "Components/ProgressBar.h"
+
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
@@ -28,7 +32,12 @@ ALaetusGameMode::ALaetusGameMode() {
 	if (PlayerPawnBPClass.Class != nullptr) {
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}*/
+
+	//set action bar 
+	ActionBarComp = CreateDefaultSubobject<UWidgetComponent>("ActionBar");
+	//ActionBar = CreateDefaultSubobject<UProgressBar>("ActionBar");
 }
+
 
 /**
  * Called at the very beginning of the game. Sets up the map of AGridSpaces with
@@ -42,13 +51,13 @@ void ALaetusGameMode::BeginPlay() {
 
 	//The code below is to test if crew and crewmember are working correctly
 	redTeamController = Cast<ACrewController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
-	ACrew* redCrew = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0)); 
+	ACrew* redCrew = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
 	redTeamController->Possess(redCrew);
-	
+
 	blueTeamController = Cast<ACrewController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true));
 	ACrew* blueCrew = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
 	blueTeamController->Possess(blueCrew);
-	
+
 	//set teams
 	redCrew->SetUp(0, grid);
 	blueCrew->SetUp(1, grid);
@@ -60,6 +69,13 @@ void ALaetusGameMode::BeginPlay() {
 	//Begin first turn
 	currentCrew = -1;
 	ChangeTurn();
+
+
+	//ActionBar = CreateWidget<UProgressBar>(GetWorld(), HUDWidgetClass);
+	//actionBar = Cast<UTheActionBar>(ActionBarComp->GetUserWidgetObject());
+
+	//actionBar->SetPercentage(100.0);
+	//actionBar = CreateDefaultSubobject<UWidgetComponent>(this, TEXT("ActionBar"));
 }
 
 //Begin new turn
@@ -91,6 +107,10 @@ void ALaetusGameMode::ChangeTurn() {
 	hud->ProcessEvent(setTeamFunction, &params1);
 
 	callHUDSetPlayer(0);
+
+	// Update action bar 
+	float actionBarStat = newCrew->GetActionBarStatus();
+	//actionBar->UpdateActionBar(50);
 }
 
 int ALaetusGameMode::EvaluateWin()
