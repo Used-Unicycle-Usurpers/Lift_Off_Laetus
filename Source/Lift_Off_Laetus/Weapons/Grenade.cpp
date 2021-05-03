@@ -6,6 +6,9 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "../GameManagement/GridSpace.h"
 #include "../GameManagement/Grid.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "../Controllers/CrewController.h"
 
 // Sets default values
 AGrenade::AGrenade() {
@@ -18,8 +21,17 @@ AGrenade::AGrenade() {
 	mesh->SetWorldScale3D(FVector(50.f, 50.f, 50.f));
 	SetRootComponent(mesh);
 
-	collision = CreateDefaultSubobject<UCapsuleComponent>("GrenadeHitbox");
 	movement = CreateDefaultSubobject<UProjectileMovementComponent>("Movement");
+
+	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
+	cameraArm->SetupAttachment(mesh);
+	cameraArm->SetAbsolute(false, true, false);
+	cameraArm->SetWorldRotation(FRotator(320.f, 270.f, 0.f));
+	cameraArm->TargetArmLength = 1150.f;
+	cameraArm->bDoCollisionTest = false;
+
+	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	camera->AttachToComponent(cameraArm, FAttachmentTransformRules::KeepRelativeTransform, USpringArmComponent::SocketName);
 }
 
 // Called when the game starts or when spawned
@@ -43,21 +55,40 @@ void AGrenade::Tick(float DeltaTime) {
 		FVector2D gridLocation = targetSpace->getGridLocation();
 		for (int row = gridLocation.X - 1; row <= gridLocation.X + 1; row++) {
 			for (int column = gridLocation.Y - 1; column <= gridLocation.Y + 1; column++) {
+				
+				//Check this tile isn't a hole in the map.
 				AGridSpace* space = grid->getTile(FVector2D(row, column));
 				if (space) {
-					space->SetToRed();
+					//Valid space, temporarily highlight this tile as red
+					//to show it's been hit
+					space->SetToRedOnTimer();
+					
+					//Check each tile for a player to damage
 					AActor* occupant = space->getOccupant();
 					if (occupant) {
 						ACrewMember* crewMember = Cast<ACrewMember>(occupant);
 						if (crewMember) {
 							//TODO: determine damage
-							crewMember->takeDamage(10.0f);
+							crewMember->takeDamage(1.0f);
 						}
 					}
 				}
 			}
 		}
-		GetWorld()->DestroyActor(this);
+		
+		//Wait a few seconds, then let the grenade explode.
+		FTimerHandle timerParams;
+		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &AGrenade::destroySelf, 2.0f, false);
 	}
+}
+
+/**
+ * Explode this grenade, and move the camera back the player.
+ */
+void AGrenade::destroySelf() {
+	owner->getCrewController()->moveCameraSmoothly(owner);
+	owner->getCrewController()->enable();
+	//owner->getCrewController()->setStateToIdle();
+	GetWorld()->DestroyActor(this);
 }
 

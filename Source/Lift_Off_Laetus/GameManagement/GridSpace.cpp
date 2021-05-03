@@ -2,7 +2,10 @@
 
 #include "GridSpace.h"
 #include "../Characters/CoreFragment.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
+static UMaterial* regularMaterial;
 static UMaterial* redMaterial;
 static UMaterial* blueMaterial;
 static UMaterial* greenMaterial;
@@ -12,9 +15,12 @@ AGridSpace::AGridSpace(){
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GridMesh"));
-	collision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+	mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//collision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 
 	//Get the color materials for visual debugging of the grid spaces
+	static ConstructorHelpers::FObjectFinder<UMaterial>regular(TEXT("Material'/Game/Geometry/Meshes/ENV_Tile/ENV_tile_mat.ENV_tile_mat'"));
+	regularMaterial = regular.Object;
 	static ConstructorHelpers::FObjectFinder<UMaterial>red(TEXT("Material'/Game/RedMaterial.RedMaterial'"));
 	redMaterial = red.Object;
 	static ConstructorHelpers::FObjectFinder<UMaterial>blue(TEXT("Material'/Game/BlueMaterial.BlueMaterial'"));
@@ -26,7 +32,9 @@ AGridSpace::AGridSpace(){
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>CubeMeshAsset(TEXT("StaticMesh'/Game/Geometry/Meshes/1M_Cube.1M_Cube'"));
 	mesh->SetStaticMesh(CubeMeshAsset.Object);
 	mesh->SetRelativeScale3D(FVector(2.f, 2.f, 0.1f));
+	SetToRegularMaterial();
 
+	/*
 	//Set up box collision component, which will be used to keep track of the current
 	//occupant of this AGridSpace, if any.
 	collision->SetRelativeScale3D(FVector(1.55f, 1.55f, 5.f));
@@ -36,6 +44,17 @@ AGridSpace::AGridSpace(){
 	collision->OnComponentBeginOverlap.AddDynamic(this, &AGridSpace::OnEnterGridSpace);
 	collision->OnComponentEndOverlap.AddDynamic(this, &AGridSpace::OnExitGridSpace);
 	collision->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
+	*/
+
+	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
+	cameraArm->SetupAttachment(mesh);
+	cameraArm->SetAbsolute(false, true, false);
+	cameraArm->SetWorldRotation(FRotator(320.f, 270.f, 0.f));
+	cameraArm->TargetArmLength = 1150.f;
+	cameraArm->bDoCollisionTest = false;
+
+	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	camera->AttachToComponent(cameraArm, FAttachmentTransformRules::KeepRelativeTransform, USpringArmComponent::SocketName);
 }
 
 // Called when the game starts or when spawned
@@ -80,11 +99,21 @@ void AGridSpace::OnExitGridSpace(UPrimitiveComponent* OverlappedComponent, AActo
 	setOccupant(nullptr);
 }
 
+void AGridSpace::SetToRegularMaterial() {
+	mesh->SetMaterial(0, regularMaterial);
+}
+
 /**
  * For visual debugging, set tile color
  */
 void AGridSpace::SetToRed() {
 	mesh->SetMaterial(0, redMaterial);
+}
+
+void AGridSpace::SetToRedOnTimer() {
+	SetToRed();
+	FTimerHandle f;
+	GetWorld()->GetTimerManager().SetTimer(f, this, &AGridSpace::SetToRegularMaterial, 2.0f, false);
 }
 
 void AGridSpace::SetToBlue() {

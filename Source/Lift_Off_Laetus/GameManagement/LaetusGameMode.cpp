@@ -4,6 +4,7 @@
 #include "../Controllers/CrewController.h"
 #include "Lift_Off_Laetus/Characters/Crew.h"
 #include "GridSpace.h"
+#include "CoreFragmentReceiver.h"
 #include "Grid.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
@@ -57,6 +58,9 @@ void ALaetusGameMode::BeginPlay() {
 	crews.Add(redCrew);
 	crews.Add(blueCrew);
 
+	// Assign core fragment receivers to respective teams
+	grid->assignCoreFragmentReceivers(redCrew, blueCrew);
+
 	//Begin first turn
 	currentCrew = -1;
 	ChangeTurn();
@@ -83,22 +87,61 @@ void ALaetusGameMode::ChangeTurn() {
 		redTeamController->disable();
 	}
 
-	FsetTeamParams p;
-	p.teamIndex = currentCrew;
-	UFunction* setTeamFunction = hud->FindFunction(FName("setTeam"));
-	hud->ProcessEvent(setTeamFunction, &p);
+	callHUDSetPlayer(-1);
 
+	FsetTeamParams params1;
+	params1.teamIndex = currentCrew;
+	UFunction* setTeamFunction = hud->FindFunction(FName("setTeam"));
+	hud->ProcessEvent(setTeamFunction, &params1);
+
+	callHUDSetPlayer(0);
 }
 
-int ALaetusGameMode::EvaluateWin()
+void ALaetusGameMode::EvaluateWin()
 {
 	// Check if the current crew has same or more cores than 'coresToWin'
-	// Return 1 if true, 0 if false
+	// Return -1 if neither, 0 if team 0, or 1 if team 1
 
-	// Possibly check other conditions? e.g. no crew members remaining, no cores available, etc.
+	// TODO: Possibly check other conditions? e.g. no crew members remaining, no cores available, etc.
 
-	return 0;
+	int winner = -1;
+
+	bool redWon = (crews[0]->getCoreCount() >= coresToWin);
+	bool blueWon = (crews[0]->getCoreCount() >= coresToWin);
+
+	// Check which team won
+	if (blueWon && redWon) {
+		winner = currentCrew; // No room for ties - just pick the current team?
+	} else if (redWon) {
+		winner = 0;
+	} else if (blueWon) {
+		winner = 1;
+	}
+
+	// End the game if a team has won
+	if (winner != -1) {
+		OnGameEnd(winner);
+	} else {
+		ChangeTurn();
+	}
 }
+
+void ALaetusGameMode::OnGameEnd(int32 winner) {
+
+	// TODO: End turn, lock inputs
+
+	redTeamController->disable();
+	blueTeamController->disable();
+
+	if (winner == 0) {
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, TEXT("Red Team Won!"));
+	} else if (winner == 1) {
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, TEXT("Blue Team Won!"));
+	} else {
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, TEXT("Error: Unrecognized team won"));
+	}
+}
+
 
 void ALaetusGameMode::ClearTurnActionStack()
 {
@@ -111,4 +154,15 @@ APawn* ALaetusGameMode::SpawnDefaultPawnFor(AController* NewPlayer, AActor* Star
 
 UClass* ALaetusGameMode::GetDefaultPawnClassForController(AController* InController) {
 	return NULL;
+}
+
+AGrid* ALaetusGameMode::getGameGrid() {
+	return grid;
+}
+
+void ALaetusGameMode::callHUDSetPlayer(int newPlayerIndex) {
+	FsetPlayerParams params;
+	params.playerIndex = newPlayerIndex;
+	UFunction* setPlayerFunction = hud->FindFunction(FName("setPlayer"));
+	hud->ProcessEvent(setPlayerFunction, &params);
 }
