@@ -4,21 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "CharacterPowerUpEffect.h"
-#include "TilePowerUpEffect.h"
 #include "PowerupEffectData.generated.h"
 
 /**
  * Used to create powerup descriptions in content browser
  */
 UCLASS()
-class LIFT_OFF_LAETUS_API UPowerupEffectData : public UDataAsset
+class LIFT_OFF_LAETUS_API UPowerUpEffectData : public UDataAsset
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	UCharacterPowerUpEffect* characterEffect;
+		FName effectName;
 
 	UPROPERTY(EditAnywhere)
-	UTilePowerUpEffect* tileEffect;
+		TSubclassOf<class UCharacterPowerUpEffect> characterEffect;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UTilePowerUpEffect> tileEffect;
+
+public:
+
+	void ApplyCharacterEffect(class ACrewMember* targetCrewMember);
+	void ApplyTileEffect(class AGridSpace* targetGridSpace);
 };

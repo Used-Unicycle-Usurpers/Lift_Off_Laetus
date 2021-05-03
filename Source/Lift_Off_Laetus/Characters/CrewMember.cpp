@@ -15,6 +15,7 @@
 #include "Components/TimelineComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Controllers/CrewController.h"
+#include "../PowerUps/PowerupEffectData.h"
 
 // Sets default values
 ACrewMember::ACrewMember() {
@@ -103,6 +104,10 @@ ACrewMember::ACrewMember() {
 	pushMontage = PushAnimMontage.Object;
 
 	facingDirection = Direction::Right;
+
+	// Set the power up effect
+	// TODO: Remove this !!
+	weaponEffect = powerUp;
 }
 
 /**
@@ -542,4 +547,12 @@ ACrewController* ACrewMember::getCrewController() {
 bool ACrewMember::needToRotate(FVector2D newDirection) {
 	Direction newDirectionEnum = vectorToDirectionEnum(newDirection);
 	return facingDirection != newDirectionEnum;
+}
+
+UPowerUpEffectData* ACrewMember::GetWeaponEffect() {
+	return powerUp;
+}
+
+void ACrewMember::ClearWeaponEffect() {
+	powerUp = nullptr;
 }

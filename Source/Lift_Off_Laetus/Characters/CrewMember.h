@@ -6,7 +6,6 @@
 #include "GameFramework/Pawn.h"
 #include "../Weapons/Rifle.h"
 #include "../Weapons/Launcher.h"
-#include "../PowerUps/PowerUpEffect.h"
 #include "CrewMember.generated.h"
 
 //Enum representing the four carnidal directions for player actions
@@ -195,6 +194,13 @@ public:
 
 	bool needToRotate(FVector2D newDirection);
 
+	//The camera that follows this crew member
+	UPROPERTY(EditAnywhere)
+		class UPowerUpEffectData* powerUp;
+
+	class UPowerUpEffectData* GetWeaponEffect();
+	void ClearWeaponEffect();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -219,7 +225,7 @@ private:
 	class AGridSpace* gridSpace;
 
 	//	Weapon info
-	class PowerupEffectData* gunEffect;
+	class UPowerUpEffectData* weaponEffect;
 
 	//The team this CrewMember is on. 0 = Red team, 1 = blue team 
 	int32 team;

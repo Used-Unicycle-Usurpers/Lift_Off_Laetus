@@ -8,6 +8,7 @@
 #include "../GameManagement/Grid.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "../PowerUps/PowerUpEffectData.h"
 #include "../Controllers/CrewController.h"
 
 // Sets default values
@@ -53,6 +54,7 @@ void AGrenade::Tick(float DeltaTime) {
 	}else {
 		//Reach end of path; at target. Damage nearby players.
 		FVector2D gridLocation = targetSpace->getGridLocation();
+		UPowerUpEffectData* effectToApply = owner->GetWeaponEffect();
 		for (int row = gridLocation.X - 1; row <= gridLocation.X + 1; row++) {
 			for (int column = gridLocation.Y - 1; column <= gridLocation.Y + 1; column++) {
 				
@@ -61,7 +63,11 @@ void AGrenade::Tick(float DeltaTime) {
 				if (space) {
 					//Valid space, temporarily highlight this tile as red
 					//to show it's been hit
+					
 					space->SetToRedOnTimer();
+
+					if (effectToApply != nullptr)
+						effectToApply->ApplyTileEffect(space);
 					
 					//Check each tile for a player to damage
 					AActor* occupant = space->getOccupant();
@@ -76,6 +82,9 @@ void AGrenade::Tick(float DeltaTime) {
 			}
 		}
 		
+		if (effectToApply != nullptr)
+			owner->ClearWeaponEffect();
+
 		//Wait a few seconds, then let the grenade explode.
 		FTimerHandle timerParams;
 		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &AGrenade::destroySelf, 2.0f, false);

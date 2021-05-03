@@ -71,6 +71,11 @@ void URifle::shootRifle() {
 				if (crewMember) {
 					//TODO: determine damage to deal?
 					crewMember->takeDamage(damage);
+					UPowerUpEffectData* effectToApply = owner->GetWeaponEffect();
+					if (effectToApply != nullptr) {
+						effectToApply->ApplyCharacterEffect(crewMember);
+						owner->ClearWeaponEffect();
+					}
 					return;
 				}
 			}
