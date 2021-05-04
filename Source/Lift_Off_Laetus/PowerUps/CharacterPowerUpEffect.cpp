@@ -3,6 +3,8 @@
 
 void UCharacterPowerUpEffect::OnRegister()
 {
+	Super::OnRegister();
+
 	crewTarget = Cast<ACrewMember>(this->GetOwner());
 
 	ApplyEffect();
@@ -10,5 +12,7 @@ void UCharacterPowerUpEffect::OnRegister()
 
 void UCharacterPowerUpEffect::OnUnregister()
 {
+	Super::OnUnregister();
+
 	RemoveEffect();
 }

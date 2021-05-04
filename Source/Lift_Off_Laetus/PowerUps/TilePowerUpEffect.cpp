@@ -5,6 +5,8 @@
 
 void UTilePowerUpEffect::OnRegister()
 {
+	Super::OnRegister();
+
 	tileTarget = Cast<AGridSpace>(this->GetOwner());
 
 	ApplyEffect();
@@ -12,6 +14,8 @@ void UTilePowerUpEffect::OnRegister()
 
 void UTilePowerUpEffect::OnUnregister()
 {
+	Super::OnUnregister();
+
 	RemoveEffect();
 }
 

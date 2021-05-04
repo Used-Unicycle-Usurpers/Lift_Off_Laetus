@@ -5,11 +5,11 @@
 
 void UTileStickyEffect::ApplyEffect()
 {
-	this->tileTarget->SetExtraMoveCost(1);
+	tileTarget->SetExtraMoveCost(1);
 }
 
 void UTileStickyEffect::RemoveEffect()
 {
-	this->tileTarget->SetExtraMoveCost(0);
+	tileTarget->SetExtraMoveCost(0);
 }
 

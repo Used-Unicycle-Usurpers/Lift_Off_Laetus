@@ -11,16 +11,15 @@ void UPowerUpEffectData::ApplyCharacterEffect(ACrewMember* targetCrewMember) {
 
 	if (targetCrewMember)
 	{
-		UActorComponent* newEffect = targetCrewMember->CreateComponentFromTemplate(Cast<UCharacterPowerUpEffect>(characterEffect.Get()));
+		UE_LOG(LogTemp, Warning, TEXT("Rifle target was valid"));
 
-		UE_LOG(LogTemp, Warning, TEXT("Target was valid"));
+		UActorComponent* newEffect = NewObject<UActorComponent>(targetCrewMember, characterEffect.Get());
 
 		if (newEffect)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Rifle effect was valid"));
-
+			targetCrewMember->AddOwnedComponent(newEffect);
 			newEffect->RegisterComponent();
-			targetCrewMember->AttachToActor(targetCrewMember, FAttachmentTransformRules::KeepRelativeTransform);
+			UE_LOG(LogTemp, Warning, TEXT("Rifle effect registered to %s"), *targetCrewMember->GetFName().ToString());
 		}
 	}
 }
@@ -29,12 +28,15 @@ void UPowerUpEffectData::ApplyTileEffect(AGridSpace* targetGridSpace) {
 	
 	if (targetGridSpace)
 	{
-		UActorComponent* newEffect = targetGridSpace->CreateComponentFromTemplate(Cast<UTilePowerUpEffect>(tileEffect.Get()));
+		UE_LOG(LogTemp, Warning, TEXT("Grenade target was valid"));
+
+		UActorComponent* newEffect = NewObject<UActorComponent>(targetGridSpace, tileEffect.Get());
 
 		if (newEffect)
 		{
+			targetGridSpace->AddOwnedComponent(newEffect);
 			newEffect->RegisterComponent();
-			targetGridSpace->AttachToActor(targetGridSpace, FAttachmentTransformRules::KeepRelativeTransform);
+			UE_LOG(LogTemp, Warning, TEXT("Grenade effect registered to %s"), *targetGridSpace->GetFName().ToString());
 		}
 	}
 }
