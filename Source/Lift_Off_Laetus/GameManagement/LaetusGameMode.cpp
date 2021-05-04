@@ -72,9 +72,9 @@ void ALaetusGameMode::BeginPlay() {
 
 
 	//ActionBar = CreateWidget<UProgressBar>(GetWorld(), HUDWidgetClass);
-	//actionBar = Cast<UTheActionBar>(ActionBarComp->GetUserWidgetObject());
+	actionBar = Cast<UTheActionBar>(ActionBarComp->GetUserWidgetObject());
 
-	//actionBar->SetPercentage(100.0);
+	actionBar->UpdateActionBar(100.0);
 	//actionBar = CreateDefaultSubobject<UWidgetComponent>(this, TEXT("ActionBar"));
 }
 

@@ -60,7 +60,7 @@ public:
 		//class UProgressBar* ActionBar;
 	
 	UPROPERTY(VisibleAnywhere)
-		class UWidgetComponent* ActionBarComp; //for action bar
+		class UWidgetComponent* ActionBarComp; 
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
 		TSubclassOf<class UUserWidget> HUDWidgetClass;
@@ -69,7 +69,8 @@ public:
 		class UUserWidget* hud;
 
 	class AGrid* getGameGrid();
-	//class UTheActionBar* actionBar;
+
+	class UTheActionBar* actionBar;
 
 	void callHUDSetPlayer(int newPlayerIndex);
 

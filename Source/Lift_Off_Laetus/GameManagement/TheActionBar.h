@@ -21,8 +21,8 @@ public:
 
 protected: 
     UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-        class UProgressBar* ActionBar = nullptr;
-
+        //class UProgressBar* ActionBar = nullptr;
+        class UProgressBar* ActionBar;
     
 
 };
