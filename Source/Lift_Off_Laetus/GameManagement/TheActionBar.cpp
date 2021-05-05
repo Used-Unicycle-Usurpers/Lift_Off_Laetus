@@ -5,6 +5,7 @@
 #include "TheActionBar.h"
 
 void UTheActionBar::UpdateActionBar(float newValue) { 
-	ActionBar->SetPercent(newValue); 
+	if(ActionBar != nullptr)
+		ActionBar->SetPercent(newValue); 
 }
 

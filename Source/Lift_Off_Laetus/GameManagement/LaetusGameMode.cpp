@@ -34,7 +34,7 @@ ALaetusGameMode::ALaetusGameMode() {
 	}*/
 
 	//set action bar 
-	ActionBarComp = CreateDefaultSubobject<UWidgetComponent>("ActionBar");
+	//ActionBarComp = CreateDefaultSubobject<UWidgetComponent>("ActionBar");
 	//ActionBar = CreateDefaultSubobject<UProgressBar>("ActionBar");
 }
 
@@ -70,7 +70,7 @@ void ALaetusGameMode::BeginPlay() {
 	currentCrew = -1;
 	ChangeTurn();
 
-
+	ActionBarComp = NewObject<UWidgetComponent>(this);
 	//ActionBar = CreateWidget<UProgressBar>(GetWorld(), HUDWidgetClass);
 	actionBar = Cast<UTheActionBar>(ActionBarComp->GetUserWidgetObject());
 
