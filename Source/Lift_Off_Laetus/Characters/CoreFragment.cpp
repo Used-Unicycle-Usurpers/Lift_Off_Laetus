@@ -18,6 +18,7 @@ ACoreFragment::ACoreFragment() {
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>CubeMeshAsset(TEXT("StaticMesh'/Game/Geometry/Meshes/TEAM_CoreFragment__2_.TEAM_CoreFragment__2_'"));
 	mesh->SetStaticMesh(CubeMeshAsset.Object);
+	RootComponent = mesh;
 	//mesh->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
 }
 

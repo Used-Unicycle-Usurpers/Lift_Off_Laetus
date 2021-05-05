@@ -16,6 +16,7 @@ AGridSpace::AGridSpace(){
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GridMesh"));
 	mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RootComponent = mesh;
 	//collision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 
 	//Get the color materials for visual debugging of the grid spaces

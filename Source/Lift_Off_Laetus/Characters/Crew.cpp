@@ -11,6 +11,8 @@
 #include "../Controllers/CrewController.h"
 #include "Camera/CameraComponent.h"
 #include "../Characters/CoreFragment.h"
+#include "Components/WidgetComponent.h"
+#include "../UIComponents/CurrentlySelectedComponent.h"
 
 // Sets default values
 ACrew::ACrew() {
@@ -20,11 +22,17 @@ ACrew::ACrew() {
 
 	//set action bar to max number 
 	actionBar = 500;
+
+	currentlySelectedArrowComponent = CreateDefaultSubobject<UWidgetComponent>("CurrenlySelectedCrewMember");
+	currentlySelectedArrowComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
 // Called when the game starts or when spawned
 void ACrew::BeginPlay() {
 	Super::BeginPlay();
+
+	UCurrentlySelectedArrow* current = Cast<UCurrentlySelectedArrow>(currentlySelectedArrowComponent->GetUserWidgetObject());
+	UE_LOG(LogTemp, Warning, TEXT("User widget is: %s"), *current->GetName());
 }
 
 //Setup Crew Members 

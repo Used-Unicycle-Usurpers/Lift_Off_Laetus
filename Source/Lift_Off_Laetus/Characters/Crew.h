@@ -90,4 +90,7 @@ private:
 	void moveCrewMember(int32 crewMember, FVector2D direction);
 
 	class ACrewController* controller;
+
+	UPROPERTY(VisibleAnywhere)
+		class UWidgetComponent* currentlySelectedArrowComponent;
 };

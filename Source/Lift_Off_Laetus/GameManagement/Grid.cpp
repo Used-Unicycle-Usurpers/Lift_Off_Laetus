@@ -276,9 +276,12 @@ void AGrid::placeCoreFragments() {
 			int column = FCString::Atoi(*rowStr[i+1]);
 			AGridSpace* space = getTile(FVector2D(row, column));
 
-			ACoreFragment* fragment = GetWorld()->SpawnActor<ACoreFragment>(space->GetActorLocation(), FRotator(0.f, 0.f, 0.f));
-
-			fragment->setGridSpace(space);
+			if (space) {
+				ACoreFragment* fragment = GetWorld()->SpawnActor<ACoreFragment>(space->GetActorLocation(), FRotator(0.f, 0.f, 0.f));
+				fragment->setGridSpace(space);
+			}else {
+				UE_LOG(LogTemp, Warning, TEXT("Unable to spawn core fragment, no tile at row: %d, column: %d."), row, column);
+			}
 		}
 	}
 
