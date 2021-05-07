@@ -125,5 +125,6 @@ private:
 	class ACrewController* blueTeamController;
 	class ACrewController* currentTeamController;
 	class ACrew* controlledCrew;
+	bool twoPlayers;
 
 };

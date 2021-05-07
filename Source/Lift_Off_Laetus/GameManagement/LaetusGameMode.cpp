@@ -42,26 +42,36 @@ void ALaetusGameMode::BeginPlay() {
 	hud = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 	hud->AddToViewport();
 
+	singleInput = false;
+
 	inputController = Cast<AInputController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
 
 	//The code below is to test if crew and crewmember are working correctly
 	redTeamController = GetWorld()->SpawnActor<ACrewController>();//Cast<ACrewController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
-	ACrew* redCrew = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0)); 
+	ACrew* redCrew = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
 	redTeamController->Possess(redCrew);
-	
+
 	blueTeamController = GetWorld()->SpawnActor<ACrewController>();//Cast<ACrewController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true));
 	ACrew* blueCrew = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
 	blueTeamController->Possess(blueCrew);
-	
+
 	//Initialize Crews and Controllers
 	redCrew->SetUp(0, grid, redTeamController);
-	redTeamController->init(redCrew, inputController);
-
 	blueCrew->SetUp(1, grid, blueTeamController);
-	blueTeamController->init(blueCrew, inputController);
 
 	//Initialize the input controller with info on both players of the game.
-	inputController->init(redTeamController, blueTeamController);
+	if (singleInput) {
+		redTeamController->init(redCrew, inputController);
+		blueTeamController->init(blueCrew, inputController);
+		inputController->init(redTeamController, blueTeamController);
+	}else {
+		inputController2 = Cast<AInputController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true));
+
+		redTeamController->init(redCrew, inputController);
+		blueTeamController->init(blueCrew, inputController2);
+		inputController->init(redTeamController, nullptr);
+		inputController2->init(nullptr, blueTeamController);
+	}
 
 	// add to crews array
 	crews.Add(redCrew);
@@ -77,23 +87,30 @@ void ALaetusGameMode::BeginPlay() {
 
 //Begin new turn
 void ALaetusGameMode::ChangeTurn() {
-	//Get location of first crew member in new team
+	//Swap to the other team
 	currentCrew += 1;
 	if (currentCrew > crewCount - 1){
 		currentCrew = 0;
 	}
-	inputController->changeTurn(currentCrew);
 
 	ACrew* newCrew = crews[currentCrew];
 	newCrew->setSelectedCrewMember(0);
 	if (currentCrew == 0) {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, TEXT("Red Team's Turn"));
-		//redTeamController->enable();
-		//blueTeamController->disable();
+		inputController->enable();
+		inputController->changeTurn(currentCrew);
+		if (!singleInput) {
+			inputController2->disable();
+			inputController2->changeTurn(currentCrew);
+		}
 	}else {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, TEXT("Blue Team's Turn"));
-		//blueTeamController->enable();
-		//redTeamController->disable();
+		inputController->disable();
+		inputController->changeTurn(currentCrew);
+		if (!singleInput) {
+			inputController2->enable();
+			inputController2->changeTurn(currentCrew);
+		}
 	}
 
 	callHUDSetPlayer(-1);

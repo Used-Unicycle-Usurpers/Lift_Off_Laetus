@@ -48,17 +48,29 @@ void AInputController::SetupInputComponent() {
 
 void AInputController::init(ACrewController* redController, ACrewController* blueController) {
 	cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	currentTurnState = FTurnState::Idle;
 	redTeamController = redController;
 	blueTeamController = blueController;
+	if (redController && blueController) {
+		twoPlayers = true;
+	}else {
+		twoPlayers = false;
+
+		//Set current to the only controller that was provided
+		currentTeamController = (redTeamController != nullptr) ? redTeamController : blueTeamController;
+		controlledCrew = currentTeamController->getControlledCrew();
+	}
 }
 
 void AInputController::changeTurn(int newTeam) {
-	if (newTeam == 0) {
-		currentTeamController = redTeamController;
-		controlledCrew = currentTeamController->getControlledCrew();
-	}else {
-		currentTeamController = blueTeamController;
-		controlledCrew = currentTeamController->getControlledCrew();
+	if (twoPlayers) {
+		if (newTeam == 0) {
+			currentTeamController = redTeamController;
+			controlledCrew = currentTeamController->getControlledCrew();
+		}else {
+			currentTeamController = blueTeamController;
+			controlledCrew = currentTeamController->getControlledCrew();
+		}
 	}
 }
 
@@ -86,14 +98,12 @@ void AInputController::endTurn() {
 	}
 
 	gameMode->EvaluateWin();  // Check for winner + change turn if no one won (order subject to change)
-	// gameMode->ChangeTurn();
 }
 
 /**
  * Moves the camera to the current ACrewMember.
  */
 void AInputController::moveCameraToCrewMember() {
-	//ACrew* crew = currentTeamController->getControlledCrew();//Cast<ACrew>(GetPawn());
 	if (controlledCrew) {
 		ACrewMember* current = controlledCrew->getCurrentCrewMember();
 		FViewTargetTransitionParams p;
