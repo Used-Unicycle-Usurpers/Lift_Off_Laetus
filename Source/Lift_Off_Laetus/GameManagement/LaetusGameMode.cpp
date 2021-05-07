@@ -75,6 +75,10 @@ void ALaetusGameMode::ChangeTurn() {
 		currentCrew = 0;
 	}
 
+	//set actionbar to 10 and update hud 
+	actionbar = 10;
+	callHUDUpdateAB(actionbar);
+
 	ACrew* newCrew = crews[currentCrew];
 	newCrew->setSelectedCrewMember(0);
 	if (currentCrew == 0) {
@@ -165,4 +169,11 @@ void ALaetusGameMode::callHUDSetPlayer(int newPlayerIndex) {
 	params.playerIndex = newPlayerIndex;
 	UFunction* setPlayerFunction = hud->FindFunction(FName("setPlayer"));
 	hud->ProcessEvent(setPlayerFunction, &params);
+}
+
+void ALaetusGameMode::callHUDUpdateAB(int32 status) {
+	FsetABParams params;
+	params.status = status;
+	UFunction* updateActionBar = hud->FindFunction(FName("updateActionBar"));
+	hud->ProcessEvent(updateActionBar, &params);
 }

@@ -21,6 +21,13 @@ struct FsetPlayerParams {
 		int playerIndex;
 };
 
+//Params used to update the action bar in the UI
+USTRUCT()
+struct FsetABParams {
+	GENERATED_BODY()
+		int32 status;
+};
+
 enum FTurnState {
 	Idle,
 	CameraMovement,
@@ -65,6 +72,7 @@ public:
 	class AGrid* getGameGrid();
 
 	void callHUDSetPlayer(int newPlayerIndex);
+	void callHUDUpdateAB(int32 status);
 
 private:
 
@@ -78,6 +86,7 @@ private:
 	int32 currentCrew = 0;          // Which crew is playing currently
 	// TimerHandle turnTimer;     // Keeps track of the time left in the turn
 	// TurnActionStack * turnStack;  // Records the actions taken during the current turn
+	int32 actionbar = 10;
 
 	//The grid representing the tiles of the map.
 	UPROPERTY(EditAnywhere, Category = MyCategory)
