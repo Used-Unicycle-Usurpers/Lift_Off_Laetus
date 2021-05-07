@@ -42,7 +42,7 @@ void ALaetusGameMode::BeginPlay() {
 	hud = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 	hud->AddToViewport();
 
-	singleInput = false;
+	singleInput = true;
 
 	inputController = Cast<AInputController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
 
@@ -97,17 +97,17 @@ void ALaetusGameMode::ChangeTurn() {
 	newCrew->setSelectedCrewMember(0);
 	if (currentCrew == 0) {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, TEXT("Red Team's Turn"));
-		inputController->enable();
 		inputController->changeTurn(currentCrew);
 		if (!singleInput) {
+			inputController->enable();
 			inputController2->disable();
 			inputController2->changeTurn(currentCrew);
 		}
 	}else {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, TEXT("Blue Team's Turn"));
-		inputController->disable();
 		inputController->changeTurn(currentCrew);
 		if (!singleInput) {
+			inputController->disable();
 			inputController2->enable();
 			inputController2->changeTurn(currentCrew);
 		}
