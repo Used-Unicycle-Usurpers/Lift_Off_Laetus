@@ -85,6 +85,7 @@ private:
 
 	class ACrewController* redTeamController;
 	class ACrewController* blueTeamController;
+	class AInputController* inputController;
 
 	// Private helper methods
 	void ClearTurnActionStack(); // Clears the stack of actions done on the current crew's turn
