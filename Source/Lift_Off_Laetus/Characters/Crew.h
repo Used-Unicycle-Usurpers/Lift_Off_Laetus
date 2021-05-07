@@ -15,7 +15,7 @@ public:
 	ACrew(); 
 	
 	//void SetTeam(int32 newTeam);
-	void SetUp(int32 newTeam, class AGrid* newGrid);
+	void SetUp(int32 newTeam, class AGrid* newGrid, class ACrewController* newController);
 
 	//Action bar stuff 
 	int32 GetActionBarStatus();

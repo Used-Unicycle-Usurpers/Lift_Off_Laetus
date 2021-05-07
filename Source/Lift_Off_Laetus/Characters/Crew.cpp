@@ -28,9 +28,10 @@ void ACrew::BeginPlay() {
 }
 
 //Setup Crew Members 
-void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
+void ACrew::SetUp(int32 newTeam, AGrid* newGrid, ACrewController* newController) {
 	team = newTeam;
 	grid = newGrid;
+	setController(newController);
 	TArray<int32> startingRows = grid->getStartingRows();
 	
 	//Set to left side, facing right
@@ -52,10 +53,6 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 		crewMembers.Add(newMember);
 		newMember->setGridSpace(space);
 	}
-	
-	//Set up the refernce to the PlayerCameraManager and move camera to the
-	//first crew member of the first crew.
-	controller->init();
 }
 
 // Return the current status of the action bar

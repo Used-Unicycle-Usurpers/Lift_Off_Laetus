@@ -40,4 +40,6 @@ private:
 	 * tiles. Stop either at max range or when the first ACrewMember gets hit.
 	 */
 	void shootRifle();
+
+	void endShooting();
 };

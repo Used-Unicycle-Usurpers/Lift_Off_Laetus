@@ -25,72 +25,11 @@ public:
 	 * Sets up the APlayerCameraManager reference so all controllers affect the
 	 * same camera manager.
 	 */
-	void init();
-
-	/**
-	 * Enable input on this controller.
-	 */
-	void enable();
-
-	/**
-	 * Disable input on this controller.
-	 */
-	void disable();
-
-	/**
-	 * Tell the game mode to end this players turn and switch control over to
-	 * the other player.
-	 */
-	void endTurn();
-
-	/**
-	 * Handle the "Up" input based on the current turn state this player is in.
-	 */
-	void handleUp();
-
-	/**
-	 * Handle the "Left" input based on the current turn state this player is in.
-	 */
-	void handleLeft();
-
-	/**
-	 * Handle the "Right" input based on the current turn state this player is in.
-	 */
-	void handleRight();
-
-	/**
-	 * Handle the "Down" input based on the current turn state this player is in.
-	 */
-	void handleDown();
-
-	/**
-	 * Handle the "Confim" input based on the current turn state this player is in.
-	 */
-	void handleConfirm();
-
-	/**
-	 * Have the currently selected crew member shoot their rifle in the given direction.
-	 */
-	void shoot(FVector2D direction);
-
-	//Helper functions for shoot, to specify the direction to shoot in.
-	void shootUp();
-	void shootLeft();
-	void shootRight();
-	void shootDown();
+	void init(class ACrew* newControlledCrew, class AInputController* newInputController);
 	
-	/**
-	 * Have the currently selected crew member launch a grenade in the given direction.
-	 */
-	void launch();
+	void enableInputController();
+	void disableInputController();
 
-	//Helper functions for launch, to specify the direction to throw 
-	//a grenade in.
-	void launchUp();
-	void launchLeft();
-	void launchRight();
-	void launchDown();
-	
 	/**
 	 * Sets up the APlayerCameraManager reference so all controllers affect the
 	 * same camera manager.
@@ -106,31 +45,18 @@ public:
 	//shared camera.
 	class APlayerCameraManager* cameraManager;
 
-	// Each moves the selected character in the corresponding direction
-	void moveCrewMemberRight();
-	void moveCrewMemberLeft();
-	void moveCrewMemberTowardScreen();
-	void moveCrewMemberAwayFromScreen();
-
-	virtual void OnPossess(APawn* InPawn) override;
-
-	//The current state of their turn this player is currently in.
-	enum FTurnState currentTurnState;
-
-	/**
-	 * Set the state of the turn this player is in to the given state.
-	 */
-	void setTurnState(enum FTurnState newState);
-
-	//Helper functions for setTurnState to specify the state to switch to.
-	void setStateToMovement();
-	void setStateToRifleAttack();
-	void setStateToGrenadeAttack();
-	void setStateToHarvest();
-	void setStateToIdle();
-
 	//A reference to the game mode for quick access.
 	class ALaetusGameMode* gameMode;
+
+	/**
+	 * Have the currently selected crew member shoot their rifle in the given direction.
+	 */
+	void shoot(FVector2D direction);
+
+	/**
+	 * Have the currently selected crew member launch a grenade in the given direction.
+	 */
+	void launch(FVector2D target);
 
 	/**
 	 * Move camera to the next AGridSpace in the specified direction.
@@ -146,4 +72,12 @@ public:
 	 * Move the camera smoothly from its current location to the target actor.
 	 */
 	void moveCameraSmoothly(AActor* target);
+
+	class ACrew* getControlledCrew();
+
+private:
+	class ACrew* controlledCrew;
+	class AInputController* inputController;
+	void setControlledCrew(class ACrew* newControlledCrew);
+	void setInputController(class AInputController* newInputController);
 };
