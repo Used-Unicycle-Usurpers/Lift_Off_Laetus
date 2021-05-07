@@ -91,7 +91,7 @@ void ALaetusGameMode::ChangeTurn() {
 	currentCrew += 1;
 	if (currentCrew > crewCount - 1){
 		currentCrew = 0;
-	}
+	}	
 
 	ACrew* newCrew = crews[currentCrew];
 	newCrew->setSelectedCrewMember(0);
