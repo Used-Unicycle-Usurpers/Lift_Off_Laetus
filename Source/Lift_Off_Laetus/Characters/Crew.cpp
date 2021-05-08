@@ -28,9 +28,10 @@ void ACrew::BeginPlay() {
 }
 
 //Setup Crew Members 
-void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
+void ACrew::SetUp(int32 newTeam, AGrid* newGrid, ACrewController* newController) {
 	team = newTeam;
 	grid = newGrid;
+	setController(newController);
 	TArray<int32> startingRows = grid->getStartingRows();
 	
 	//Set to left side, facing right
@@ -45,17 +46,16 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 	for (int i = 0; i < 3; i++) {
 		AGridSpace* space = grid->getTile(FVector2D(startingRows[i], column));
 		FVector location = space->GetActorLocation();
-		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(FVector(location.X, location.Y, location.Z+20), rotation);
-
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(location + FVector(0.f, 0.f, 20.f), rotation, params);
+		
+		newMember->setMeshAnimData((FCharacter) i);
+		newMember->setController(controller);
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);
 		newMember->setGridSpace(space);
 	}
-	
-	//Set up the refernce to the PlayerCameraManager and move camera to the
-	//first crew member of the first crew.
-	ACrewController* controller = Cast<ACrewController>(GetController());
-	controller->init();
 }
 
 // Return the current status of the action bar
@@ -103,10 +103,7 @@ int ACrew::toggleSelectedCrewMember() {
 
 void ACrew::setSelectedCrewMember(int current) {
 	selectedCharacter = current;
-	ACrewController* controller = Cast<ACrewController>(GetController());
-	if (controller) {
-		controller->moveCameraToCrewMember();
-	}
+	controller->moveCameraToCrewMember();
 }
 
 /**
@@ -119,7 +116,7 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 	AGridSpace* destination = grid->getTile(crewMemberGridLocation + direction);
 
 	if (destination && !(destination->isOccupied())) {
-		crewMembers[selectedCharacter]->MoveTo(destination);
+		crewMembers[selectedCharacter]->MoveTo(destination, false);
 	}else {
 
 		if (destination && destination->containsFragment()) {
@@ -131,8 +128,10 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 				//Can move, push core fragment first
 				ACoreFragment* fragment = Cast<ACoreFragment>(destination->getOccupant());
 				if (fragment) {
-					fragment->moveTo(fragmentDest);
-					crewMembers[selectedCharacter]->MoveTo(destination);
+					//Move the core fragment first so that space is no longer occupired and thus
+					//the crew member can move as well.
+					fragment->moveTo(fragmentDest, crewMembers[selectedCharacter]);
+					crewMembers[selectedCharacter]->MoveTo(destination, true);
 				}
 			}
 		}
@@ -146,3 +145,18 @@ void ACrew::moveSelectedCrewMember(FVector2D direction) {
 	moveCrewMember(selectedCharacter, direction);
 }
 
+void ACrew::setController(ACrewController* newController) {
+	controller = newController;
+}
+
+int32 ACrew::getSelectedCrewMemberIndex() {
+	return selectedCharacter;
+}
+
+int32 ACrew::getCoreCount() {
+	return cores;
+}
+
+void ACrew::incrementCores() {
+	cores += 1;
+}

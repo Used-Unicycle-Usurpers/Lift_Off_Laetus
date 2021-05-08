@@ -6,72 +6,67 @@
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
 #include "../GameManagement/LaetusGameMode.h"
+#include "../GameManagement/GridSpace.h"
+#include "../GameManagement/Grid.h"
+#include "../Controllers/InputController.h"
 
 ACrewController::ACrewController() {
+	
+}
 
+void ACrewController::BeginPlay() {
+	Super::BeginPlay();
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 void ACrewController::SetupInputComponent() {
 	Super::SetupInputComponent();
-	//EnableInput(this);
-	disable();
-	InputComponent->BindAction("ToggleCrewMember", IE_Pressed, this, &ACrewController::toggleCrewMember);
-	InputComponent->BindAction("EndTurn", IE_Pressed, this, &ACrewController::endTurn);
 
-	//Shoot rifle in one of 4 directions
-	InputComponent->BindAction("ShootUp", IE_Pressed, this, &ACrewController::shootUp);
-	InputComponent->BindAction("ShootLeft", IE_Pressed, this, &ACrewController::shootLeft);
-	InputComponent->BindAction("ShootRight", IE_Pressed, this, &ACrewController::shootRight);
-	InputComponent->BindAction("ShootDown", IE_Pressed, this, &ACrewController::shootDown);
-
-	//Launch a grenade in one of 4 directions
-	InputComponent->BindAction("LaunchUp", IE_Pressed, this, &ACrewController::launchUp);
-	InputComponent->BindAction("LaunchLeft", IE_Pressed, this, &ACrewController::launchLeft);
-	InputComponent->BindAction("LaunchRight", IE_Pressed, this, &ACrewController::launchRight);
-	InputComponent->BindAction("LaunchDown", IE_Pressed, this, &ACrewController::launchDown);
-
-	//Move currently selected ACrewMember with WASD
-	InputComponent->BindAction("MoveRight", IE_Pressed, this, &ACrewController::moveCrewMemberRight);
-	InputComponent->BindAction("MoveLeft", IE_Pressed, this, &ACrewController::moveCrewMemberLeft);
-	InputComponent->BindAction("MoveToward", IE_Pressed, this, &ACrewController::moveCrewMemberTowardScreen);
-	InputComponent->BindAction("MoveAway", IE_Pressed, this, &ACrewController::moveCrewMemberAwayFromScreen);
-
+	//TODO: Move this somewhere else?
 	PlayerCameraManagerClass = PlayerCameraManager->GetClass();
 }
 
-void ACrewController::enable() {
-	EnableInput(this);
-}
-
-void ACrewController::disable() {
-	DisableInput(this);
-}
-
 /**
- * Sets up the APlayerCameraManager reference so all controllers affect the 
+ * Sets up the APlayerCameraManager reference so all controllers affect the
  * same camera manager.
  */
-void ACrewController::init() {
+void ACrewController::init(ACrew* newControlledCrew, AInputController* newInputController) {
 	cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	setControlledCrew(newControlledCrew);
+	setInputController(newInputController);
+}
 
-	/*
-	TArray<UUserWidget*> results;
-	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), results, HUDWidgetClass);
-	if (results[0]) {
-		hud = results[0];
+void ACrewController::enableInputController() {
+	if (inputController) {
+		inputController->enable();
 	}else {
-		UE_LOG(LogTemp, Warning, TEXT("Couldn't find hud in world"));
+		UE_LOG(LogTemp, Warning, TEXT("Input Controller was null when trying to enable input from: %s"), *GetName());
 	}
-	*/
+}
+
+void ACrewController::disableInputController() {
+	if (inputController) {
+		inputController->disable();
+	}else {
+		UE_LOG(LogTemp, Warning, TEXT("Input Controller was null when trying to disable input from: %s"), *GetName());
+	}
+}
+
+void ACrewController::setControlledCrew(ACrew* newControlledCrew) {
+	controlledCrew = newControlledCrew;
+}
+
+void ACrewController::setInputController(AInputController* newInputController) {
+	inputController = newInputController;
 }
 
 /**
  * Moves the camera to the current ACrewMember.
  */
 void ACrewController::moveCameraToCrewMember() {
-	ACrew* c = Cast<ACrew>(GetPawn());
-	if (c) {
-		ACrewMember* current = c->getCurrentCrewMember();
+	ACrew* crew = Cast<ACrew>(GetPawn());
+	if (crew) {
+		ACrewMember* current = crew->getCurrentCrewMember();
 		FViewTargetTransitionParams p;
 		p.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
 		p.BlendTime = 1.f;
@@ -84,94 +79,100 @@ void ACrewController::moveCameraToCrewMember() {
  * on them
  */
 void ACrewController::toggleCrewMember() {
+	//Remove the yellow highlight on the HUD for the crew member that 
+	//is no longer selected.
+	gameMode->callHUDSetPlayer(-1);
+
+	//Toggle and highlight character portrait on the HUD
 	ACrew* c = Cast<ACrew>(GetPawn());
 	c->toggleSelectedCrewMember();
+	gameMode->callHUDSetPlayer(c->getSelectedCrewMemberIndex());
+
+	//Now move the camera to focus on this crew member.
 	moveCameraToCrewMember();
 }
 
-void ACrewController::endTurn() {
-	ALaetusGameMode* gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	gameMode->ChangeTurn();
-}
-
-void ACrewController::shootUp() {
-	shoot(FVector2D(-1, 0));
-}
-
-void ACrewController::shootLeft() {
-	shoot(FVector2D(0, -1));
-}
-
-void ACrewController::shootRight() {
-	shoot(FVector2D(0, 1));
-}
-
-void ACrewController::shootDown() {
-	shoot(FVector2D(1, 0));
-}
-
+/**
+ * Have the currently selected crew member shoot their rifle in the given direction.
+ *
+ * @param direction the carindal direction for the currently selected ACrewMember
+ *     to fire their rifle towards.
+ */
 void ACrewController::shoot(FVector2D direction) {
-	ACrew* crew = Cast<ACrew>(GetPawn());
-	if (crew) {
-		crew->getCurrentCrewMember()->Shoot(direction, true);
+	if (controlledCrew) {
+		controlledCrew->getCurrentCrewMember()->Shoot(direction, true);
 	}else {
 		UE_LOG(LogTemp, Warning, TEXT("Tried to shoot rifle, but controlled Crew pawn was null for controller %s"), *GetName());
 	}
 }
 
-void ACrewController::launchUp() {
-	launch(FVector2D(-1, 0));
-}
-
-void ACrewController::launchLeft() {
-	launch(FVector2D(0, -1));
-}
-
-void ACrewController::launchRight() {
-	launch(FVector2D(0, 1));
-}
-
-void ACrewController::launchDown() {
-	launch(FVector2D(1, 0));
-}
-
-void ACrewController::launch(FVector2D direction) {
-	ACrew* crew = Cast<ACrew>(GetPawn());
-	if (crew) {
-		crew->getCurrentCrewMember()->Shoot(direction, false);
+/**
+ * Have the currently selected crew member launch a grenade in the given direction.
+ *
+ * @param direction the carindal direction for the currently selected ACrewMember
+ *     to launch a grenade towards.
+ */
+void ACrewController::launch(FVector2D target) {
+	if (controlledCrew) {
+		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
+		controlledCrew->getCurrentCrewMember()->Shoot(target, false);
 	}else {
 		UE_LOG(LogTemp, Warning, TEXT("Tried to launch a grenade, but controlled Crew pawn was null for controller %s"), *GetName());
 	}
 }
 
+
 /**
-* Move the currently selected crew member in to the right
-*/
-void ACrewController::moveCrewMemberRight() {
-	ACrew* c = Cast<ACrew>(GetPawn());
-	c->moveSelectedCrewMember(FVector2D(0, 1));
+ * Move camera to the next AGridSpace in the specified direction.
+ * 
+ * @param direction a Direction enum specifying the direction of 
+ *     the next tile to move the camera to.
+ */
+void ACrewController::moveCameraToTile(Direction direction) {
+	AGrid* grid = gameMode->getGameGrid();
+
+	FVector2D directionVector = FVector2D(0, 0);
+	switch (direction) {
+	case Up:
+		directionVector = FVector2D(-1, 0);
+		break;
+	case Left:
+		directionVector = FVector2D(0, -1);
+		break;
+	case Right:
+		directionVector = FVector2D(0, 1);
+		break;
+	case Down:
+		directionVector = FVector2D(1, 0);
+		break;
+	default:
+		return;
+	}
+	FVector2D currentLocation = currentlySelectedTile->getGridLocation();
+	FVector2D newLocation = currentLocation + directionVector;
+
+	AGridSpace* newSpace = grid->getTile(newLocation);
+	if (newSpace) {
+		currentlySelectedTile->SetToRegularMaterial();
+		currentlySelectedTile = newSpace;
+		currentlySelectedTile->SetToGreen();
+
+		moveCameraSmoothly(currentlySelectedTile);
+	}
 }
 
 /**
-* Move the currently selected crew member in to the right
-*/
-void ACrewController::moveCrewMemberLeft() {
-	ACrew* c = Cast<ACrew>(GetPawn());
-	c->moveSelectedCrewMember(FVector2D(0, -1));
+ * Move the camera smoothly from its current location to the target actor.
+ * 
+ * @param target the actor to smoothly move the camera to.
+ */
+void ACrewController::moveCameraSmoothly(AActor* target) {
+	FViewTargetTransitionParams p;
+	p.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
+	p.BlendTime = 0.1f;
+	cameraManager->SetViewTarget(target, p);
 }
 
-/**
-* Move the currently selected crew member in to the right
-*/
-void ACrewController::moveCrewMemberTowardScreen() {
-	ACrew* c = Cast<ACrew>(GetPawn());
-	c->moveSelectedCrewMember(FVector2D(1, 0));
-}
-
-/**
-* Move the currently selected crew member in to the right
-*/
-void ACrewController::moveCrewMemberAwayFromScreen() {
-	ACrew* c = Cast<ACrew>(GetPawn());
-	c->moveSelectedCrewMember(FVector2D(-1, 0));
+ACrew* ACrewController::getControlledCrew() {
+	return controlledCrew;
 }

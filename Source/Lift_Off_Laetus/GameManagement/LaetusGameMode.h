@@ -6,10 +6,28 @@
 #include "GameFramework/GameModeBase.h"
 #include "LaetusGameMode.generated.h"
 
+
+//Params used to call the setTeam() function in the UI
 USTRUCT()
 struct FsetTeamParams {
 	GENERATED_BODY()
 	int teamIndex;
+};
+
+//Params used to call the setTeam() function in the UI
+USTRUCT()
+struct FsetPlayerParams {
+	GENERATED_BODY()
+		int playerIndex;
+};
+
+enum FTurnState {
+	Idle,
+	CameraMovement,
+	Movement,
+	RifleAttack,
+	GrenadeAttack,
+	Harvest
 };
 
 /**
@@ -30,7 +48,7 @@ public:
 		int32 crewCount = 2;
 
 	void ChangeTurn();
-	int32 EvaluateWin();
+	void EvaluateWin();
 	// ?? GetValidMoves(GridSpace);
 
 	class APlayerCameraManager* cameraManager;
@@ -44,10 +62,14 @@ public:
 	UPROPERTY()
 		class UUserWidget* hud;
 
+	class AGrid* getGameGrid();
+
+	void callHUDSetPlayer(int newPlayerIndex);
+
 private:
 
 	// Game rule parameters
-	int32 coresToWin = 3;  // Number of cores needed to win
+	int32 coresToWin = 1;  // Number of cores needed to win
 
 	// Crew/turn parameters
 	//ACrew* crews;     // Array of crews, defined at runtime
@@ -63,10 +85,16 @@ private:
 
 	class ACrewController* redTeamController;
 	class ACrewController* blueTeamController;
+	class AInputController* inputController;
+	class AInputController* inputController2;
 
 	// Private helper methods
 	void ClearTurnActionStack(); // Clears the stack of actions done on the current crew's turn
 
 	virtual APawn* SpawnDefaultPawnFor(AController* NewPlayer, AActor* StartSpot);
 	virtual UClass* GetDefaultPawnClassForController(AController* InController);
+
+	void OnGameEnd(int32 winner);
+
+	bool singleInput;
 };

@@ -16,11 +16,6 @@ public:
 	// Sets default values for this actor's properties
 	AGrenade();
 
-	//Hitbox used to set the current occupant of this AGridSpace as players 
-	//move around the board.
-	UPROPERTY(EditAnywhere)
-		class UCapsuleComponent* collision;
-
 	//For visual debugging
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
@@ -41,10 +36,28 @@ public:
 	//A reference to the map grid.
 	class AGrid* grid;
 
+	//The player who threw this grenade.
+	class ACrewMember* owner;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	//The sprint arm that holds the camera
+	UPROPERTY(EditAnywhere)
+		class USpringArmComponent* cameraArm;
+
+	//The camera that follows this crew member
+	UPROPERTY(EditAnywhere)
+		class UCameraComponent* camera;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+private:
+
+	/**
+	 * Explode this grenade, and move the camera back the player.
+	 */
+	void destroySelf();
 };

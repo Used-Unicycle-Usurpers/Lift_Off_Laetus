@@ -8,6 +8,7 @@
 #include "../GameManagement/Grid.h"
 #include "Grenade.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "../Controllers/CrewController.h"
 
 ULauncher::ULauncher() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>launcherMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/grenade.grenade'"));
@@ -23,30 +24,47 @@ ULauncher::ULauncher() {
  *     row of the target space, and the Y component is the column 
  *     of the desired space.
  */
-int ULauncher::fire(FVector2D direction) {
+int ULauncher::fire(FVector2D target) {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
-	directionToFaceEnum = owner->vectorToDirectionEnum(direction);
-	owner->rotateWithAnimation(directionToFaceEnum);
-	targetDirection = direction;
+	owner->getCrewController()->disableInputController();
+	directionToFaceEnum = getDirectionToThrow(target);
+	float montageLength = owner->rotateWithAnimation(directionToFaceEnum);
+	targetSpace = target;
 
-	FTimerHandle timerParams;
-	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::readyLaunch, 0.7f, false);
+	if (montageLength > 0) {
+		FTimerHandle timerParams;
+		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::readyLaunch, montageLength - 0.2f, false);
+	}else {
+		readyLaunch();
+	}
 	return 0;
 }
 
+/**
+ * Prepare to throw the grenade by starting the throw animation and setting a timer
+ * to later actually throw it.
+ */
 void ULauncher::readyLaunch() {
+	//Finshed rotating montage, so actually set the rotation of the actor
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	owner->rotateToDirection(directionToFaceEnum);
+
+	//About to throw the grenade, so show it in the player's hand.
 	mesh->SetVisibility(true);
+	
 	owner->playThrowMontage();
 	FTimerHandle timerParams;
-	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, 1.8f, false);
+	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, owner->throwMontageDelay, false);
 }
 
+/**
+ * Caluclate a perfect arc from the player's location the target AGridSpace, 
+ * and throw the grenade.
+ */
 void ULauncher::launch() {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	FVector2D location = owner->getGridSpace()->getGridLocation();
-	AGridSpace* space = grid->getTile(FVector2D(FVector2D(location.X + (targetDirection.X * range), location.Y + (targetDirection.Y * range))));
+	AGridSpace* space = grid->getTile(targetSpace);
 
 	if (space) {
 		space->SetToRed();
@@ -61,12 +79,11 @@ void ULauncher::launch() {
 		FPredictProjectilePathParams p;
 		p.StartLocation = start;
 		p.LaunchVelocity = velocity;
-		//p.DrawDebugType = EDrawDebugTrace::Persistent;
-		//p.DrawDebugTime = 100.f;
 		p.SimFrequency = 15;
 		p.MaxSimTime = 20.f;
 		p.bTraceWithCollision = true;
-		p.ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
+		p.bTraceWithChannel = true;
+		p.TraceChannel = ECollisionChannel::ECC_GameTraceChannel1;
 		p.ActorsToIgnore.Add(GetOwner());
 		FPredictProjectilePathResult r;
 		UGameplayStatics::PredictProjectilePath(GetWorld(), p, r);
@@ -77,6 +94,59 @@ void ULauncher::launch() {
 		g->targetLocation = end;
 		g->targetSpace = space;
 		g->grid = grid;
+		g->owner = owner;
+
+		//Now have the camera follow the grenade as it flies through the air.
+		ACrewController* controller = owner->getCrewController();
+		controller->moveCameraSmoothly(g);
 	}
+
+	//Hide the grenade launcher, since we have now finished 
+	//throwing a grenade.
 	mesh->SetVisibility(false);
+}
+
+/**
+ * Based on the coordinates of the given target AGridSpace, calculate which 
+ * of the four caridinal directions to rotate to that most closely matches the 
+ * direction you're throwing the grenade to. This is useful when throwing a
+ * grenade diagonally, so you can get which of the four directions most closely 
+ * matches that direction to face.
+ * 
+ * @param target a 2D vector that contains the (row, column) coordinates of the 
+ *     AGridSpace that a grenade is about to be thrown to.
+ * @return a Direction enum for one of the four cardinal directions that most closely
+ *     matches the direction the ACrewMember should be facing when throwing the grenade.
+ */
+Direction ULauncher::getDirectionToThrow(FVector2D target) {
+	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
+	FVector2D current = target - owner->getGridSpace()->getGridLocation();
+	current.Normalize();
+
+	//Calucate a dot product against all four carindal directions.
+	TArray<float> dotProducts;
+	dotProducts.Add(FVector2D::DotProduct(current, FVector2D(-1, 0)));//Up
+	dotProducts.Add(FVector2D::DotProduct(current, FVector2D(0, -1)));//Left
+	dotProducts.Add(FVector2D::DotProduct(current, FVector2D(0, 1)));//Right
+	dotProducts.Add(FVector2D::DotProduct(current, FVector2D(1, 0)));//Down
+	
+	//The max dot product will be with the vector that this trajveoty most closely 
+	//matches and thus is the direction the ACrewMember should face when throwing 
+	//the grenade.
+	int32 maxIdx;
+	FMath::Max(dotProducts, &maxIdx);
+
+	//Return the corresponding Direction enum
+	switch (maxIdx) {
+	case 0:
+		return Direction::Up;
+	case 1:
+		return Direction::Left;
+	case 2:
+		return Direction::Right;
+	case 3:
+		return Direction::Down;
+	default:
+		return Direction::InvalidDirection;
+	}
 }

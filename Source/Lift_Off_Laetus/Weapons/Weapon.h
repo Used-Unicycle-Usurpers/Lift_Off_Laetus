@@ -26,7 +26,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;	
 
-	virtual int fire(FVector2D direction);
+	virtual int fire(FVector2D target);
 
 	//A reference to the map grid.
 	class AGrid* grid;
