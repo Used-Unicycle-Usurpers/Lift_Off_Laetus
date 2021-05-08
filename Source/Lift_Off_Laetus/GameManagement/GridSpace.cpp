@@ -34,6 +34,8 @@ AGridSpace::AGridSpace(){
 	mesh->SetRelativeScale3D(FVector(2.f, 2.f, 0.1f));
 	SetToRegularMaterial();
 
+	RootComponent = mesh;
+
 	/*
 	//Set up box collision component, which will be used to keep track of the current
 	//occupant of this AGridSpace, if any.
