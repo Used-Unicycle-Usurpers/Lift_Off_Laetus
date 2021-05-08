@@ -28,6 +28,13 @@ enum RotationAnim {
 	TurnAround
 };
 
+UENUM()
+enum FCharacter {
+	Pavo = 0,
+	Lyra = 1,
+	Nembus = 2
+};
+
 
 UCLASS()
 class LIFT_OFF_LAETUS_API ACrewMember : public APawn {
@@ -195,6 +202,10 @@ public:
 
 	bool needToRotate(FVector2D newDirection);
 
+	void setMeshAnimData(FCharacter character);
+
+	float throwMontageDelay;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -252,6 +263,8 @@ private:
 	//animate movement forward.
 	FVector newLocation;
 	FVector moveIncrement;
+	int numIncrements;
+	int incrementsLeft;
 	FTimerHandle moveTimerHandle;
 	Direction directionToFaceEnum;
 	class AGridSpace* targetLocation;

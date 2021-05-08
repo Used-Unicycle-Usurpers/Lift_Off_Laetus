@@ -54,7 +54,7 @@ void ULauncher::readyLaunch() {
 	
 	owner->playThrowMontage();
 	FTimerHandle timerParams;
-	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, 1.8f, false);
+	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, owner->throwMontageDelay, false);
 }
 
 /**

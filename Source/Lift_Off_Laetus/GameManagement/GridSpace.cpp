@@ -35,13 +35,15 @@ AGridSpace::AGridSpace(){
 	SetToRegularMaterial();
 
 	RootComponent = mesh;
-
-	/*
+	
 	//Set up box collision component, which will be used to keep track of the current
 	//occupant of this AGridSpace, if any.
+	collision = CreateDefaultSubobject<UBoxComponent>("Box");
 	collision->SetRelativeScale3D(FVector(1.55f, 1.55f, 5.f));
 	collision->SetHiddenInGame(false);//Only visible for debugging
+	collision->SetVisibility(true);
 	collision->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
+	/*
 	collision->SetGenerateOverlapEvents(true);
 	collision->OnComponentBeginOverlap.AddDynamic(this, &AGridSpace::OnEnterGridSpace);
 	collision->OnComponentEndOverlap.AddDynamic(this, &AGridSpace::OnExitGridSpace);
