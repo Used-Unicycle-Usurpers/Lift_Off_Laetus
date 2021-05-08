@@ -20,10 +20,6 @@
 ACrewMember::ACrewMember() {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
-	//Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	//static ConstructorHelpers::FObjectFinder<UStaticMesh>CharacterMeshAsset(TEXT("StaticMesh'/Game/Characters/CHAR_Pavo_Base.CHAR_Pavo_Base'"));
-	//Mesh->SetStaticMesh(CharacterMeshAsset.Object);
 
 	skeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh>SkeletalMeshAsset(TEXT("SkeletalMesh'/Game/Characters/Animations/CHAR_Pavo_Walk.CHAR_Pavo_Walk'"));
