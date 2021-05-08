@@ -78,6 +78,13 @@ public:
 	 * Return the team this ACrewMember is a part of.
 	 */
 	int getTeam();
+	
+	void setID(int32 newidNum);
+
+	/**
+	 * Return the index of this ACrewMember in its team.
+	 */
+	int getID();
 
 	/**
 	 * Set the AGridSpace this ACrewMember is currently standing on to the given
@@ -89,11 +96,6 @@ public:
 	 * Get the AGridSpace this ACrewMember is currently standing on.
 	 */
 	class AGridSpace* getGridSpace();
-
-	/**
-	 * Returns the ACrew (team) this ACrewMember is a part of.
-	 */
-	class ACrew* getCrew();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -209,11 +211,8 @@ private:
 	//The controller for the ACrew that this ACrewMember belongs to.
 	class ACrewController* controller;
 
-	// The Crew (team) this CrewMember belongs too
-	class ACrew* crew;
-
 	// Character ID (index in crewMember array)
-	int32 id;
+	int32 idNum;
 
 	// Remaining amount of heatlh
 	float health;

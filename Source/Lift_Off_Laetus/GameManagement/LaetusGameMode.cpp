@@ -192,3 +192,12 @@ void ALaetusGameMode::callHUDSetPlayer(int newPlayerIndex) {
 	UFunction* setPlayerFunction = hud->FindFunction(FName("setPlayer"));
 	hud->ProcessEvent(setPlayerFunction, &params);
 }
+
+void ALaetusGameMode::callHUDSetEffectOverlay(int teamIndex, int playerIndex, UTexture2D* overlayTexture) {
+	FSetEffectOverlayParams params;
+	params.teamIndex = teamIndex;
+	params.playerIndex = playerIndex;
+	params.overlayTexture = overlayTexture;
+	UFunction* setOverlayFunction = hud->FindFunction(FName("SetEffectOverlay"));
+	hud->ProcessEvent(setOverlayFunction, &params);
+}

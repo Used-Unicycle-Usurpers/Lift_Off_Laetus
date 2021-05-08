@@ -50,6 +50,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid, ACrewController* newController)
 		newMember->setController(controller);
 
 		newMember->SetTeam(newTeam);
+		newMember->setID(i);
 		crewMembers.Add(newMember);
 		newMember->setGridSpace(space);
 	}

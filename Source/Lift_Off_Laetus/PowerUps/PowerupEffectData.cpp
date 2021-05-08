@@ -6,6 +6,10 @@
 #include "TilePowerUpEffect.h"
 #include "Templates/SubclassOf.h"
 #include "Engine/EngineTypes.h"
+#include "Kismet/GameplayStatics.h"
+#include "../Controllers/CrewController.h"
+#include "../GameManagement/LaetusGameMode.h"
+#include "Engine/Texture2D.h" 
 
 void UPowerUpEffectData::ApplyCharacterEffect(ACrewMember* targetCrewMember) {
 
@@ -20,6 +24,8 @@ void UPowerUpEffectData::ApplyCharacterEffect(ACrewMember* targetCrewMember) {
 			targetCrewMember->AddOwnedComponent(newEffect);
 			newEffect->RegisterComponent();
 			UE_LOG(LogTemp, Warning, TEXT("Rifle effect registered to %s"), *targetCrewMember->GetFName().ToString());
+			
+			targetCrewMember->getCrewController()->gameMode->callHUDSetEffectOverlay(targetCrewMember->getTeam(), targetCrewMember->getID(), portraitOverlay);
 		}
 	}
 }
@@ -37,6 +43,9 @@ void UPowerUpEffectData::ApplyTileEffect(AGridSpace* targetGridSpace) {
 			targetGridSpace->AddOwnedComponent(newEffect);
 			newEffect->RegisterComponent();
 			UE_LOG(LogTemp, Warning, TEXT("Grenade effect registered to %s"), *targetGridSpace->GetFName().ToString());
+
+			if (UGameplayStatics::SpawnEmitterAtLocation(targetGridSpace->GetWorld(), impactParticles, targetGridSpace->GetActorTransform(), false) != nullptr)
+				UE_LOG(LogTemp, Warning, TEXT("Particles spawned at %s"), *targetGridSpace->GetFName().ToString());
 		}
 	}
 }

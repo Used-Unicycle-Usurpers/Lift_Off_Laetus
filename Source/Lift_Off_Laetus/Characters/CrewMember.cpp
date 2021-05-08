@@ -131,6 +131,10 @@ ACrewMember::ACrewMember() {
 	 } 
 }
 
+ void ACrewMember::setID(int32 newidNum) {
+	 idNum = newidNum;
+ }
+
  /**
   * Return the team this ACrewMember is a part of.
   *
@@ -139,6 +143,10 @@ ACrewMember::ACrewMember() {
   */
  int ACrewMember::getTeam() {
 	 return team;
+ }
+
+ int ACrewMember::getID() {
+	 return idNum;
  }
 
 // Called when the game starts or when spawned
@@ -323,15 +331,6 @@ void ACrewMember::setGridSpace(class AGridSpace* space) {
  */
 AGridSpace* ACrewMember::getGridSpace() {
 	return gridSpace;
-}
-
-/**
- * Returns the ACrew (team) this ACrewMember is a part of.
- * 
- * @return a pointer to the ACrew this ACrewMember is a part of.
- */
-ACrew* ACrewMember::getCrew() {
-	return crew;
 }
 
 /**

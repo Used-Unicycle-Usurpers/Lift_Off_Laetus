@@ -21,6 +21,14 @@ struct FsetPlayerParams {
 		int playerIndex;
 };
 
+USTRUCT()
+struct FSetEffectOverlayParams {
+	GENERATED_BODY()
+	int teamIndex;
+	int playerIndex;
+	UTexture2D* overlayTexture;
+};
+
 enum FTurnState {
 	Idle,
 	CameraMovement,
@@ -65,6 +73,7 @@ public:
 	class AGrid* getGameGrid();
 
 	void callHUDSetPlayer(int newPlayerIndex);
+	void callHUDSetEffectOverlay(int teamIndex, int playerIndex, UTexture2D* overlayTexture);
 
 private:
 

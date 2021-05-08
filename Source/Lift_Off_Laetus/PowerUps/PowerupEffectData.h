@@ -14,17 +14,24 @@ class LIFT_OFF_LAETUS_API UPowerUpEffectData : public UDataAsset
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="General")
 		FName effectName;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "General")
+		FColor mainColor;
+
+	UPROPERTY(EditAnywhere, Category="Character Effect")
 		TSubclassOf<class UCharacterPowerUpEffect> characterEffect;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Character Effect")
+		UTexture2D* portraitOverlay;
+
+	UPROPERTY(EditAnywhere, Category = "Tile Effect")
 		TSubclassOf<class UTilePowerUpEffect> tileEffect;
 
-	UPROPERTY(EditAnywhere)
-		UTexture* portraitOverlay;
+	UPROPERTY(EditAnywhere, Category = "Tile Effect")
+		UParticleSystem* impactParticles;
+
 
 public:
 
