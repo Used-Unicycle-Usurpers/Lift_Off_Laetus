@@ -46,9 +46,12 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid, ACrewController* newController)
 	for (int i = 0; i < 3; i++) {
 		AGridSpace* space = grid->getTile(FVector2D(startingRows[i], column));
 		FVector location = space->GetActorLocation();
-		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(FVector(location.X, location.Y, location.Z+20), rotation);
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(location + FVector(0.f, 0.f, 20.f), rotation, params);
+		
+		newMember->setMeshAnimData((FCharacter) i);
 		newMember->setController(controller);
-
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);
 		newMember->setGridSpace(space);

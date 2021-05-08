@@ -15,22 +15,31 @@
 #include "Components/TimelineComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Controllers/CrewController.h"
+#include "CharacterAnimDataAsset.h"
+
+UCharacterAnimDataAsset* pavoData;
+UCharacterAnimDataAsset* lyraData;
+UCharacterAnimDataAsset* nembusData;
+
+#define RED_TEAM_MATERIAL "Material'/Game/Characters/lambert1.lambert1'"
+#define BLUE_TEAM_MATERIAL "Material'/Game/Characters/lambert1_2.lambert1_2'"
 
 // Sets default values
 ACrewMember::ACrewMember() {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	static ConstructorHelpers::FObjectFinder<UCharacterAnimDataAsset>PavoData(TEXT("CharacterAnimDataAsset'/Game/Characters/PavoAnimDataAsset.PavoAnimDataAsset'"));
+	pavoData = PavoData.Object;
+	static ConstructorHelpers::FObjectFinder<UCharacterAnimDataAsset>LyraData(TEXT("CharacterAnimDataAsset'/Game/Characters/LyraAnimDataAsset.LyraAnimDataAsset'"));
+	lyraData = LyraData.Object;
+	static ConstructorHelpers::FObjectFinder<UCharacterAnimDataAsset>NembusData(TEXT("CharacterAnimDataAsset'/Game/Characters/NembusAnimDataAsset.NembusAnimDataAsset'"));
+	nembusData = NembusData.Object;
+
 	skeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh>SkeletalMeshAsset(TEXT("SkeletalMesh'/Game/Characters/Animations/CHAR_Pavo_Walk.CHAR_Pavo_Walk'"));
-	skeletalMesh->SetSkeletalMesh(SkeletalMeshAsset.Object);
 	skeletalMesh->SetEnableGravity(true);
 	skeletalMesh->SetSimulatePhysics(false);
-
-	static ConstructorHelpers::FObjectFinder<UClass>AnimationBP(TEXT("AnimBlueprint'/Game/Characters/Animations/Pavo_AnimBP.Pavo_AnimBP_C'"));
 	skeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	skeletalMesh->AnimClass = AnimationBP.Object;
-	//skeletalMesh->SetAnimInstanceClass(AnimationBP.Object->GetAnimBlueprintGeneratedClass());
 
 	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
 	cameraArm->SetupAttachment(skeletalMesh);
@@ -44,28 +53,32 @@ ACrewMember::ACrewMember() {
 
 	Speed = 0.f;
 
-	RootComponent = skeletalMesh;//Mesh;
-	
+	RootComponent = skeletalMesh;
+
 	//Create and attach the rifle and grenade
 	rifle = CreateDefaultSubobject<URifle>("Rifle");
 	rifle->mesh->SetVisibility(false);
 	rifle->mesh->SetSimulatePhysics(false);
+	/*
 	rifle->mesh->SetupAttachment(skeletalMesh, FName("GunSocket"));
 	rifle->mesh->SetRelativeLocation(FVector(0, 0, 0));
-	rifle->mesh->SetWorldRotation(FRotator(0, 270, 90));
+	rifle->mesh->SetWorldRotation(FRotator(0, 180, 0));
+	*/
 	
 	launcher = CreateDefaultSubobject<ULauncher>("Launcher");
 	launcher->mesh->SetSimulatePhysics(false);
 	launcher->mesh->SetVisibility(false);
+	/*
 	launcher->mesh->SetupAttachment(skeletalMesh, FName("GrenadeSocket"));
 	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
+	*/
 
 	//Set to blue team's (color 02) material 
-	static ConstructorHelpers::FObjectFinder<UMaterial>RedTeamMaterial(TEXT("Material'/Game/Characters/lambert1.lambert1'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>RedTeamMaterial(TEXT(RED_TEAM_MATERIAL));
 	RedTeamColor = (UMaterial*)RedTeamMaterial.Object;
 	skeletalMesh->SetMaterial(0, RedTeamColor);
 
-	static ConstructorHelpers::FObjectFinder<UMaterial>BlueTeamMaterial(TEXT("Material'/Game/Characters/lambert1_2.lambert1_2'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>BlueTeamMaterial(TEXT(BLUE_TEAM_MATERIAL));
 	BlueTeamColor = (UMaterial*)BlueTeamMaterial.Object;
 
 	//physics 
@@ -77,28 +90,43 @@ ACrewMember::ACrewMember() {
 	}
 	skeletalMesh->SetSimulatePhysics(false);
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage>ThrowAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/ThrowGrenadeMontage.ThrowGrenadeMontage'"));
-	throwMontage = ThrowAnimMontage.Object;
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage>ShootRifleAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/ShootRifleMontage.ShootRifleMontage'"));
-	shootRifleMontage = ShootRifleAnimMontage.Object;
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage>TurnLeftAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/LeftTurnMontage.LeftTurnMontage'"));
-	turnLeftMontage = TurnLeftAnimMontage.Object;
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage>TurnRightAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/RightTurnMontage.RightTurnMontage'"));
-	turnRightMontage = TurnRightAnimMontage.Object;
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage>TurnAroundAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/TurnAroundMontage1.TurnAroundMontage1'"));
-	turnAroundMontage = TurnAroundAnimMontage.Object;
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage>StumbleAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/StumbleMontage.StumbleMontage'"));
-	stumbleMontage = StumbleAnimMontage.Object;
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage>PushAnimMontage(TEXT("AnimMontage'/Game/Characters/Animations/BlendSpaces/PushMontage.PushMontage'"));
-	pushMontage = PushAnimMontage.Object;
-
 	facingDirection = Direction::Right;
+}
+
+void ACrewMember::setMeshAnimData(FCharacter character) {
+	UCharacterAnimDataAsset* data;
+	switch (character) {
+	case Pavo:
+		data = pavoData;
+		break;
+	case Lyra:
+		data = lyraData;
+		break;
+	default:
+		data = nembusData;
+		break;
+	}
+
+	throwMontage = data->throwMontage;
+	throwMontageDelay = data->throwMontageDelay;
+	shootRifleMontage = data->shootRifleMontage;
+	turnLeftMontage = data->turnLeftMontage;
+	turnRightMontage = data->turnRightMontage;
+	turnAroundMontage = data->turnAroundMontage;
+	stumbleMontage = data->stumbleMontage;
+	pushMontage = data->pushMontage;
+	skeletalMesh->SetSkeletalMesh(data->skeletalMesh);
+	skeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	skeletalMesh->SetAnimClass(data->animBP);
+
+	FAttachmentTransformRules params = FAttachmentTransformRules(EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, false);
+
+	rifle->mesh->AttachToComponent(skeletalMesh, params, FName("GunSocket"));
+	rifle->mesh->SetRelativeLocation(FVector(0, 0, 0));
+	rifle->mesh->SetRelativeRotation(FRotator(0, 0, 0));
+
+	launcher->mesh->AttachToComponent(skeletalMesh, params, FName("GrenadeSocket"));
+	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
 }
 
 /**
@@ -116,10 +144,12 @@ ACrewMember::ACrewMember() {
 	 //Red  - Color 01 - default
 	 //Blue - Color 02 - update material 
 	 if (team == 1) {
-		// CrewColor = CreateDefaultSubobject<UMaterial>(TEXT("UMaterial'/Game/Characters/lambert1_2'"));
 		skeletalMesh->SetMaterial(0, BlueTeamColor);
 		facingDirection = Direction::Left;
-	 } 
+	 }else {
+		 skeletalMesh->SetMaterial(0, RedTeamColor);
+		 facingDirection = Direction::Right;
+	 }
 }
 
  /**
@@ -199,7 +229,8 @@ void ACrewMember::moveForward() {
 	//Calculate how much to increment movement by in each iteration of the timer.
 	newLocation = targetLocation->GetActorLocation() + FVector(0, 0, 20);
 	FVector oldLocation = gridSpace->GetActorLocation() + FVector(0, 0, 20);
-	moveIncrement = (newLocation - oldLocation) / 150;
+	incrementsLeft = numIncrements = 75;
+	moveIncrement = (newLocation - oldLocation) / numIncrements;
 
 	// Reset pointers/references
 	setGridSpace(targetLocation);
@@ -223,7 +254,8 @@ void ACrewMember::incrementMoveForward() {
 	//If in a certain distance tolerance of the actual location, consider 
 	//the movement completed. This handles cases where moveIncrement does 
 	//not add up to exactly the destination location.
-	if (FMath::Abs(distance) > 5) {
+	incrementsLeft--;
+	if (/*FMath::Abs(distance) > 5 || */incrementsLeft > 0) {
 		//Destination has not been reached, increment position
 		SetActorLocation(currentLocation + moveIncrement);
 	}else {

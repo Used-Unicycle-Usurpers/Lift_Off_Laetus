@@ -11,9 +11,9 @@
 #include "Kismet/GameplayStatics.h"
 
 URifle::URifle() {
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>rifleMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/gunMockup.gunMockup'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>rifleMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/CHAR_Rifle.CHAR_Rifle'"));
 	mesh->SetStaticMesh(rifleMesh.Object);
-	mesh->SetWorldScale3D(FVector(10.f, 10.f, 10.f));
+	mesh->SetWorldScale3D(FVector(5.f, 5.f, 5.f));
 
 	range = 5;
 	damage = 1;
