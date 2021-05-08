@@ -23,6 +23,9 @@ class LIFT_OFF_LAETUS_API UPowerUpEffectData : public UDataAsset
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class UTilePowerUpEffect> tileEffect;
 
+	UPROPERTY(EditAnywhere)
+		UTexture* portraitOverlay;
+
 public:
 
 	void ApplyCharacterEffect(class ACrewMember* targetCrewMember);
