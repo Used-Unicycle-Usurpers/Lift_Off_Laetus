@@ -203,3 +203,25 @@ void ALaetusGameMode::callHUDUpdateAB(int32 status) {
 	UFunction* updateActionBar = hud->FindFunction(FName("updateActionBar"));
 	hud->ProcessEvent(updateActionBar, &params);
 }
+
+int32 ALaetusGameMode::getABStatus() {
+	return actionbar;
+}
+
+// We check if we have enough action points to complete a move 
+// if so we update actionbar
+bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
+	int32 pointsLeft = actionbar - actionPrice;
+
+	if (pointsLeft >= 0) { //update actionbar, no need to change turn
+		actionbar -= actionPrice;
+		callHUDUpdateAB(actionbar);
+	}
+	else { //not enough action points
+		return false;
+		//will call a function that gives a message to player
+	}
+
+	//return true 
+	return true;
+}

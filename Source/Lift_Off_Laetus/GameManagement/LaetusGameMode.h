@@ -72,7 +72,12 @@ public:
 	class AGrid* getGameGrid();
 
 	void callHUDSetPlayer(int newPlayerIndex);
+	
+	//for action bar
 	void callHUDUpdateAB(int32 status);
+	int32 getABStatus();
+	bool checkLegalMove(int32 actionPrice);
+
 
 private:
 
