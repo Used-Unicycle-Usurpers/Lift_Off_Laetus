@@ -76,10 +76,16 @@ void AGridSpace::BeginPlay(){
  * @param bFromSweep true if occured by a sweep, false otherwise
  * @param SweepResult the FHitResult containing the details about the overlap
  */
-void AGridSpace::OnEnterGridSpace(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	ACrewMember* newOccupant = Cast<ACrewMember>(OtherActor);
-	if (IsValid(newOccupant)) {
-		setOccupant(newOccupant);
+void AGridSpace::OnEnterGridSpace(AActor* whoEntered) {
+
+	ACrewMember* crewMember = Cast<ACrewMember>(whoEntered);
+	if (IsValid(crewMember)) {
+		setOccupant(crewMember);
+	} else {
+		ACoreFragment* coreFragment = Cast<ACoreFragment>(whoEntered);
+		if (IsValid(coreFragment)) {
+			setOccupant(coreFragment);
+		}
 	}
 }
 
@@ -95,7 +101,7 @@ void AGridSpace::OnEnterGridSpace(UPrimitiveComponent* OverlappedComponent, AAct
  * @param OtherBodyIndex
  * @param bFromSweep
  */
-void AGridSpace::OnExitGridSpace(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+void AGridSpace::OnExitGridSpace(AActor* whoLeft) {
 	setOccupant(nullptr);
 }
 
