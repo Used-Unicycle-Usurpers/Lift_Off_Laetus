@@ -85,6 +85,8 @@ private:
 
 	class ACrewController* redTeamController;
 	class ACrewController* blueTeamController;
+	class AInputController* inputController;
+	class AInputController* inputController2;
 
 	// Private helper methods
 	void ClearTurnActionStack(); // Clears the stack of actions done on the current crew's turn
@@ -93,4 +95,6 @@ private:
 	virtual UClass* GetDefaultPawnClassForController(AController* InController);
 
 	void OnGameEnd(int32 winner);
+
+	bool singleInput;
 };

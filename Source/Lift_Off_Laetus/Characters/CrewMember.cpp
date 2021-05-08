@@ -174,7 +174,7 @@ void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
  *     ACrewMember to.
  */
 void ACrewMember::MoveTo(AGridSpace * target, bool pushingCoreFragment) {
-	controller->disable();
+	controller->disableInputController();
 	targetLocation = target;
 	pushing = pushingCoreFragment;
 	FVector2D unitDirection = grid->getUnitDifference(gridSpace, target);
@@ -240,7 +240,7 @@ void ACrewMember::incrementMoveForward() {
 		Speed = 0;
 		SetActorLocation(newLocation);//Snap to the exact location
 		GetWorld()->GetTimerManager().ClearTimer(moveTimerHandle);
-		controller->enable();
+		controller->enableInputController();
 	}
 }
 
@@ -337,15 +337,15 @@ ACrew* ACrewMember::getCrew() {
 /**
  * Play the grenade throwing montage.
  */
-void ACrewMember::playThrowMontage() {
-	skeletalMesh->GetAnimInstance()->Montage_Play(throwMontage);
+float ACrewMember::playThrowMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(throwMontage);
 }
 
 /**
  * Play the shooting rifle montage.
  */
-void ACrewMember::playShootRifleMontage() {
-	skeletalMesh->GetAnimInstance()->Montage_Play(shootRifleMontage);
+float ACrewMember::playShootRifleMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(shootRifleMontage);
 }
 
 /**

@@ -96,7 +96,7 @@ void AGrenade::Tick(float DeltaTime) {
  */
 void AGrenade::destroySelf() {
 	owner->getCrewController()->moveCameraSmoothly(owner);
-	owner->getCrewController()->enable();
+	owner->getCrewController()->enableInputController();
 	//owner->getCrewController()->setStateToIdle();
 	GetWorld()->DestroyActor(this);
 }

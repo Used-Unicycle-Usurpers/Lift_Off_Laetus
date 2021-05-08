@@ -34,7 +34,7 @@ int URifle::fire(FVector2D target) {
 	directionToShoot = target;
 	
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
-	owner->getCrewController()->disable();
+	owner->getCrewController()->disableInputController();
 	directionToShootEnum = owner->vectorToDirectionEnum(directionToShoot);
 	float montageLength = owner->rotateWithAnimation(directionToShootEnum);
 	
@@ -54,7 +54,7 @@ int URifle::fire(FVector2D target) {
 void URifle::shootRifle() {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	owner->rotateToDirection(directionToShootEnum);
-	owner->playShootRifleMontage();
+	float montageLength = owner->playShootRifleMontage();
 	FVector2D location = owner->getGridSpace()->getGridLocation();
 
 	//Iterate through the tiles in this direction upto range, checking for a player.
@@ -76,12 +76,23 @@ void URifle::shootRifle() {
 						effectToApply->ApplyCharacterEffect(crewMember);
 						owner->ClearWeaponEffect();
 					}
-					return;
+					break;
 				}
 			}
 		}
 	}
 
-	owner->getCrewController()->enable();
+	if (montageLength > 0) {
+		FTimerHandle timer;
+		GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::endShooting, montageLength, false);
+	}
 	//owner->getCrewController()->setStateToIdle();
+}
+
+void URifle::endShooting() {
+	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
+	if (owner) {
+		owner->getCrewController()->enableInputController();
+	}
+	mesh->SetVisibility(false);
 }

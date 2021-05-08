@@ -108,12 +108,12 @@ public:
 	/**
 	 * Play the grenade throwing montage.
 	 */
-	void playThrowMontage();
+	float playThrowMontage();
 
 	/**
 	 * Play the shooting rifle montage.
 	 */
-	void playShootRifleMontage();
+	float playShootRifleMontage();
 
 	/**
 	 * Play the stumble montage (used when taking damage).
