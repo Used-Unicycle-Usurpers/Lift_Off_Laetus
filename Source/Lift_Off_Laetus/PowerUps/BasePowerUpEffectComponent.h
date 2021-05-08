@@ -23,15 +23,15 @@ public:
 	// Decrement the lifetime counter if it has a limit
 	void DecrementLife();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
 	// Apply the effect
 	virtual void ApplyEffect();
 
 	// Remove the effect
 	virtual void RemoveEffect();
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
 
 private:
 	// Number of turns remaining in lifetime

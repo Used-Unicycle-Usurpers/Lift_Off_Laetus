@@ -110,7 +110,6 @@ void ACoreFragment::setGridSpace(AGridSpace* space) {
 			receiver->OnCoreFragmentReceived(this);
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("TEMP"));
 }
 
 AGridSpace* ACoreFragment::getGridSpace() {

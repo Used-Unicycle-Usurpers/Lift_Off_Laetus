@@ -19,3 +19,6 @@ void UTilePowerUpEffect::OnUnregister()
 	RemoveEffect();
 }
 
+void UTilePowerUpEffect::ApplyCharacterEffect(ACrewMember* crewMember) { }
+
+void UTilePowerUpEffect::RemoveCharacterEffect(ACrewMember* crewMember) { }

@@ -15,6 +15,9 @@ class LIFT_OFF_LAETUS_API UTilePowerUpEffect : public UBasePowerUpEffectComponen
 {
 	GENERATED_BODY()
 
+public:
+	virtual void ApplyCharacterEffect(ACrewMember* crewMember);
+	virtual void RemoveCharacterEffect(ACrewMember* crewMember);
 protected:
 	AGridSpace* tileTarget;
 	virtual void OnRegister() override;

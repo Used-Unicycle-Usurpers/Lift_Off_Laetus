@@ -4,6 +4,7 @@
 #include "../Characters/CoreFragment.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "../PowerUps/TilePowerUpEffect.h"
 
 static UMaterial* regularMaterial;
 static UMaterial* redMaterial;
@@ -83,6 +84,11 @@ void AGridSpace::OnEnterGridSpace(AActor* whoEntered) {
 	ACrewMember* crewMember = Cast<ACrewMember>(whoEntered);
 	if (IsValid(crewMember)) {
 		setOccupant(crewMember);
+		UActorComponent* powerUpComponent = FindComponentByClass<UTilePowerUpEffect>();
+		if (IsValid(powerUpComponent)) {
+			UTilePowerUpEffect* actualPowerUp = Cast<UTilePowerUpEffect>(powerUpComponent);
+			actualPowerUp->ApplyCharacterEffect(crewMember);
+		}
 	} else {
 		ACoreFragment* coreFragment = Cast<ACoreFragment>(whoEntered);
 		if (IsValid(coreFragment)) {
@@ -104,7 +110,20 @@ void AGridSpace::OnEnterGridSpace(AActor* whoEntered) {
  * @param bFromSweep
  */
 void AGridSpace::OnExitGridSpace(AActor* whoLeft) {
+
+	if (occupant == nullptr || whoLeft != occupant)
+		return;
+
 	setOccupant(nullptr);
+
+	ACrewMember* crewMember = Cast<ACrewMember>(whoLeft);
+	if (IsValid(crewMember)) {
+		UActorComponent* powerUpComponent = FindComponentByClass<UTilePowerUpEffect>();
+		if (IsValid(powerUpComponent)) {
+			UTilePowerUpEffect* actualPowerUp = Cast<UTilePowerUpEffect>(powerUpComponent);
+			actualPowerUp->RemoveCharacterEffect(crewMember);
+		}
+	}
 }
 
 void AGridSpace::SetToRegularMaterial() {

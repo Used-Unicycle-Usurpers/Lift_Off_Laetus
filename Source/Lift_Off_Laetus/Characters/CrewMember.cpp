@@ -307,10 +307,10 @@ void ACrewMember::setGridSpace(class AGridSpace* space) {
 	if (space && !space->isOccupied()) {
 
 		if (gridSpace) {
-			gridSpace->setOccupant(nullptr);
+			gridSpace->OnExitGridSpace(this);
 		}
 
-		space->setOccupant(this);
+		space->OnEnterGridSpace(this);
 		gridSpace = space;
 	}
 }
