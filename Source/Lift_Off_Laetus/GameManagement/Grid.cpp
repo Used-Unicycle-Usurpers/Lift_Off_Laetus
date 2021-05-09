@@ -397,8 +397,21 @@ void AGrid::colorGridInRange(FVector2D origin, int range) {
 					
 					tile->SetOverlayToBlue(false);
 				}
-				else {
-					tile->SetOverlayToRed(false);
+			}
+		}
+	}
+}
+
+void AGrid::colorGridDirectionsInRange(FVector2D origin, int range) {
+	for (int i = 0; i < numRows; i++) {
+		for (int j = 0; j < numColumns; j++) {
+			AGridSpace* tile = getTile(FVector2D(i, j));
+			if (tile) {
+				int dX = FMath::Abs(origin.X - i);
+				int dY = FMath::Abs(origin.Y - j);
+				if (dX <= range && dY <= range) {
+
+					tile->SetOverlayToBlue(false);
 				}
 			}
 		}
