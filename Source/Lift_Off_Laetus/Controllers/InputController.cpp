@@ -170,6 +170,7 @@ void AInputController::setStateToGrenadeAttack() {
 		currentlySelectedTile = controlledCrew->getCurrentCrewMember()->getGridSpace();
 		moveCameraSmoothly(currentlySelectedTile);
 		setTurnState(GrenadeAttack);
+		gameMode->getGameGrid()->colorGridInRange(currentlySelectedTile->getGridLocation(), 2);
 	}
 }
 
@@ -361,16 +362,20 @@ void AInputController::moveCameraToTile(Direction direction) {
 	default:
 		return;
 	}
+
 	FVector2D currentLocation = currentlySelectedTile->getGridLocation();
 	FVector2D newLocation = currentLocation + directionVector;
+	FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
+	if (grid->areTilesWithinRange(origin, newLocation, 2)) {
 
-	AGridSpace* newSpace = grid->getTile(newLocation);
-	if (newSpace) {
-		currentlySelectedTile->SetToRegularMaterial();
-		currentlySelectedTile = newSpace;
-		currentlySelectedTile->SetToGreen();
+		AGridSpace* newSpace = grid->getTile(newLocation);
+		if (newSpace) {
+			currentlySelectedTile->RestoreOverlayColor();
+			currentlySelectedTile = newSpace;
+			currentlySelectedTile->SetOverlayToGreen(true);
 
-		moveCameraSmoothly(currentlySelectedTile);
+			moveCameraSmoothly(currentlySelectedTile);
+		}
 	}
 }
 
