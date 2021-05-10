@@ -88,6 +88,8 @@ public:
 
 	void colorGridDirectionsInRange(FVector2D origin, int range);
 
+	void clearGridOverlay();
+
 	bool areTilesWithinRange(FVector2D loc1, FVector2D loc2, int range);
 
 protected:

@@ -149,7 +149,8 @@ void AGridSpace::SetToGreen() {
 }
 
 void AGridSpace::ClearOverlay() {
-	overlayMesh->SetMaterial(0, nullptr);
+	overlayMesh->SetMaterial(0, translucentInvisibleMaterial);
+	mainOverlayColor = translucentInvisibleMaterial;
 }
 
 void AGridSpace::SetOverlayToRed(bool temp) {

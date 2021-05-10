@@ -141,6 +141,7 @@ void AInputController::setTurnState(enum FTurnState newState) {
 
 void AInputController::setStateToMovement() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN MOVEMENT MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -152,17 +153,21 @@ void AInputController::setStateToMovement() {
 
 void AInputController::setStateToRifleAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN RIFLE ATTACK MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
+		const FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
+		gameMode->getGameGrid()->colorGridDirectionsInRange(origin, 5);
 		setTurnState(RifleAttack);
 	}
 }
 
 void AInputController::setStateToGrenadeAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN GRENADE ATTACK MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 
 	//Start by focusing on current tile. WASD will now move highlighted so player can select 
 	//where to throw the grenade.
@@ -176,6 +181,7 @@ void AInputController::setStateToGrenadeAttack() {
 
 void AInputController::setStateToHarvest() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN HARVEST MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -187,6 +193,7 @@ void AInputController::setStateToHarvest() {
 
 void AInputController::setStateToIdle() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN IDLE MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();

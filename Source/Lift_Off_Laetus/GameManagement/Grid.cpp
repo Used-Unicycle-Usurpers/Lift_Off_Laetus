@@ -393,8 +393,7 @@ void AGrid::colorGridInRange(FVector2D origin, int range) {
 			if (tile) {
 				int dX = FMath::Abs(origin.X - i);
 				int dY = FMath::Abs(origin.Y - j);
-				if (dX <= range && dY <= range) {
-					
+				if (dX <= range && dY <= range) {	
 					tile->SetOverlayToBlue(false);
 				}
 			}
@@ -402,17 +401,30 @@ void AGrid::colorGridInRange(FVector2D origin, int range) {
 	}
 }
 
-void AGrid::colorGridDirectionsInRange(FVector2D origin, int range) {
+void AGrid::colorGridDirectionsInRange(const FVector2D origin, int range) {
+	UE_LOG(LogTemp, Warning, TEXT("Origin is: (%f,%f)"), origin.X, origin.Y);
+	for (int i = origin.X - range; i < origin.X + range+1; i++) {
+		UE_LOG(LogTemp, Warning, TEXT("Getting tile at (%d,%f)"), i, origin.Y);
+		AGridSpace* tile = getTile(FVector2D(i, origin.Y));
+		if (tile) {
+				tile->SetOverlayToBlue(false);
+		}
+	}
+
+	for (int j = origin.Y - range; j < origin.Y + range+1; j++) {
+		AGridSpace* tile = getTile(FVector2D(origin.X, j));
+		if (tile) {
+			tile->SetOverlayToBlue(false);
+		}
+	}
+}
+
+void AGrid::clearGridOverlay() {
 	for (int i = 0; i < numRows; i++) {
 		for (int j = 0; j < numColumns; j++) {
 			AGridSpace* tile = getTile(FVector2D(i, j));
 			if (tile) {
-				int dX = FMath::Abs(origin.X - i);
-				int dY = FMath::Abs(origin.Y - j);
-				if (dX <= range && dY <= range) {
-
-					tile->SetOverlayToBlue(false);
-				}
+				tile->ClearOverlay();
 			}
 		}
 	}

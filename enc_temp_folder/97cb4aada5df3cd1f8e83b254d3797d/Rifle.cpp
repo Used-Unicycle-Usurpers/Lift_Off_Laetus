@@ -57,7 +57,7 @@ void URifle::shootRifle() {
 	montageLength = owner->playShootRifleMontage();
 
 	FTimerHandle timer;
-	GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shoot, montageLength / 2, false);
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shoot, montageLength / 0.5, false);
 }
 
 void URifle::shoot(){

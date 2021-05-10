@@ -41,5 +41,9 @@ private:
 	 */
 	void shootRifle();
 
+	float montageLength;
+
+	void shoot();
+
 	void endShooting();
 };
