@@ -60,4 +60,7 @@ private:
 	 * Explode this grenade, and move the camera back the player.
 	 */
 	void destroySelf();
+
+	//A reference to the game mode for quick access.
+	class ALaetusGameMode* gameMode;
 };

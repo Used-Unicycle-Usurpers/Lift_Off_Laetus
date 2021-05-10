@@ -145,6 +145,16 @@ void ACrew::moveSelectedCrewMember(FVector2D direction) {
 	moveCrewMember(selectedCharacter, direction);
 }
 
+/**
+* Check if we are pushing core
+*/
+bool ACrew::pushingCore(FVector2D direction) {FVector2D crewMemberGridLocation = crewMembers[selectedCharacter]->getGridSpace()->getGridLocation();
+	AGridSpace * destination = grid->getTile(crewMemberGridLocation + direction);
+	if (destination && destination->containsFragment()) { return true; }
+		
+	return false;
+}
+
 void ACrew::setController(ACrewController* newController) {
 	controller = newController;
 }
