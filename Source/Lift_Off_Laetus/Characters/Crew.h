@@ -26,6 +26,9 @@ public:
 
 	void setController(class ACrewController* newController);
 
+	//return if we are pushing a core piece 
+	bool pushingCore( FVector2D direction);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

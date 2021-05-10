@@ -126,5 +126,6 @@ private:
 	class ACrewController* currentTeamController;
 	class ACrew* controlledCrew;
 	bool twoPlayers;
+	int32 price = 0; //for actionBar
 
 };

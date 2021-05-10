@@ -19,6 +19,13 @@ URifle::URifle() {
 	damage = 1;
 }
 
+// Called when the game starts or when spawned
+void URifle::BeginPlay() {
+	Super::BeginPlay();
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+}
+
+
 /**
  * Rotate the ACrewMember in the targer direction, fire a bullet (i.e. line trace) 
  * in that cardinal direction specified in target andamages the first player it 
@@ -36,7 +43,7 @@ int URifle::fire(FVector2D target) {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	owner->getCrewController()->disableInputController();
 	directionToShootEnum = owner->vectorToDirectionEnum(directionToShoot);
-	montageLength = owner->rotateWithAnimation(directionToShootEnum);
+	float montageLength = owner->rotateWithAnimation(directionToShootEnum);
 	
 	if (montageLength > 0) {
 		FTimerHandle timer;
@@ -54,14 +61,7 @@ int URifle::fire(FVector2D target) {
 void URifle::shootRifle() {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	owner->rotateToDirection(directionToShootEnum);
-	montageLength = owner->playShootRifleMontage();
-
-	FTimerHandle timer;
-	GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shoot, montageLength / 2, false);
-}
-
-void URifle::shoot(){
-	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
+	float montageLength = owner->playShootRifleMontage();
 	FVector2D location = owner->getGridSpace()->getGridLocation();
 
 	//Iterate through the tiles in this direction upto range, checking for a player.
@@ -88,7 +88,7 @@ void URifle::shoot(){
 		FTimerHandle timer;
 		GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::endShooting, montageLength, false);
 	}
-	//owner->getCrewController()->getinputcontroler
+	//owner->getCrewController()->setStateToIdle();
 }
 
 void URifle::endShooting() {
@@ -97,4 +97,6 @@ void URifle::endShooting() {
 		owner->getCrewController()->enableInputController();
 	}
 	mesh->SetVisibility(false);
+	//change turn if actionBar is 0
+	if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
 }

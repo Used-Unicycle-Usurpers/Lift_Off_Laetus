@@ -84,14 +84,6 @@ public:
 
 	AGridSpace* getValidRespawnSpace(ACrewMember* crewMember);
 
-	void colorGridInRange(FVector2D origin, int range);
-
-	void colorGridDirectionsInRange(FVector2D origin, int range);
-
-	void clearGridOverlay();
-
-	bool areTilesWithinRange(FVector2D loc1, FVector2D loc2, int range);
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

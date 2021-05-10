@@ -166,12 +166,13 @@ void ACrewMember::setMeshAnimData(FCharacter character) {
 void ACrewMember::BeginPlay() {
 	Super::BeginPlay();
 
-	ALaetusGameMode* gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (gameMode) {
 		grid = gameMode->getGameGrid();
 	}
 
 	health = 3.f;
+	
 	
 }
 
@@ -264,6 +265,8 @@ void ACrewMember::incrementMoveForward() {
 		SetActorLocation(newLocation);//Snap to the exact location
 		GetWorld()->GetTimerManager().ClearTimer(moveTimerHandle);
 		controller->enableInputController();
+		//change turn if actionBar is 0
+		if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
 	}
 }
 
