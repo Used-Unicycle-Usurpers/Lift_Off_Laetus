@@ -28,6 +28,13 @@ enum RotationAnim {
 	TurnAround
 };
 
+UENUM()
+enum FCharacter {
+	Pavo = 0,
+	Lyra = 1,
+	Nembus = 2
+};
+
 
 UCLASS()
 class LIFT_OFF_LAETUS_API ACrewMember : public APawn {
@@ -109,12 +116,12 @@ public:
 	/**
 	 * Play the grenade throwing montage.
 	 */
-	void playThrowMontage();
+	float playThrowMontage();
 
 	/**
 	 * Play the shooting rifle montage.
 	 */
-	void playShootRifleMontage();
+	float playShootRifleMontage();
 
 	/**
 	 * Play the stumble montage (used when taking damage).
@@ -195,11 +202,18 @@ public:
 
 	bool needToRotate(FVector2D newDirection);
 
+	void setMeshAnimData(FCharacter character);
+
+	float throwMontageDelay;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
+	//A reference to the game mode for quick access.
+	class ALaetusGameMode* gameMode;
+
 	//The controller for the ACrew that this ACrewMember belongs to.
 	class ACrewController* controller;
 
@@ -252,6 +266,8 @@ private:
 	//animate movement forward.
 	FVector newLocation;
 	FVector moveIncrement;
+	int numIncrements;
+	int incrementsLeft;
 	FTimerHandle moveTimerHandle;
 	Direction directionToFaceEnum;
 	class AGridSpace* targetLocation;

@@ -26,7 +26,7 @@ ULauncher::ULauncher() {
  */
 int ULauncher::fire(FVector2D target) {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
-	owner->getCrewController()->disable();
+	owner->getCrewController()->disableInputController();
 	directionToFaceEnum = getDirectionToThrow(target);
 	float montageLength = owner->rotateWithAnimation(directionToFaceEnum);
 	targetSpace = target;
@@ -54,7 +54,7 @@ void ULauncher::readyLaunch() {
 	
 	owner->playThrowMontage();
 	FTimerHandle timerParams;
-	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, 1.8f, false);
+	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, owner->throwMontageDelay, false);
 }
 
 /**

@@ -9,6 +9,10 @@ static UMaterial* regularMaterial;
 static UMaterial* redMaterial;
 static UMaterial* blueMaterial;
 static UMaterial* greenMaterial;
+static UMaterial* translucentRedMaterial;
+static UMaterial* translucentBlueMaterial;
+static UMaterial* translucentGreenMaterial;
+static UMaterial* translucentInvisibleMaterial;
 
 // Sets default values
 AGridSpace::AGridSpace(){
@@ -16,6 +20,8 @@ AGridSpace::AGridSpace(){
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GridMesh"));
 	mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	overlayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OverlayMesh"));
+	overlayMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//collision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 
 	//Get the color materials for visual debugging of the grid spaces
@@ -27,6 +33,14 @@ AGridSpace::AGridSpace(){
 	blueMaterial = blue.Object;
 	static ConstructorHelpers::FObjectFinder<UMaterial>green(TEXT("Material'/Game/GreenMaterial.GreenMaterial'"));
 	greenMaterial = green.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterial>translucentRed(TEXT("Material'/Game/Translucent_RedMaterial.Translucent_RedMaterial'"));
+	translucentRedMaterial = translucentRed.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterial>translucentBlue(TEXT("Material'/Game/Translucent_BlueMaterial.Translucent_BlueMaterial'"));
+	translucentBlueMaterial = translucentBlue.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterial>translucentGreen(TEXT("Material'/Game/Translucent_GreenMaterial.Translucent_GreenMaterial'"));
+	translucentGreenMaterial = translucentGreen.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterial>translucentInvisible(TEXT("Material'/Game/Translucent_InvisibleMaterial.Translucent_InvisibleMaterial'"));
+	translucentInvisibleMaterial = translucentInvisible.Object;
 
 	//Get mesh for visual debugging
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>CubeMeshAsset(TEXT("StaticMesh'/Game/Geometry/Meshes/1M_Cube.1M_Cube'"));
@@ -34,12 +48,22 @@ AGridSpace::AGridSpace(){
 	mesh->SetRelativeScale3D(FVector(2.f, 2.f, 0.1f));
 	SetToRegularMaterial();
 
-	/*
+	RootComponent = mesh;
+
+	overlayMesh->SetStaticMesh(CubeMeshAsset.Object);
+	overlayMesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
+	overlayMesh->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
+	overlayMesh->SetRelativeLocation(FVector(0.f, 0.f, 300.f));
+	overlayMesh->GetStaticMesh()->SetMaterial(0, translucentInvisibleMaterial);
+	
 	//Set up box collision component, which will be used to keep track of the current
 	//occupant of this AGridSpace, if any.
+	collision = CreateDefaultSubobject<UBoxComponent>("Box");
 	collision->SetRelativeScale3D(FVector(1.55f, 1.55f, 5.f));
 	collision->SetHiddenInGame(false);//Only visible for debugging
+	collision->SetVisibility(true);
 	collision->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
+	/*
 	collision->SetGenerateOverlapEvents(true);
 	collision->OnComponentBeginOverlap.AddDynamic(this, &AGridSpace::OnEnterGridSpace);
 	collision->OnComponentEndOverlap.AddDynamic(this, &AGridSpace::OnExitGridSpace);
@@ -122,6 +146,36 @@ void AGridSpace::SetToBlue() {
 
 void AGridSpace::SetToGreen() {
 	mesh->SetMaterial(0, greenMaterial);
+}
+
+void AGridSpace::ClearOverlay() {
+	overlayMesh->SetMaterial(0, translucentInvisibleMaterial);
+	mainOverlayColor = translucentInvisibleMaterial;
+}
+
+void AGridSpace::SetOverlayToRed(bool temp) {
+	overlayMesh->SetMaterial(0, translucentRedMaterial);
+	if (!temp) {
+		mainOverlayColor = translucentRedMaterial;
+	}
+}
+
+void AGridSpace::SetOverlayToBlue(bool temp) {
+	overlayMesh->SetMaterial(0, translucentBlueMaterial);
+	if (!temp) {
+		mainOverlayColor = translucentBlueMaterial;
+	}
+}
+
+void AGridSpace::SetOverlayToGreen(bool temp) {
+	overlayMesh->SetMaterial(0, translucentGreenMaterial);
+	if (!temp) {
+		mainOverlayColor = translucentGreenMaterial;
+	}
+}
+
+void AGridSpace::RestoreOverlayColor() {
+	overlayMesh->SetMaterial(0, mainOverlayColor);
 }
 
 /**

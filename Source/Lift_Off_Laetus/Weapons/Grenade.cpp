@@ -8,6 +8,7 @@
 #include "../GameManagement/Grid.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "../GameManagement/LaetusGameMode.h"
 #include "../Controllers/CrewController.h"
 
 // Sets default values
@@ -38,6 +39,7 @@ AGrenade::AGrenade() {
 void AGrenade::BeginPlay() {
 	Super::BeginPlay();
 	current = 0;
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 // Called every frame
@@ -87,8 +89,10 @@ void AGrenade::Tick(float DeltaTime) {
  */
 void AGrenade::destroySelf() {
 	owner->getCrewController()->moveCameraSmoothly(owner);
-	owner->getCrewController()->enable();
+	owner->getCrewController()->enableInputController();
 	//owner->getCrewController()->setStateToIdle();
+	//change turn if actionBar is 0
+	if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
 	GetWorld()->DestroyActor(this);
 }
 

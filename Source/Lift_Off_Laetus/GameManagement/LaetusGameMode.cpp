@@ -2,6 +2,7 @@
 
 #include "LaetusGameMode.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
 #include "Lift_Off_Laetus/Characters/Crew.h"
 #include "GridSpace.h"
 #include "CoreFragmentReceiver.h"
@@ -13,10 +14,11 @@
 #include "Camera/CameraActor.h"
 #include "Engine/Engine.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "LaetusGameInstance.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
-	PlayerControllerClass = ACrewController::StaticClass();
+	PlayerControllerClass = AInputController::StaticClass();//ACrewController::StaticClass();
 	DefaultPawnClass = NULL;
 
 	camera = CreateDefaultSubobject<UCameraComponent>("MainCamera");
@@ -41,18 +43,39 @@ void ALaetusGameMode::BeginPlay() {
 	hud = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 	hud->AddToViewport();
 
+	//Based on the mode selected in the main menu, support keyboard only or keyboard 
+	//for player one / gamepad for player two
+	ULaetusGameInstance* gameInstance = Cast<ULaetusGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	singleInput = gameInstance->singleInput;
+
+	inputController = Cast<AInputController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
+
 	//The code below is to test if crew and crewmember are working correctly
-	redTeamController = Cast<ACrewController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
-	ACrew* redCrew = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0)); 
+	redTeamController = GetWorld()->SpawnActor<ACrewController>();//Cast<ACrewController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
+	ACrew* redCrew = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
 	redTeamController->Possess(redCrew);
-	
-	blueTeamController = Cast<ACrewController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true));
+
+	blueTeamController = GetWorld()->SpawnActor<ACrewController>();//Cast<ACrewController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true));
 	ACrew* blueCrew = GetWorld()->SpawnActor<ACrew>(FVector(0, 0, 0), FRotator(0, 0, 0));
 	blueTeamController->Possess(blueCrew);
-	
-	//set teams
-	redCrew->SetUp(0, grid);
-	blueCrew->SetUp(1, grid);
+
+	//Initialize Crews and Controllers
+	redCrew->SetUp(0, grid, redTeamController);
+	blueCrew->SetUp(1, grid, blueTeamController);
+
+	//Initialize the input controller with info on both players of the game.
+	if (singleInput) {
+		redTeamController->init(redCrew, inputController);
+		blueTeamController->init(blueCrew, inputController);
+		inputController->init(redTeamController, blueTeamController);
+	}else {
+		inputController2 = Cast<AInputController>(UGameplayStatics::CreatePlayer(GetWorld(), -1, true));
+
+		redTeamController->init(redCrew, inputController);
+		blueTeamController->init(blueCrew, inputController2);
+		inputController->init(redTeamController, nullptr);
+		inputController2->init(nullptr, blueTeamController);
+	}
 
 	// add to crews array
 	crews.Add(redCrew);
@@ -68,23 +91,41 @@ void ALaetusGameMode::BeginPlay() {
 
 //Begin new turn
 void ALaetusGameMode::ChangeTurn() {
-	//CHANGE CAMERA FOCUS TO NEW CREW
-	//Get location of first crew member in new team
+	//inform player we are switching turns 
+	if (firstChangeTurn) {
+		firstChangeTurn = false;
+	}else {
+		callHUDMessage(true, 10);
+	}
+
+	//Swap to the other team
 	currentCrew += 1;
 	if (currentCrew > crewCount - 1){
 		currentCrew = 0;
-	}
+	}	
+
+	//set actionbar to 10 and update hud 
+	actionbar = 10;
+	callHUDUpdateAB(actionbar);
 
 	ACrew* newCrew = crews[currentCrew];
 	newCrew->setSelectedCrewMember(0);
 	if (currentCrew == 0) {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, TEXT("Red Team's Turn"));
-		redTeamController->enable();
-		blueTeamController->disable();
+		inputController->changeTurn(currentCrew);
+		if (!singleInput) {
+			inputController->enable();
+			inputController2->disable();
+			inputController2->changeTurn(currentCrew);
+		}
 	}else {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, TEXT("Blue Team's Turn"));
-		blueTeamController->enable();
-		redTeamController->disable();
+		inputController->changeTurn(currentCrew);
+		if (!singleInput) {
+			inputController->disable();
+			inputController2->enable();
+			inputController2->changeTurn(currentCrew);
+		}
 	}
 
 	callHUDSetPlayer(-1);
@@ -95,6 +136,13 @@ void ALaetusGameMode::ChangeTurn() {
 	hud->ProcessEvent(setTeamFunction, &params1);
 
 	callHUDSetPlayer(0);
+
+	//hide change turn message
+	if (!firstChangeTurn) {
+		message = 10;
+		visible = false;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.0f, false);
+	}
 }
 
 void ALaetusGameMode::EvaluateWin()
@@ -130,8 +178,8 @@ void ALaetusGameMode::OnGameEnd(int32 winner) {
 
 	// TODO: End turn, lock inputs
 
-	redTeamController->disable();
-	blueTeamController->disable();
+	//redTeamController->disable();
+	//blueTeamController->disable();
 
 	if (winner == 0) {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, TEXT("Red Team Won!"));
@@ -165,4 +213,59 @@ void ALaetusGameMode::callHUDSetPlayer(int newPlayerIndex) {
 	params.playerIndex = newPlayerIndex;
 	UFunction* setPlayerFunction = hud->FindFunction(FName("setPlayer"));
 	hud->ProcessEvent(setPlayerFunction, &params);
+}
+
+void ALaetusGameMode::callHUDUpdateAB(int32 status) {
+	FsetABParams params;
+	params.status = status;
+	UFunction * updateActionBar = hud->FindFunction(FName("updateActionBar"));
+	hud->ProcessEvent(updateActionBar, &params);
+}
+
+void ALaetusGameMode::callHUDMessage(bool vis, int32 mess) {
+	FsetHUDMessageParams params;
+	params.visible = vis;
+	params.message = mess;
+	UFunction * displayMessage = hud->FindFunction(FName("displayMessage"));
+	hud->ProcessEvent(displayMessage, &params);
+}
+
+int32 ALaetusGameMode::getABStatus() {
+	return actionbar;
+}
+
+void ALaetusGameMode::callHUDTimer() {
+	callHUDMessage(visible, message);
+}
+
+// We check if we have enough action points to complete a move 
+// if so we update actionbar
+bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
+	int32 pointsLeft = actionbar - actionPrice;
+	if (pointsLeft >= 0) { //update actionbar, no need to change turn
+		actionbar -= actionPrice;
+		callHUDUpdateAB(actionbar);
+
+		//inform player of how many action point spent 
+		callHUDMessage(true, actionPrice);
+
+		//hide message after a bit
+		message = actionPrice;
+		visible = false;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
+	}else { //not enough action points
+	 //show invalid move message 
+		callHUDMessage(true, 0);
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, TEXT("Called display message"));
+
+		//display invalid move message for a bit
+		visible = false;
+		message = 0;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
+		return false;
+	}
+
+	//GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+	//return true 
+	return true;
 }

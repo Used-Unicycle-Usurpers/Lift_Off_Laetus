@@ -28,9 +28,10 @@ void ACrew::BeginPlay() {
 }
 
 //Setup Crew Members 
-void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
+void ACrew::SetUp(int32 newTeam, AGrid* newGrid, ACrewController* newController) {
 	team = newTeam;
 	grid = newGrid;
+	setController(newController);
 	TArray<int32> startingRows = grid->getStartingRows();
 	
 	//Set to left side, facing right
@@ -45,17 +46,16 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid) {
 	for (int i = 0; i < 3; i++) {
 		AGridSpace* space = grid->getTile(FVector2D(startingRows[i], column));
 		FVector location = space->GetActorLocation();
-		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(FVector(location.X, location.Y, location.Z+20), rotation);
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(location + FVector(0.f, 0.f, 20.f), rotation, params);
+		
+		newMember->setMeshAnimData((FCharacter) i);
 		newMember->setController(controller);
-
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);
 		newMember->setGridSpace(space);
 	}
-	
-	//Set up the refernce to the PlayerCameraManager and move camera to the
-	//first crew member of the first crew.
-	controller->init();
 }
 
 // Return the current status of the action bar
@@ -143,6 +143,16 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 */
 void ACrew::moveSelectedCrewMember(FVector2D direction) {
 	moveCrewMember(selectedCharacter, direction);
+}
+
+/**
+* Check if we are pushing core
+*/
+bool ACrew::pushingCore(FVector2D direction) {FVector2D crewMemberGridLocation = crewMembers[selectedCharacter]->getGridSpace()->getGridLocation();
+	AGridSpace * destination = grid->getTile(crewMemberGridLocation + direction);
+	if (destination && destination->containsFragment()) { return true; }
+		
+	return false;
 }
 
 void ACrew::setController(ACrewController* newController) {

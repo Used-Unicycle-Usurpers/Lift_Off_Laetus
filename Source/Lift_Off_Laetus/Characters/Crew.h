@@ -15,7 +15,7 @@ public:
 	ACrew(); 
 	
 	//void SetTeam(int32 newTeam);
-	void SetUp(int32 newTeam, class AGrid* newGrid);
+	void SetUp(int32 newTeam, class AGrid* newGrid, class ACrewController* newController);
 
 	//Action bar stuff 
 	int32 GetActionBarStatus();
@@ -26,6 +26,9 @@ public:
 
 	void setController(class ACrewController* newController);
 
+	//return if we are pushing a core piece 
+		bool pushingCore(FVector2D direction);
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
