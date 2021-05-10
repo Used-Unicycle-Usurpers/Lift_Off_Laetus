@@ -211,6 +211,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	//A reference to the game mode for quick access.
+	class ALaetusGameMode* gameMode;
+
 	//The controller for the ACrew that this ACrewMember belongs to.
 	class ACrewController* controller;
 

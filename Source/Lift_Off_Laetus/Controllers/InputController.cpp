@@ -215,15 +215,27 @@ void AInputController::handleUp() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Camera state"));
 		break;
 	case Movement:
-		controlledCrew->moveSelectedCrewMember(FVector2D(-1, 0));
+		//Price for movement is 1, if we are pushing core its 2
+		//see if we are pushing core
+		price = 1;
+		if (controlledCrew->pushingCore(FVector2D(-1, 0))) { price = 2; }
+
+		if (gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(FVector2D(-1, 0));
+		}
 		break;
 	case RifleAttack:
-		currentTeamController->shoot(FVector2D(-1, 0));
+		//Price for rifle attack is 3 
+		price = 3;
+		if (gameMode->checkLegalMove(price)) {
+				currentTeamController->shoot(FVector2D(-1, 0));
+		}
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Up);
 		break;
 	case Harvest:
+		// For now I was thinking we set the price of harvest to 2
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Harvest state"));
 		break;
 	default:
@@ -243,10 +255,21 @@ void AInputController::handleLeft() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Camera state"));
 		break;
 	case Movement:
-		controlledCrew->moveSelectedCrewMember(FVector2D(0, -1));
+		//Price for movement is 1, if we are pushing core its 2
+		//see if we are pushing core
+		price = 1;
+		if (controlledCrew->pushingCore(FVector2D(0, -1))) { price = 2; }
+		
+		if (gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(FVector2D(0, -1));
+		}
 		break;
 	case RifleAttack:
-		currentTeamController->shoot(FVector2D(0, -1));
+		//Price for rifle attack is 3 
+		price = 3;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->shoot(FVector2D(0, -1));
+		}
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Left);
@@ -271,10 +294,22 @@ void AInputController::handleRight() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Camera state"));
 		break;
 	case Movement:
-		controlledCrew->moveSelectedCrewMember(FVector2D(0, 1));
+		//Price for movement is 1, if we are pushing core its 2
+		//see if we are pushing core
+		price = 1;
+		if (controlledCrew->pushingCore(FVector2D(0, 1))) { price = 2; }
+		
+			if (gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(FVector2D(0, 1));
+		}
 		break;
 	case RifleAttack:
-		currentTeamController->shoot(FVector2D(0, 1));
+		//Price for rifle attack is 3 
+		price = 3;
+		
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->shoot(FVector2D(0, 1));
+		}
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Right);
@@ -299,10 +334,21 @@ void AInputController::handleDown() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Camera state"));
 		break;
 	case Movement:
-		controlledCrew->moveSelectedCrewMember(FVector2D(1, 0));
+		//Price for movement is 1, if we are pushing core its 2
+		//see if we are pushing core
+		price = 1;
+		if (controlledCrew->pushingCore(FVector2D(1, 0))) { price = 2; }
+		
+		if (gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(FVector2D(1, 0));
+		}
 		break;
 	case RifleAttack:
-		currentTeamController->shoot(FVector2D(1, 0));
+		//Price for rifle attack is 3 
+		price = 3;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->shoot(FVector2D(1, 0));
+		}
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Down);
@@ -333,7 +379,11 @@ void AInputController::handleConfirm() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in RifleAttack state"));
 		break;
 	case GrenadeAttack:
-		currentTeamController->launch(currentlySelectedTile->getGridLocation());
+		//Price for grenade attack is 5
+		price = 5;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->launch(currentlySelectedTile->getGridLocation());
+		}
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in Harvest state"));

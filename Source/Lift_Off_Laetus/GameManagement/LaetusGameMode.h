@@ -21,6 +21,22 @@ struct FsetPlayerParams {
 		int playerIndex;
 };
 
+//Params used to update the action bar in the UI
+USTRUCT()
+struct FsetABParams {
+	GENERATED_BODY()
+	int32 status;
+};
+
+//Params used to display messages on HUD for a certain amount of seconds
+USTRUCT()
+struct FsetHUDMessageParams {
+	GENERATED_BODY()
+		bool visible;
+		int32 message;
+};
+
+
 enum FTurnState {
 	Idle,
 	CameraMovement,
@@ -66,6 +82,13 @@ public:
 
 	void callHUDSetPlayer(int newPlayerIndex);
 
+	//for action bar
+	void callHUDUpdateAB(int32 status);
+	void callHUDMessage(bool visible, int32 message);
+	void callHUDTimer();
+	int32 getABStatus();
+	bool checkLegalMove(int32 actionPrice);
+
 private:
 
 	// Game rule parameters
@@ -78,6 +101,8 @@ private:
 	int32 currentCrew = 0;          // Which crew is playing currently
 	// TimerHandle turnTimer;     // Keeps track of the time left in the turn
 	// TurnActionStack * turnStack;  // Records the actions taken during the current turn
+
+	int32 actionbar = 10;
 
 	//The grid representing the tiles of the map.
 	UPROPERTY(EditAnywhere, Category = MyCategory)
@@ -97,4 +122,9 @@ private:
 	void OnGameEnd(int32 winner);
 
 	bool singleInput;
+
+	FTimerHandle TimerHandle;
+	int32 message;
+	bool visible;
+	bool firstChangeTurn = true; //so message does not show up during startup
 };

@@ -22,6 +22,10 @@ public:
 	 */
 	virtual int fire(FVector2D target) override;
 
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 private:
 	//The amount of damage a shot typically deals.
 	float damage;

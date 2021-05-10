@@ -19,6 +19,12 @@ URifle::URifle() {
 	damage = 1;
 }
 
+// Called when the game starts or when spawned
+void URifle::BeginPlay() {
+	Super::BeginPlay();
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+}
+
 /**
  * Rotate the ACrewMember in the targer direction, fire a bullet (i.e. line trace) 
  * in that cardinal direction specified in target andamages the first player it 
@@ -97,4 +103,6 @@ void URifle::endShooting() {
 		owner->getCrewController()->enableInputController();
 	}
 	mesh->SetVisibility(false);
+	//change turn if actionBar is 0
+	if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
 }
