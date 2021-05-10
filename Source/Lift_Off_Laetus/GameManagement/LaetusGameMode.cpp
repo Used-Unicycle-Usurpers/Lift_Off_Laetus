@@ -14,6 +14,7 @@
 #include "Camera/CameraActor.h"
 #include "Engine/Engine.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "LaetusGameInstance.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
@@ -42,7 +43,10 @@ void ALaetusGameMode::BeginPlay() {
 	hud = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 	hud->AddToViewport();
 
-	singleInput = true;
+	//Based on the mode selected in the main menu, support keyboard only or keyboard 
+	//for player one / gamepad for player two
+	ULaetusGameInstance* gameInstance = Cast<ULaetusGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	singleInput = gameInstance->singleInput;
 
 	inputController = Cast<AInputController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
 
