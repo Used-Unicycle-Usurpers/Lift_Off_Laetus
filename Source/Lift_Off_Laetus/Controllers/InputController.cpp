@@ -141,6 +141,7 @@ void AInputController::setTurnState(enum FTurnState newState) {
 
 void AInputController::setStateToMovement() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN MOVEMENT MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -152,17 +153,21 @@ void AInputController::setStateToMovement() {
 
 void AInputController::setStateToRifleAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN RIFLE ATTACK MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
+		const FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
+		gameMode->getGameGrid()->colorGridDirectionsInRange(origin, 5);
 		setTurnState(RifleAttack);
 	}
 }
 
 void AInputController::setStateToGrenadeAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN GRENADE ATTACK MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 
 	//Start by focusing on current tile. WASD will now move highlighted so player can select 
 	//where to throw the grenade.
@@ -170,11 +175,13 @@ void AInputController::setStateToGrenadeAttack() {
 		currentlySelectedTile = controlledCrew->getCurrentCrewMember()->getGridSpace();
 		moveCameraSmoothly(currentlySelectedTile);
 		setTurnState(GrenadeAttack);
+		gameMode->getGameGrid()->colorGridInRange(currentlySelectedTile->getGridLocation(), 2);
 	}
 }
 
 void AInputController::setStateToHarvest() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN HARVEST MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -186,6 +193,7 @@ void AInputController::setStateToHarvest() {
 
 void AInputController::setStateToIdle() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN IDLE MODE"));
+	gameMode->getGameGrid()->clearGridOverlay();
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -207,15 +215,27 @@ void AInputController::handleUp() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Camera state"));
 		break;
 	case Movement:
-		controlledCrew->moveSelectedCrewMember(FVector2D(-1, 0));
+		//Price for movement is 1, if we are pushing core its 2
+		//see if we are pushing core
+		price = 1;
+		if (controlledCrew->pushingCore(FVector2D(-1, 0))) { price = 2; }
+
+		if (gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(FVector2D(-1, 0));
+		}
 		break;
 	case RifleAttack:
-		currentTeamController->shoot(FVector2D(-1, 0));
+		//Price for rifle attack is 3 
+		price = 3;
+		if (gameMode->checkLegalMove(price)) {
+				currentTeamController->shoot(FVector2D(-1, 0));
+		}
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Up);
 		break;
 	case Harvest:
+		// For now I was thinking we set the price of harvest to 2
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Harvest state"));
 		break;
 	default:
@@ -235,10 +255,21 @@ void AInputController::handleLeft() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Camera state"));
 		break;
 	case Movement:
-		controlledCrew->moveSelectedCrewMember(FVector2D(0, -1));
+		//Price for movement is 1, if we are pushing core its 2
+		//see if we are pushing core
+		price = 1;
+		if (controlledCrew->pushingCore(FVector2D(0, -1))) { price = 2; }
+		
+		if (gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(FVector2D(0, -1));
+		}
 		break;
 	case RifleAttack:
-		currentTeamController->shoot(FVector2D(0, -1));
+		//Price for rifle attack is 3 
+		price = 3;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->shoot(FVector2D(0, -1));
+		}
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Left);
@@ -263,10 +294,22 @@ void AInputController::handleRight() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Camera state"));
 		break;
 	case Movement:
-		controlledCrew->moveSelectedCrewMember(FVector2D(0, 1));
+		//Price for movement is 1, if we are pushing core its 2
+		//see if we are pushing core
+		price = 1;
+		if (controlledCrew->pushingCore(FVector2D(0, 1))) { price = 2; }
+		
+			if (gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(FVector2D(0, 1));
+		}
 		break;
 	case RifleAttack:
-		currentTeamController->shoot(FVector2D(0, 1));
+		//Price for rifle attack is 3 
+		price = 3;
+		
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->shoot(FVector2D(0, 1));
+		}
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Right);
@@ -291,10 +334,21 @@ void AInputController::handleDown() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Camera state"));
 		break;
 	case Movement:
-		controlledCrew->moveSelectedCrewMember(FVector2D(1, 0));
+		//Price for movement is 1, if we are pushing core its 2
+		//see if we are pushing core
+		price = 1;
+		if (controlledCrew->pushingCore(FVector2D(1, 0))) { price = 2; }
+		
+		if (gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(FVector2D(1, 0));
+		}
 		break;
 	case RifleAttack:
-		currentTeamController->shoot(FVector2D(1, 0));
+		//Price for rifle attack is 3 
+		price = 3;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->shoot(FVector2D(1, 0));
+		}
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Down);
@@ -325,7 +379,11 @@ void AInputController::handleConfirm() {
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in RifleAttack state"));
 		break;
 	case GrenadeAttack:
-		currentTeamController->launch(currentlySelectedTile->getGridLocation());
+		//Price for grenade attack is 5
+		price = 5;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->launch(currentlySelectedTile->getGridLocation());
+		}
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in Harvest state"));
@@ -361,16 +419,20 @@ void AInputController::moveCameraToTile(Direction direction) {
 	default:
 		return;
 	}
+
 	FVector2D currentLocation = currentlySelectedTile->getGridLocation();
 	FVector2D newLocation = currentLocation + directionVector;
+	FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
+	if (grid->areTilesWithinRange(origin, newLocation, 2)) {
 
-	AGridSpace* newSpace = grid->getTile(newLocation);
-	if (newSpace) {
-		currentlySelectedTile->SetToRegularMaterial();
-		currentlySelectedTile = newSpace;
-		currentlySelectedTile->SetToGreen();
+		AGridSpace* newSpace = grid->getTile(newLocation);
+		if (newSpace) {
+			currentlySelectedTile->RestoreOverlayColor();
+			currentlySelectedTile = newSpace;
+			currentlySelectedTile->SetOverlayToGreen(true);
 
-		moveCameraSmoothly(currentlySelectedTile);
+			moveCameraSmoothly(currentlySelectedTile);
+		}
 	}
 }
 
