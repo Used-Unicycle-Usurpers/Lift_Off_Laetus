@@ -90,6 +90,7 @@ void ULauncher::launch() {
 		UGameplayStatics::PredictProjectilePath(GetWorld(), p, r);
 
 		//Spawn the grenade and pass the path for it to traverse.
+		grid->clearGridOverlay();
 		AGrenade* g = GetWorld()->SpawnActor<AGrenade>(mesh->GetComponentLocation(), FRotator(0, 0, 0));
 		g->path = r.PathData;
 		g->targetLocation = end;

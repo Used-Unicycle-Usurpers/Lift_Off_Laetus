@@ -134,6 +134,7 @@ void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
 	throwMontage = data->throwMontage;
 	throwMontageDelay = data->throwMontageDelay;
 	shootRifleMontage = data->shootRifleMontage;
+	takeDamageMontage = data->takeDamageMontage;
 	turnLeftMontage = data->turnLeftMontage;
 	turnRightMontage = data->turnRightMontage;
 	turnAroundMontage = data->turnAroundMontage;
@@ -351,7 +352,7 @@ void ACrewMember::takeDamage(int32 damageTaken) {
 		//destroy actor?
 		UE_LOG(LogTemp, Warning, TEXT("Player died!"));
 	}
-	float montageLength = playStumbleMontage();
+	float montageLength = playTakeDamageMontage();
 	FTimerHandle f;
 	GetWorld()->GetTimerManager().SetTimer(f, this, &ACrewMember::die, montageLength);
 }
@@ -421,7 +422,14 @@ float ACrewMember::playShootRifleMontage() {
 }
 
 /**
- * Play the stumble montage (used when taking damage).
+ * Play the take damage montage.
+ */
+float ACrewMember::playTakeDamageMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(takeDamageMontage);
+}
+
+/**
+ * Play the stumble montage.
  */
 float ACrewMember::playStumbleMontage() {
 	return skeletalMesh->GetAnimInstance()->Montage_Play(stumbleMontage);

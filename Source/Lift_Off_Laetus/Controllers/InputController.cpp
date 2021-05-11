@@ -494,11 +494,7 @@ void AInputController::moveCameraToCrewMember() {
 		FViewTargetTransitionParams p;
 		p.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
 		p.BlendTime = 1.f;
-		disable();
 		cameraManager->SetViewTarget(current, p);
-
-		FTimerHandle timer;
-		GetWorld()->GetTimerManager().SetTimer(timer, this, &AInputController::enable, 0.1f);
 	}
 }
 
@@ -511,9 +507,5 @@ void AInputController::moveCameraSmoothly(AActor* target) {
 	FViewTargetTransitionParams p;
 	p.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
 	p.BlendTime = 0.1f;
-	disable();
 	cameraManager->SetViewTarget(target, p);
-
-	FTimerHandle timer;
-	GetWorld()->GetTimerManager().SetTimer(timer, this, &AInputController::enable, 0.1f);
 }

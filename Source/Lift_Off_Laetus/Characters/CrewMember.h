@@ -93,7 +93,12 @@ public:
 	float playShootRifleMontage();
 
 	/**
-	 * Play the stumble montage (used when taking damage).
+	 * Play the take damage montage.
+	 */
+	float playTakeDamageMontage();
+
+	/**
+	 * Play the stumble montage.
 	 */
 	float playStumbleMontage();
 
@@ -266,6 +271,9 @@ private:
 	//Animation montages to play for using weapons
 	class UAnimMontage* throwMontage;
 	class UAnimMontage* shootRifleMontage;
+
+	//Animation montage for taking damage
+	class UAnimMontage* takeDamageMontage;
 
 	//Animations montages for rotating
 	class UAnimMontage* turnLeftMontage;
