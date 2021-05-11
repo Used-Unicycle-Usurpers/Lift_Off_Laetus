@@ -86,6 +86,8 @@ void ALaetusGameMode::BeginPlay() {
 
 //Begin new turn
 void ALaetusGameMode::ChangeTurn() {
+	grid->clearGridOverlay();
+
 	//inform player we are switching turns 
 	if (firstChangeTurn) {
 		firstChangeTurn = false;

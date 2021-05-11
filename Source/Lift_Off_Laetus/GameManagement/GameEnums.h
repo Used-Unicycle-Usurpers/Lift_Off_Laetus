@@ -45,3 +45,18 @@ enum Team {
 	Red,
 	Blue
 };
+
+static FVector2D DirectionToUnitVector(Direction direction) {
+	switch (direction){
+	case Left:
+		return FVector2D(0, -1);
+	case Right:
+		return FVector2D(0, 1);
+	case Up:
+		return FVector2D(-1, 0);
+	case Down:
+		return FVector2D(1, 0);
+	default:
+		return FVector2D(0, 0);
+	}
+}

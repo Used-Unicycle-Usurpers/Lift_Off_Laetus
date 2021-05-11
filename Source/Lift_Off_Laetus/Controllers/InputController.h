@@ -105,6 +105,8 @@ public:
 	//A reference to the game mode for quick access.
 	class ALaetusGameMode* gameMode;
 
+	class AGrid* grid;
+
 	/**
 	 * Move camera to the next AGridSpace in the specified direction.
 	 */

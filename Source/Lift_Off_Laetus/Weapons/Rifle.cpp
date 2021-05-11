@@ -77,7 +77,7 @@ void URifle::shoot(){
 
 		AGridSpace* space = grid->getTile(location);
 		if (space) {
-			space->SetToRedOnTimer();
+			//space->SetToRedOnTimer();
 			AActor* occupant = space->getOccupant();
 			if (occupant) {
 				ACrewMember* crewMember = Cast<ACrewMember>(occupant);

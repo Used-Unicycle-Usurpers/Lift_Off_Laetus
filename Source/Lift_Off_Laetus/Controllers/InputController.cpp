@@ -18,6 +18,9 @@ AInputController::AInputController() {
 void AInputController::BeginPlay() {
 	Super::BeginPlay();
 	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (gameMode) {
+		grid = gameMode->getGameGrid();
+	}
 }
 
 void AInputController::SetupInputComponent() {
@@ -72,6 +75,7 @@ void AInputController::changeTurn(int newTeam) {
 			controlledCrew = currentTeamController->getControlledCrew();
 		}
 	}
+	setTurnState(Idle);
 }
 
 /**
@@ -93,6 +97,10 @@ void AInputController::disable() {
  * the other player.
  */
 void AInputController::endTurn() {
+	if (grid) {
+		grid->clearGridOverlay();
+	}
+
 	if (currentlySelectedTile) {
 		currentlySelectedTile->SetToRegularMaterial();
 	}
@@ -127,7 +135,8 @@ void AInputController::toggleCrewMember() {
 	gameMode->callHUDSetPlayer(controlledCrew->getSelectedCrewMemberIndex());
 
 	//Now move the camera to focus on this crew member.
-	moveCameraToCrewMember();
+	//moveCameraToCrewMember();
+	setStateToIdle();
 }
 
 /**
@@ -141,7 +150,9 @@ void AInputController::setTurnState(enum FTurnState newState) {
 
 void AInputController::setStateToMovement() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN MOVEMENT MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -153,7 +164,9 @@ void AInputController::setStateToMovement() {
 
 void AInputController::setStateToRifleAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN RIFLE ATTACK MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -167,7 +180,9 @@ void AInputController::setStateToRifleAttack() {
 
 void AInputController::setStateToGrenadeAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN GRENADE ATTACK MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
 
 	//Start by focusing on current tile. WASD will now move highlighted so player can select 
 	//where to throw the grenade.
@@ -181,7 +196,10 @@ void AInputController::setStateToGrenadeAttack() {
 
 void AInputController::setStateToHarvest() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN HARVEST MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
+
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -193,7 +211,10 @@ void AInputController::setStateToHarvest() {
 
 void AInputController::setStateToIdle() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN IDLE MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
+
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -207,6 +228,9 @@ void AInputController::setStateToIdle() {
  * Handle the "Up" key based on the current turn state this player is in.
  */
 void AInputController::handleUp() {
+	ACrewMember* current;
+	bool canMove;
+	FVector2D direction;
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Idle state"));
@@ -218,10 +242,13 @@ void AInputController::handleUp() {
 		//Price for movement is 1, if we are pushing core its 2
 		//see if we are pushing core
 		price = 1;
-		if (controlledCrew->pushingCore(FVector2D(-1, 0))) { price = 2; }
+		direction = DirectionToUnitVector(Direction::Up);
+		if (controlledCrew->pushingCore(direction)) { price = 2; }
 
-		if (gameMode->checkLegalMove(price)) {
-			controlledCrew->moveSelectedCrewMember(FVector2D(-1, 0));
+		current = controlledCrew->getCurrentCrewMember();
+		canMove = grid->canMove(current->getGridSpace(), direction);
+		if (canMove && gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(direction);
 		}
 		break;
 	case RifleAttack:
@@ -247,6 +274,9 @@ void AInputController::handleUp() {
  * Handle the "Left" input based on the current turn state this player is in.
  */
 void AInputController::handleLeft() {
+	ACrewMember* current;
+	bool canMove;
+	FVector2D direction;
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Idle state"));
@@ -258,10 +288,13 @@ void AInputController::handleLeft() {
 		//Price for movement is 1, if we are pushing core its 2
 		//see if we are pushing core
 		price = 1;
-		if (controlledCrew->pushingCore(FVector2D(0, -1))) { price = 2; }
-		
-		if (gameMode->checkLegalMove(price)) {
-			controlledCrew->moveSelectedCrewMember(FVector2D(0, -1));
+		direction = DirectionToUnitVector(Direction::Left);
+		if (controlledCrew->pushingCore(direction)) { price = 2; }
+
+		current = controlledCrew->getCurrentCrewMember();
+		canMove = grid->canMove(current->getGridSpace(), direction);
+		if (canMove && gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(direction);
 		}
 		break;
 	case RifleAttack:
@@ -286,6 +319,9 @@ void AInputController::handleLeft() {
  * Handle the "Right" input based on the current turn state this player is in.
  */
 void AInputController::handleRight() {
+	ACrewMember* current;
+	bool canMove;
+	FVector2D direction;
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Idle state"));
@@ -297,10 +333,13 @@ void AInputController::handleRight() {
 		//Price for movement is 1, if we are pushing core its 2
 		//see if we are pushing core
 		price = 1;
-		if (controlledCrew->pushingCore(FVector2D(0, 1))) { price = 2; }
+		direction = DirectionToUnitVector(Direction::Right);
+		if (controlledCrew->pushingCore(direction)) { price = 2; }
 		
-			if (gameMode->checkLegalMove(price)) {
-			controlledCrew->moveSelectedCrewMember(FVector2D(0, 1));
+		current = controlledCrew->getCurrentCrewMember();
+		canMove = grid->canMove(current->getGridSpace(), direction);
+		if (canMove && gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(direction);
 		}
 		break;
 	case RifleAttack:
@@ -326,6 +365,9 @@ void AInputController::handleRight() {
  * Handle the "Down" input based on the current turn state this player is in.
  */
 void AInputController::handleDown() {
+	ACrewMember* current;
+	bool canMove;
+	FVector2D direction;
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Idle state"));
@@ -337,10 +379,13 @@ void AInputController::handleDown() {
 		//Price for movement is 1, if we are pushing core its 2
 		//see if we are pushing core
 		price = 1;
-		if (controlledCrew->pushingCore(FVector2D(1, 0))) { price = 2; }
+		direction = DirectionToUnitVector(Direction::Down);
+		if (controlledCrew->pushingCore(direction)) { price = 2; }
 		
-		if (gameMode->checkLegalMove(price)) {
-			controlledCrew->moveSelectedCrewMember(FVector2D(1, 0));
+		current = controlledCrew->getCurrentCrewMember();
+		canMove = grid->canMove(current->getGridSpace(), direction);
+		if (canMove && gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(direction);
 		}
 		break;
 	case RifleAttack:
@@ -400,8 +445,6 @@ void AInputController::handleConfirm() {
  *     the next tile to move the camera to.
  */
 void AInputController::moveCameraToTile(Direction direction) {
-	AGrid* grid = gameMode->getGameGrid();
-
 	FVector2D directionVector = FVector2D(0, 0);
 	switch (direction) {
 	case Up:
@@ -445,5 +488,9 @@ void AInputController::moveCameraSmoothly(AActor* target) {
 	FViewTargetTransitionParams p;
 	p.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
 	p.BlendTime = 0.1f;
+	disable();
 	cameraManager->SetViewTarget(target, p);
+
+	FTimerHandle timer;
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &AInputController::enable, 0.1f);
 }
