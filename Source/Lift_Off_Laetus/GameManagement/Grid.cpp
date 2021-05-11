@@ -369,16 +369,16 @@ FVector2D AGrid::getUnitDifference(AGridSpace* source, AGridSpace* dest) {
 }
 
 AGridSpace* AGrid::getValidRespawnSpace(ACrewMember* crewMember) {
-	int column = numSteps;
+	int column = 0;
 	if (crewMember->getTeam() == 1) {
-		column = numColumns - numSteps - 1;
+		column = numColumns - 1;
 	}
 
 	bool spaceFound = false;
 	while (!spaceFound) {
 		int randRow = FMath::RandRange(0, numRows - 1);
 		AGridSpace* space = getTile(FVector2D(randRow, column));
-		if (!space->isOccupied()) {
+		if (space && !space->isOccupied()) {
 			spaceFound = true;
 			return space;
 		}

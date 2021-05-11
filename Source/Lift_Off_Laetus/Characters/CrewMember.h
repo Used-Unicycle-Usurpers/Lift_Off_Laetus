@@ -98,6 +98,11 @@ public:
 	float playTakeDamageMontage();
 
 	/**
+	 * Play the death montage.
+	 */
+	float playDeathMontage();
+
+	/**
 	 * Play the stumble montage.
 	 */
 	float playStumbleMontage();
@@ -210,10 +215,17 @@ private:
 	void incrementMoveForward();
 
 	/**
-	 * Called when this ACrewMember has died (i.e. health <= 0). Finds a vald
-	 * respawn space and moves them there.
+	 * Called when this ACrewMember has died (i.e. health <= 0). Plays
+	 * the death montage and calls respawn once montage has ended.
 	 */
 	void die();
+
+	/**
+	 * Find a valid respawn point, and move this ACrewMember there. Also resets
+	 * the corresponding AInputController's currentlySelectedTile to this new
+	 * location.
+	 */
+	void respawn();
 
 	/**
 	 * Rotate this ACrewMember to face upward i.e. away from the screen.
@@ -274,6 +286,9 @@ private:
 
 	//Animation montage for taking damage
 	class UAnimMontage* takeDamageMontage;
+
+	//Animation montage for dying.
+	class UAnimMontage* deathMontage;
 
 	//Animations montages for rotating
 	class UAnimMontage* turnLeftMontage;

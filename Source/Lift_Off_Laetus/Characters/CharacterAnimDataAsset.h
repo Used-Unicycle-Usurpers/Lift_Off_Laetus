@@ -55,6 +55,10 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* takeDamageMontage;
 
+	//Animation montage for taking damage
+	UPROPERTY(EditAnywhere)
+		class UAnimMontage* deathMontage;
+
 	//Animation montage for pushing a core fragment
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* pushMontage;
