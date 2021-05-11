@@ -16,7 +16,7 @@
 #define ROCK 6
 #define SHRUB 7
 
-class ACrew;
+//class ACrew;
 
 /**
  * Struct representing a single row of AGridSpaces in an FGrid.
