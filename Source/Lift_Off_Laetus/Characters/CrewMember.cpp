@@ -14,6 +14,7 @@
 #include "Components/TimelineComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
 #include "CharacterAnimDataAsset.h"
 
 //Data assets with all mesh, material, and animation information
@@ -135,6 +136,7 @@ void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
 	throwMontageDelay = data->throwMontageDelay;
 	shootRifleMontage = data->shootRifleMontage;
 	takeDamageMontage = data->takeDamageMontage;
+	deathMontage = data->deathMontage;
 	turnLeftMontage = data->turnLeftMontage;
 	turnRightMontage = data->turnRightMontage;
 	turnAroundMontage = data->turnAroundMontage;
@@ -354,17 +356,30 @@ void ACrewMember::takeDamage(int32 damageTaken) {
 	}
 	float montageLength = playTakeDamageMontage();
 	FTimerHandle f;
-	GetWorld()->GetTimerManager().SetTimer(f, this, &ACrewMember::die, montageLength);
+	GetWorld()->GetTimerManager().SetTimer(f, this, &ACrewMember::die, montageLength, false);
 }
 
 /**
- * Called when this ACrewMember has died (i.e. health <= 0). Finds a vald
- * respawn space and moves them there.
+ * Called when this ACrewMember has died (i.e. health <= 0). Plays 
+ * the death montage and calls respawn once montage has ended.
  */
 void ACrewMember::die() {
+	float montageLength = playDeathMontage();
+
+	FTimerHandle timerParams;
+	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACrewMember::respawn, montageLength, false);
+}
+
+/**
+ * Find a valid respawn point, and move this ACrewMember there. Also resets 
+ * the corresponding AInputController's currentlySelectedTile to this new 
+ * location.
+ */
+void ACrewMember::respawn() {
 	AGridSpace* newSpace = grid->getValidRespawnSpace(this);
 	SetActorLocation(newSpace->GetActorLocation() + FVector(0, 0, 20));
 	setGridSpace(newSpace);
+	getCrewController()->getInputController()->currentlySelectedTile = gridSpace;
 	health = 3;
 }
 
@@ -426,6 +441,13 @@ float ACrewMember::playShootRifleMontage() {
  */
 float ACrewMember::playTakeDamageMontage() {
 	return skeletalMesh->GetAnimInstance()->Montage_Play(takeDamageMontage);
+}
+
+/**
+ * Play the death montage.
+ */
+float ACrewMember::playDeathMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(deathMontage);
 }
 
 /**

@@ -31,6 +31,7 @@ int ULauncher::fire(FVector2D target) {
 	directionToFaceEnum = getDirectionToThrow(target);
 	float montageLength = owner->rotateWithAnimation(directionToFaceEnum);
 	targetSpace = target;
+	grid->clearGridOverlay();
 
 	if (montageLength > 0) {
 		FTimerHandle timerParams;
