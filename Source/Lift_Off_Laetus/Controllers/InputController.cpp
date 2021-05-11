@@ -18,6 +18,9 @@ AInputController::AInputController() {
 void AInputController::BeginPlay() {
 	Super::BeginPlay();
 	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (gameMode) {
+		grid = gameMode->getGameGrid();
+	}
 }
 
 void AInputController::SetupInputComponent() {
@@ -72,6 +75,7 @@ void AInputController::changeTurn(int newTeam) {
 			controlledCrew = currentTeamController->getControlledCrew();
 		}
 	}
+	setTurnState(Idle);
 }
 
 /**
@@ -93,6 +97,10 @@ void AInputController::disable() {
  * the other player.
  */
 void AInputController::endTurn() {
+	if (grid) {
+		grid->clearGridOverlay();
+	}
+
 	if (currentlySelectedTile) {
 		currentlySelectedTile->SetToRegularMaterial();
 	}
@@ -127,7 +135,8 @@ void AInputController::toggleCrewMember() {
 	gameMode->callHUDSetPlayer(controlledCrew->getSelectedCrewMemberIndex());
 
 	//Now move the camera to focus on this crew member.
-	moveCameraToCrewMember();
+	//moveCameraToCrewMember();
+	setStateToIdle();
 }
 
 /**
@@ -141,7 +150,9 @@ void AInputController::setTurnState(enum FTurnState newState) {
 
 void AInputController::setStateToMovement() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN MOVEMENT MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -153,7 +164,9 @@ void AInputController::setStateToMovement() {
 
 void AInputController::setStateToRifleAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN RIFLE ATTACK MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -167,7 +180,9 @@ void AInputController::setStateToRifleAttack() {
 
 void AInputController::setStateToGrenadeAttack() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN GRENADE ATTACK MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
 
 	//Start by focusing on current tile. WASD will now move highlighted so player can select 
 	//where to throw the grenade.
@@ -181,7 +196,10 @@ void AInputController::setStateToGrenadeAttack() {
 
 void AInputController::setStateToHarvest() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN HARVEST MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
+
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -193,7 +211,10 @@ void AInputController::setStateToHarvest() {
 
 void AInputController::setStateToIdle() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN IDLE MODE"));
-	gameMode->getGameGrid()->clearGridOverlay();
+	if (grid) {
+		grid->clearGridOverlay();
+	}
+
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -225,7 +246,7 @@ void AInputController::handleUp() {
 		if (controlledCrew->pushingCore(direction)) { price = 2; }
 
 		current = controlledCrew->getCurrentCrewMember();
-		canMove = gameMode->getGameGrid()->canMove(current->getGridSpace(), direction);
+		canMove = grid->canMove(current->getGridSpace(), direction);
 		if (canMove && gameMode->checkLegalMove(price)) {
 			controlledCrew->moveSelectedCrewMember(direction);
 		}
@@ -271,7 +292,7 @@ void AInputController::handleLeft() {
 		if (controlledCrew->pushingCore(direction)) { price = 2; }
 
 		current = controlledCrew->getCurrentCrewMember();
-		canMove = gameMode->getGameGrid()->canMove(current->getGridSpace(), direction);
+		canMove = grid->canMove(current->getGridSpace(), direction);
 		if (canMove && gameMode->checkLegalMove(price)) {
 			controlledCrew->moveSelectedCrewMember(direction);
 		}
@@ -316,7 +337,7 @@ void AInputController::handleRight() {
 		if (controlledCrew->pushingCore(direction)) { price = 2; }
 		
 		current = controlledCrew->getCurrentCrewMember();
-		canMove = gameMode->getGameGrid()->canMove(current->getGridSpace(), direction);
+		canMove = grid->canMove(current->getGridSpace(), direction);
 		if (canMove && gameMode->checkLegalMove(price)) {
 			controlledCrew->moveSelectedCrewMember(direction);
 		}
@@ -362,7 +383,7 @@ void AInputController::handleDown() {
 		if (controlledCrew->pushingCore(direction)) { price = 2; }
 		
 		current = controlledCrew->getCurrentCrewMember();
-		canMove = gameMode->getGameGrid()->canMove(current->getGridSpace(), direction);
+		canMove = grid->canMove(current->getGridSpace(), direction);
 		if (canMove && gameMode->checkLegalMove(price)) {
 			controlledCrew->moveSelectedCrewMember(direction);
 		}
@@ -424,8 +445,6 @@ void AInputController::handleConfirm() {
  *     the next tile to move the camera to.
  */
 void AInputController::moveCameraToTile(Direction direction) {
-	AGrid* grid = gameMode->getGameGrid();
-
 	FVector2D directionVector = FVector2D(0, 0);
 	switch (direction) {
 	case Up:
@@ -469,5 +488,9 @@ void AInputController::moveCameraSmoothly(AActor* target) {
 	FViewTargetTransitionParams p;
 	p.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
 	p.BlendTime = 0.1f;
+	disable();
 	cameraManager->SetViewTarget(target, p);
+
+	FTimerHandle timer;
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &AInputController::enable, 0.1f);
 }
