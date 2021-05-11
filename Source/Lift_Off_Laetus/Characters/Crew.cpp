@@ -9,6 +9,7 @@
 #include "../GameManagement/LaetusGameMode.h"
 #include "../GameManagement/Grid.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
 #include "Camera/CameraComponent.h"
 #include "../Characters/CoreFragment.h"
 
@@ -103,7 +104,7 @@ int ACrew::toggleSelectedCrewMember() {
 
 void ACrew::setSelectedCrewMember(int current) {
 	selectedCharacter = current;
-	controller->moveCameraToCrewMember();
+	controller->getInputController()->moveCameraToCrewMember();
 }
 
 /**
