@@ -47,4 +47,29 @@ public:
 	//Animation montage for push core fragment
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* pushMontage;
+
+	//Materials for character meshes
+	UPROPERTY(EditAnywhere)
+		class UMaterial* redTeamMainMaterial;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* blueTeamMainMaterial;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* redTeamArmorMaterial;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* blueTeamArmorMaterial;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* redGunBodyMaterial;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* redGunSightMaterial;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* blueGunBodyMaterial;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* blueGunSightMaterial;
 };

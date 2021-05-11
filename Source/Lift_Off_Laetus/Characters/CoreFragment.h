@@ -43,6 +43,8 @@ private:
 	class AGridSpace* targetLocation;
 	FVector newLocation;
 	FVector oldLocation;
+	int numIncrements;
+	int incrementsLeft;
 	FVector moveIncrement;
 	FTimerHandle moveTimerHandle;
 };

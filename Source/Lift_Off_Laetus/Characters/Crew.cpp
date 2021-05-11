@@ -28,7 +28,7 @@ void ACrew::BeginPlay() {
 }
 
 //Setup Crew Members 
-void ACrew::SetUp(int32 newTeam, AGrid* newGrid, ACrewController* newController) {
+void ACrew::SetUp(Team newTeam, AGrid* newGrid, ACrewController* newController) {
 	team = newTeam;
 	grid = newGrid;
 	setController(newController);
@@ -37,7 +37,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid, ACrewController* newController)
 	//Set to left side, facing right
 	int column = grid->getNumSteps();
 	FRotator rotation = FRotator(0, 270, 0);
-	if (team == 1) { // Team 1, so set to right side, facing left
+	if (team == Team::Blue) { // Team 1, so set to right side, facing left
 		column = grid->getNumColumns() - grid->getNumSteps() - 1;
 		rotation = FRotator(0, 90, 0);
 	}
@@ -50,7 +50,7 @@ void ACrew::SetUp(int32 newTeam, AGrid* newGrid, ACrewController* newController)
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(location + FVector(0.f, 0.f, 20.f), rotation, params);
 		
-		newMember->setMeshAnimData((FCharacter) i);
+		newMember->setMeshAnimData((FCharacter) i, newTeam);
 		newMember->setController(controller);
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);

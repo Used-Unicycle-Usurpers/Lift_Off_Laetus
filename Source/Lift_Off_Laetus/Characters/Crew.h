@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "../GameManagement/GameEnums.h"
 #include "Crew.generated.h"
 
 UCLASS()
@@ -15,7 +16,7 @@ public:
 	ACrew(); 
 	
 	//void SetTeam(int32 newTeam);
-	void SetUp(int32 newTeam, class AGrid* newGrid, class ACrewController* newController);
+	void SetUp(Team newTeam, class AGrid* newGrid, class ACrewController* newController);
 
 	//Action bar stuff 
 	int32 GetActionBarStatus();
@@ -27,7 +28,7 @@ public:
 	void setController(class ACrewController* newController);
 
 	//return if we are pushing a core piece 
-		bool pushingCore(FVector2D direction);
+	bool pushingCore(FVector2D direction);
 	
 protected:
 	// Called when the game starts or when spawned
@@ -76,7 +77,7 @@ private:
 	int32 cores;
 
 	//Team color, created for testing but we might want to keep it 
-	int32 team;
+	Team team;
 
 	//Reference the map grid
 	class AGrid* grid;

@@ -7,34 +7,8 @@
 #include "../Weapons/Rifle.h"
 #include "../Weapons/Launcher.h"
 #include "../PowerUps/PowerUpEffect.h"
+#include "../GameManagement/GameEnums.h"
 #include "CrewMember.generated.h"
-
-//Enum representing the four carnidal directions for player actions
-UENUM()
-enum Direction {
-	InvalidDirection = -1,
-	Left = 180,
-	Right = 0,
-	Up = 90,
-	Down = 270
-};
-
-//Enum representing the different possible of rotations animation 
-//an ACrewMember can do.
-UENUM()
-enum RotationAnim {
-	TurnLeft,
-	TurnRight,
-	TurnAround
-};
-
-UENUM()
-enum FCharacter {
-	Pavo = 0,
-	Lyra = 1,
-	Nembus = 2
-};
-
 
 UCLASS()
 class LIFT_OFF_LAETUS_API ACrewMember : public APawn {
@@ -80,12 +54,12 @@ public:
 	/**
 	 * Set this ACrewMember's team to the given team
 	 */
-	void SetTeam(int32 team);
+	void SetTeam(Team team);
 
 	/**
 	 * Return the team this ACrewMember is a part of.
 	 */
-	int getTeam();
+	Team getTeam();
 
 	/**
 	 * Set the AGridSpace this ACrewMember is currently standing on to the given
@@ -202,7 +176,7 @@ public:
 
 	bool needToRotate(FVector2D newDirection);
 
-	void setMeshAnimData(FCharacter character);
+	void setMeshAnimData(FCharacter character, Team playerTeam);
 
 	float throwMontageDelay;
 
@@ -236,7 +210,7 @@ private:
 	class PowerUpEffect* gunEffect;
 
 	//The team this CrewMember is on. 0 = Red team, 1 = blue team 
-	int32 team;
+	Team team;
 
 	//The rifle for shooting in a cardinal direction
 	class URifle* rifle;
