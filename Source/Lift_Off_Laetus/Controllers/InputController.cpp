@@ -446,24 +446,6 @@ void AInputController::handleConfirm() {
  *     the next tile to move the camera to.
  */
 void AInputController::moveCameraToTile(Direction direction) {
-	/*FVector2D directionVector = FVector2D(0, 0);
-	switch (direction) {
-	case Up:
-		directionVector = FVector2D(-1, 0);
-		break;
-	case Left:
-		directionVector = FVector2D(0, -1);
-		break;
-	case Right:
-		directionVector = FVector2D(0, 1);
-		break;
-	case Down:
-		directionVector = FVector2D(1, 0);
-		break;
-	default:
-		return;
-	}*/
-
 	//Calculate the coordinate of the AGridSpace being moved to
 	FVector2D directionVector = DirectionToUnitVector(direction);
 	FVector2D currentLocation = currentlySelectedTile->getGridLocation();
