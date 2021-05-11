@@ -435,3 +435,18 @@ bool AGrid::areTilesWithinRange(FVector2D loc1, FVector2D loc2, int range) {
 	int dY = FMath::Abs(loc1.Y - loc2.Y);
 	return (dX <= range && dY <= range);
 }
+
+bool AGrid::canMove(AGridSpace* location, FVector2D direction) {
+	FVector2D target = location->getGridLocation() + direction;
+	AGridSpace* dest = getTile(target);
+	if (dest) {
+		if (dest->containsFragment()) {
+			FVector2D fragTarget = target + direction;
+			return !getTile(fragTarget)->isOccupied();
+		}else {
+			return !getTile(target)->isOccupied();
+		}
+	}else {
+		return false;
+	}
+}

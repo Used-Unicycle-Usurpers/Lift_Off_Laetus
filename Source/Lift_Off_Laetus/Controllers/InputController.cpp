@@ -207,6 +207,9 @@ void AInputController::setStateToIdle() {
  * Handle the "Up" key based on the current turn state this player is in.
  */
 void AInputController::handleUp() {
+	ACrewMember* current;
+	bool canMove;
+	FVector2D direction;
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Idle state"));
@@ -218,10 +221,13 @@ void AInputController::handleUp() {
 		//Price for movement is 1, if we are pushing core its 2
 		//see if we are pushing core
 		price = 1;
-		if (controlledCrew->pushingCore(FVector2D(-1, 0))) { price = 2; }
+		direction = DirectionToUnitVector(Direction::Up);
+		if (controlledCrew->pushingCore(direction)) { price = 2; }
 
-		if (gameMode->checkLegalMove(price)) {
-			controlledCrew->moveSelectedCrewMember(FVector2D(-1, 0));
+		current = controlledCrew->getCurrentCrewMember();
+		canMove = gameMode->getGameGrid()->canMove(current->getGridSpace(), direction);
+		if (canMove && gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(direction);
 		}
 		break;
 	case RifleAttack:
@@ -247,6 +253,9 @@ void AInputController::handleUp() {
  * Handle the "Left" input based on the current turn state this player is in.
  */
 void AInputController::handleLeft() {
+	ACrewMember* current;
+	bool canMove;
+	FVector2D direction;
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Idle state"));
@@ -258,10 +267,13 @@ void AInputController::handleLeft() {
 		//Price for movement is 1, if we are pushing core its 2
 		//see if we are pushing core
 		price = 1;
-		if (controlledCrew->pushingCore(FVector2D(0, -1))) { price = 2; }
-		
-		if (gameMode->checkLegalMove(price)) {
-			controlledCrew->moveSelectedCrewMember(FVector2D(0, -1));
+		direction = DirectionToUnitVector(Direction::Left);
+		if (controlledCrew->pushingCore(direction)) { price = 2; }
+
+		current = controlledCrew->getCurrentCrewMember();
+		canMove = gameMode->getGameGrid()->canMove(current->getGridSpace(), direction);
+		if (canMove && gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(direction);
 		}
 		break;
 	case RifleAttack:
@@ -286,6 +298,9 @@ void AInputController::handleLeft() {
  * Handle the "Right" input based on the current turn state this player is in.
  */
 void AInputController::handleRight() {
+	ACrewMember* current;
+	bool canMove;
+	FVector2D direction;
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Idle state"));
@@ -297,10 +312,13 @@ void AInputController::handleRight() {
 		//Price for movement is 1, if we are pushing core its 2
 		//see if we are pushing core
 		price = 1;
-		if (controlledCrew->pushingCore(FVector2D(0, 1))) { price = 2; }
+		direction = DirectionToUnitVector(Direction::Right);
+		if (controlledCrew->pushingCore(direction)) { price = 2; }
 		
-			if (gameMode->checkLegalMove(price)) {
-			controlledCrew->moveSelectedCrewMember(FVector2D(0, 1));
+		current = controlledCrew->getCurrentCrewMember();
+		canMove = gameMode->getGameGrid()->canMove(current->getGridSpace(), direction);
+		if (canMove && gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(direction);
 		}
 		break;
 	case RifleAttack:
@@ -326,6 +344,9 @@ void AInputController::handleRight() {
  * Handle the "Down" input based on the current turn state this player is in.
  */
 void AInputController::handleDown() {
+	ACrewMember* current;
+	bool canMove;
+	FVector2D direction;
 	switch (currentTurnState) {
 	case Idle:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Idle state"));
@@ -337,10 +358,13 @@ void AInputController::handleDown() {
 		//Price for movement is 1, if we are pushing core its 2
 		//see if we are pushing core
 		price = 1;
-		if (controlledCrew->pushingCore(FVector2D(1, 0))) { price = 2; }
+		direction = DirectionToUnitVector(Direction::Down);
+		if (controlledCrew->pushingCore(direction)) { price = 2; }
 		
-		if (gameMode->checkLegalMove(price)) {
-			controlledCrew->moveSelectedCrewMember(FVector2D(1, 0));
+		current = controlledCrew->getCurrentCrewMember();
+		canMove = gameMode->getGameGrid()->canMove(current->getGridSpace(), direction);
+		if (canMove && gameMode->checkLegalMove(price)) {
+			controlledCrew->moveSelectedCrewMember(direction);
 		}
 		break;
 	case RifleAttack:

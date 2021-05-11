@@ -92,6 +92,8 @@ public:
 
 	bool areTilesWithinRange(FVector2D loc1, FVector2D loc2, int range);
 
+	bool canMove(AGridSpace* location, FVector2D direction);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
