@@ -37,6 +37,7 @@ void AInputController::SetupInputComponent() {
 	InputComponent->BindAction("SetToRifleAttack", IE_Pressed, this, &AInputController::setStateToRifleAttack);
 	InputComponent->BindAction("SetToGrenadeAttack", IE_Pressed, this, &AInputController::setStateToGrenadeAttack);
 	InputComponent->BindAction("SetToHarvest", IE_Pressed, this, &AInputController::setStateToHarvest);
+	InputComponent->BindAction("SetToPunchAttack", IE_Pressed, this, &AInputController::setStateToPunchAttack);
 
 	PlayerCameraManagerClass = PlayerCameraManager->GetClass();
 }
@@ -198,7 +199,7 @@ void AInputController::setStateToRifleAttack() {
 }
 
 /**
- * Set the current turn state to Movement, so input will be interpreted
+ * Set the current turn state to GrenadeAttack, so input will be interpreted
  * in the context of selecting a tile to throw a grenade to.
  */
 void AInputController::setStateToGrenadeAttack() {
@@ -214,6 +215,26 @@ void AInputController::setStateToGrenadeAttack() {
 		moveCameraSmoothly(currentlySelectedTile);
 		setTurnState(GrenadeAttack);
 		gameMode->getGameGrid()->colorGridInRange(currentlySelectedTile->getGridLocation(), 2);
+	}
+}
+
+/**
+ * Set the current turn state to PunchAttack, so input will be interpreted
+ * in the context of punching an ACrewMember in an adjacent AGridSpace.
+ */
+void AInputController::setStateToPunchAttack() {
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN PUNCH ATTACK MODE"));
+	if (grid) {
+		grid->clearGridOverlay();
+	}
+	if (controlledCrew) {
+		if (currentlySelectedTile) {
+			currentlySelectedTile->SetToRegularMaterial();
+		}
+		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
+		const FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
+		gameMode->getGameGrid()->colorGridDirectionsInRange(origin, 1);
+		setTurnState(PunchAttack);
 	}
 }
 
@@ -279,6 +300,12 @@ void AInputController::handleUp() {
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Up);
 		break;
+	case PunchAttack:
+		price = 2;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->punch(DirectionToUnitVector(Direction::Up));
+		}
+		break;
 	case Harvest:
 		// For now I was thinking we set the price of harvest to 2
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing up in Harvest state"));
@@ -311,6 +338,13 @@ void AInputController::handleLeft() {
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Left);
+		break;
+	case PunchAttack:
+		price = 2;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->punch(DirectionToUnitVector(Direction::Left));
+		}
+		break;
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing left in Harvest state"));
@@ -345,6 +379,13 @@ void AInputController::handleRight() {
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Right);
 		break;
+	case PunchAttack:
+		price = 2;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->punch(DirectionToUnitVector(Direction::Right));
+		}
+		break;
+		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing right in Harvest state"));
 		break;
@@ -376,6 +417,13 @@ void AInputController::handleDown() {
 		break;
 	case GrenadeAttack:
 		moveCameraToTile(Direction::Down);
+		break;
+	case PunchAttack:
+		price = 2;
+		if (gameMode->checkLegalMove(price)) {
+			currentTeamController->punch(DirectionToUnitVector(Direction::Down));
+		}
+		break;
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing down in Harvest state"));

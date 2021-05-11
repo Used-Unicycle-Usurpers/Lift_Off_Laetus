@@ -36,16 +36,6 @@ struct FsetHUDMessageParams {
 		int32 message;
 };
 
-
-enum FTurnState {
-	Idle,
-	CameraMovement,
-	Movement,
-	RifleAttack,
-	GrenadeAttack,
-	Harvest
-};
-
 /**
  * 
  */

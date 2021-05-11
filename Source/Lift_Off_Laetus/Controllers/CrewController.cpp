@@ -60,21 +60,21 @@ void ACrewController::disableInputController() {
 /**
  * Have the currently selected crew member shoot their rifle in the given direction.
  *
- * @param direction the carindal direction for the currently selected ACrewMember
+ * @param direction the cardinal direction for the currently selected ACrewMember
  *     to fire their rifle towards.
  */
 void ACrewController::shoot(FVector2D direction) {
 	if (controlledCrew) {
 		controlledCrew->getCurrentCrewMember()->Shoot(direction, true);
 	}else {
-		UE_LOG(LogTemp, Warning, TEXT("Tried to shoot rifle, but controlled Crew pawn was null for controller %s"), *GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Tried to shoot rifle, but controlledCrew pawn was null for controller %s"), *GetName());
 	}
 }
 
 /**
  * Have the currently selected crew member launch a grenade in the given direction.
  *
- * @param direction the carindal direction for the currently selected ACrewMember
+ * @param direction the cardinal direction for the currently selected ACrewMember
  *     to launch a grenade towards.
  */
 void ACrewController::launch(FVector2D target) {
@@ -82,7 +82,22 @@ void ACrewController::launch(FVector2D target) {
 		inputController->moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		controlledCrew->getCurrentCrewMember()->Shoot(target, false);
 	}else {
-		UE_LOG(LogTemp, Warning, TEXT("Tried to launch a grenade, but controlled Crew pawn was null for controller %s"), *GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Tried to launch a grenade, but controlledCrew pawn was null for controller %s"), *GetName());
+	}
+}
+
+/**
+ * Have the currently selected crew member punch at the ACrewMember in
+ * the adjacent cell in the given direction.
+ * 
+ * @param direction the cardinal direction for the currently selected ACrewMember
+ *    to punch towards.
+ */
+void ACrewController::punch(FVector2D direction) {
+	if (controlledCrew) {
+		controlledCrew->getCurrentCrewMember()->Punch(direction);
+	}else {
+		UE_LOG(LogTemp, Warning, TEXT("Tried to punch, but controlledCrew pawn was null for controller %s"), *GetName());
 	}
 }
 

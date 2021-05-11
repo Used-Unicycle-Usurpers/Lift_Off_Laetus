@@ -135,6 +135,7 @@ void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
 	throwMontage = data->throwMontage;
 	throwMontageDelay = data->throwMontageDelay;
 	shootRifleMontage = data->shootRifleMontage;
+	punchMontage = data->punchMontage;
 	takeDamageMontage = data->takeDamageMontage;
 	deathMontage = data->deathMontage;
 	turnLeftMontage = data->turnLeftMontage;
@@ -342,6 +343,45 @@ void ACrewMember::Shove() {
 }
 
 /**
+ * Punch at the ACrewMember in the adjacent AGridSpace in the given direction,
+ * if there is indeed an ACrewMember ther.
+ * 
+ * @param direction the cardinal direction to punch towards.
+ */
+void ACrewMember::Punch(FVector2D direction) {
+	UE_LOG(LogTemp, Warning, TEXT("In punch with direction: (%d,%d)"), direction.X, direction.Y);
+	controller->disableInputController();
+	targetLocation = grid->getTile(gridSpace->getGridLocation() + direction);
+	directionToFaceEnum = vectorToDirectionEnum(direction);
+	float montageLength = rotateWithAnimation(directionToFaceEnum);
+
+	if (montageLength > 0) {
+		FTimerHandle timerParams;
+		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACrewMember::punchAtDirection, montageLength, false);
+	}else {
+		punchAtDirection();
+	}
+}
+
+void ACrewMember::punchAtDirection() {
+	rotateToDirection(directionToFaceEnum);
+	
+	float montageLength = playPunchMontage();
+	ACrewMember* occupant = Cast<ACrewMember>(targetLocation->getOccupant());
+	if (occupant) {
+		occupant->takeDamage(1.0f);
+	}
+
+	//Start the timer to increment the position up until we reach the destination
+	FTimerHandle timerParams;
+	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACrewMember::enableInputAfterPunch, montageLength, false);
+}
+
+void ACrewMember::enableInputAfterPunch() {
+	getCrewController()->enableInputController();
+}
+
+/**
  * Reduce this ACrewMember's health by the given damage.
  * 
  * @param damageTaken the amount of damage to reduce this ACrewMember's 
@@ -434,6 +474,13 @@ float ACrewMember::playThrowMontage() {
  */
 float ACrewMember::playShootRifleMontage() {
 	return skeletalMesh->GetAnimInstance()->Montage_Play(shootRifleMontage);
+}
+
+/**
+ * Play the punch montage.
+ */
+float ACrewMember::playPunchMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(punchMontage);
 }
 
 /**

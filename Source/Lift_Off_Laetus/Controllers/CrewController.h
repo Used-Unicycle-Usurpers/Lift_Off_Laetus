@@ -49,6 +49,12 @@ public:
 	void launch(FVector2D target);
 
 	/**
+	 * Have the currently selected crew member punch at the ACrewMember in 
+	 * the adjacent cell in the given direction.
+	 */
+	void punch(FVector2D direction);
+
+	/**
 	 * Returns the ACrew that is currently controlled by this ACrewController.
 	 */
 	class ACrew* getControlledCrew();
