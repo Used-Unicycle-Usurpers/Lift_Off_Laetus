@@ -9,6 +9,7 @@
 #include "Grenade.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
 
 ULauncher::ULauncher() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>launcherMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/grenade.grenade'"));
@@ -98,7 +99,7 @@ void ULauncher::launch() {
 
 		//Now have the camera follow the grenade as it flies through the air.
 		ACrewController* controller = owner->getCrewController();
-		controller->moveCameraSmoothly(g);
+		controller->getInputController()->moveCameraSmoothly(g);
 	}
 
 	//Hide the grenade launcher, since we have now finished 

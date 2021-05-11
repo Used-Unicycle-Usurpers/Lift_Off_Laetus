@@ -18,8 +18,35 @@ public:
 	// Sets default values for this pawn's properties
 	ACrewMember();
 
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 	/**
-	 * Move this ACrewMember to the given AGridSpace
+	 * Loads up the CharacterAnimDataAsset and assigns the corresponding
+	 * meshes, materials, and animations beased on the provided character
+	 * and team.
+	 */
+	void setMeshAnimData(FCharacter character, Team playerTeam);
+
+	/**
+	 * Set this ACrewMember's team to the given team
+	 */
+	void SetTeam(Team team);
+
+	/**
+	 * Return the team this ACrewMember is a part of.
+	 */
+	Team getTeam();
+
+	/**
+	 * Rotate this ACrewMember to the target direction and begin moving them forward
+	 * until they have reached the target AGridSpace.
 	 */
 	void MoveTo(class AGridSpace * target, bool pushingCoreFragment);
 	
@@ -39,28 +66,6 @@ public:
 	 */
 	void takeDamage(int32 damage); //excluded cause parameter 
 	
-	//The main character mesh for this ACrewMember
-	UPROPERTY(EditAnywhere)
-		class USkeletalMeshComponent* skeletalMesh;
-	
-	//Default team color is red team's, so we need to save the 
-	//other team's color in case they are assigned blue team
-	UPROPERTY(EditAnywhere)
-		class UMaterial* BlueTeamColor;
-
-	UPROPERTY(EditAnywhere)
-		class UMaterial* RedTeamColor;
-	
-	/**
-	 * Set this ACrewMember's team to the given team
-	 */
-	void SetTeam(Team team);
-
-	/**
-	 * Return the team this ACrewMember is a part of.
-	 */
-	Team getTeam();
-
 	/**
 	 * Set the AGridSpace this ACrewMember is currently standing on to the given
 	 * AGridSpace.
@@ -76,16 +81,6 @@ public:
 	 * Returns the ACrew (team) this ACrewMember is a part of.
 	 */
 	class ACrew* getCrew();
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	//Speed this CrewMember moves.
-	UPROPERTY(EditAnywhere)
-		float Speed;
 
 	/**
 	 * Play the grenade throwing montage.
@@ -103,41 +98,36 @@ public:
 	float playStumbleMontage();
 
 	/**
+	 * Play the push montage (used when pushing a core fragment).
+	 */
+	float playPushMontage();
+
+	/**
 	 * Rotate this ACrewMember to the given direction, and play the appropriate
 	 * animation while doing so.
-	*/
+	 */
 	float rotateWithAnimation(Direction directionToFace);
-	
+
 	/**
 	 * Play the given rotation animation.
 	 */
 	float playRotationMontage(RotationAnim type);
 
 	/**
-	 * Play the push montage (used when pushing a core fragment).
+	 * Convert the given unit direction vector to the corresponding
+	 * Direction enum value.
 	 */
-	float playPushMontage();
-
-	//The current direction this ACrewMember is facing.
-	Direction facingDirection;
-
-	//Constant values representing the character rotations in world 
-	//space for the four cardinal directions.
-	const FRotator leftRotation = FRotator(0.f, 90.f, 0.f);
-	const FRotator rightRotation = FRotator(0.f, 270.f, 0.f);
-	const FRotator upRotation = FRotator(0.f, 180.f, 0.f);
-	const FRotator downRotation = FRotator(0.f, 0.f, 0.f);
+	Direction vectorToDirectionEnum(FVector2D direction);
 
 	/**
 	 * Rotates this ACrewMember in world space to given direction.
 	 */
 	void rotateToDirection(Direction direction);
 
-	/**
-	 * Convert the given unit direction vector to the corresponding
-	 * Direction enum value.
-	 */
-	Direction vectorToDirectionEnum(FVector2D direction);
+	UFUNCTION(BlueprintCallable)
+		void onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted);
+
+	bool needToRotate(FVector2D newDirection);
 
 	/**
 	 * Returns the current value of the Speed variable.
@@ -149,8 +139,45 @@ public:
 	UFUNCTION(BlueprintCallable)
 		float getSpeed();
 
-	UFUNCTION(BlueprintCallable)
-		void onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted);
+	/**
+	 * Set the reference to the controller for the ACrew that this ACrewMember is a
+	 * part of.
+	 * NOTE: this is a reference to the controller that is possessing the ACrew. No
+	 * controller is directly possessing any of the ACrewMembers.
+	 */
+	void setCrewController(class ACrewController* newController);
+
+	/**
+	 * Get a refernce the controller that possess the ACrew this ACrewMember is a
+	 * part of.
+	 */
+	class ACrewController* getCrewController();
+
+	//The current direction this ACrewMember is facing.
+	Direction facingDirection;
+
+	//Constant values representing the character rotations in world 
+	//space for the four cardinal directions.
+	const FRotator leftRotation = FRotator(0.f, 90.f, 0.f);
+	const FRotator rightRotation = FRotator(0.f, 270.f, 0.f);
+	const FRotator upRotation = FRotator(0.f, 180.f, 0.f);
+	const FRotator downRotation = FRotator(0.f, 0.f, 0.f);
+
+	//The main character mesh for this ACrewMember
+	UPROPERTY(EditAnywhere)
+		class USkeletalMeshComponent* skeletalMesh;
+
+	//Default team color is red team's, so we need to save the 
+	//other team's color in case they are assigned blue team
+	UPROPERTY(EditAnywhere)
+		class UMaterial* BlueTeamColor;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* RedTeamColor;
+
+	//Speed this CrewMember moves.
+	UPROPERTY(EditAnywhere)
+		float Speed;
 
 	//The sprint arm that holds the camera
 	UPROPERTY(EditAnywhere)
@@ -160,31 +187,49 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UCameraComponent* camera;
 
-	/**
-	 * Set the reference to the controller for the ACrew that this ACrewMember is a
-	 * part of.
-	 * NOTE: this is a reference to the controller that is possessing the ACrew. No
-	 * controller is directly possessing any of the ACrewMembers.
-	 */
-	void setController(class ACrewController* newController);
-
-	/**
-	 * Get a refernce the controller that possess the ACrew this ACrewMember is a 
-	 * part of.
-	 */
-	class ACrewController* getCrewController();
-
-	bool needToRotate(FVector2D newDirection);
-
-	void setMeshAnimData(FCharacter character, Team playerTeam);
-
+	//Amount of time, in seconds, into the throw grenade animation when
+	//the ACrewMember actually throws the grenade.
 	float throwMontageDelay;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 private:
+	/**
+	 * Play the walking animation and inch the ACrewMember forward to
+	 * the AGridSpace they're moving to.
+	 */
+	void moveForward();
+
+	/**
+	 * Called by the looping timer in moveForward. A single call to this
+	 * function moves the ACrewMember forward by the amount in moveIncrement.
+	 */
+	void incrementMoveForward();
+
+	/**
+	 * Called when this ACrewMember has died (i.e. health <= 0). Finds a vald
+	 * respawn space and moves them there.
+	 */
+	void die();
+
+	/**
+	 * Rotate this ACrewMember to face upward i.e. away from the screen.
+	 */
+	void rotateUp();
+
+	/**
+	 * Rotate this ACrewMember to face left.
+	 */
+	void rotateLeft();
+
+	/**
+	 * Rotate this ACrewMember to face right.
+	 */
+	void rotateRight();
+
+	/**
+	 * Rotate this ACrewMember to face downward i.e. towards the screen.
+	 */
+	void rotateDown();
+
 	//A reference to the game mode for quick access.
 	class ALaetusGameMode* gameMode;
 
@@ -209,7 +254,7 @@ private:
 	//	Weapon info
 	class PowerUpEffect* gunEffect;
 
-	//The team this CrewMember is on. 0 = Red team, 1 = blue team 
+	//The team this CrewMember is on 
 	Team team;
 
 	//The rifle for shooting in a cardinal direction
@@ -238,33 +283,33 @@ private:
 
 	//These variables are used to rotate before moving and then to 
 	//animate movement forward.
+	//The (row, column) this ACrewMember is moving to.
 	FVector newLocation;
-	FVector moveIncrement;
+
+	//The number of small increments to this ACrewMember will move 
+	//when moving from their current location to newLocation.
 	int numIncrements;
+
+	//The number of increments left before this ACrewMember has 
+	//reached newLocation.
 	int incrementsLeft;
+
+	//Vector representing the amount this ACrewMember moves during 
+	//each increment, until it ultimately reaches newLocation.
+	FVector moveIncrement;
+
+	//FTimerHandle for the looping time that moves the ACrewMember from
+	//oldLocation to newLocation.
 	FTimerHandle moveTimerHandle;
+
+	//The direction this ACrewMember is going to face after they have
+	//finished rotating.
 	Direction directionToFaceEnum;
+
+	//The AGridSpace this ACrewMember is going to move to.
 	class AGridSpace* targetLocation;
-	
-	/**
-	 * Play the walking animation and inch the ACrewMember forward to
-	 * the AGridSpace they're moving to.
-	 */
-	void moveForward();
 
-	/**
-	 * Called by the looping timer in moveForward. A single call to this
-	 * function moves the ACrewMember forward by the amount in moveIncrement.
-	 */
-	void incrementMoveForward();
-
-	//Helper functions used by rotateDirection
-	void rotateUp();
-	void rotateLeft();
-	void rotateRight();
-	void rotateDown();
-
-	void die();
-
+	//True if this ACrewMember is going to be pushing an ACoreFragment
+	//when they start moving, false otherwise.
 	bool pushing;
 };

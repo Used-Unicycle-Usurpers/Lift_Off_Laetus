@@ -9,6 +9,7 @@
 #include "../GameManagement/LaetusGameMode.h"
 #include "../GameManagement/Grid.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
 #include "Camera/CameraComponent.h"
 #include "../Characters/CoreFragment.h"
 
@@ -27,7 +28,24 @@ void ACrew::BeginPlay() {
 	Super::BeginPlay();
 }
 
-//Setup Crew Members 
+// Called every frame
+void ACrew::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+}
+
+// Called to bind functionality to input
+void ACrew::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+/**
+ * Sets up this ACrew with information pertaining to the team it represents,
+ * the game grid, and the ACrewController this is going to possess this ACrew.
+ * 
+ * @param newTeam the team this ACrew is on.
+ * @param newGrid the game grid that will be used in this game.
+ * @param newController the ACrewController that will be possessing this ACrew.
+ */
 void ACrew::SetUp(Team newTeam, AGrid* newGrid, ACrewController* newController) {
 	team = newTeam;
 	grid = newGrid;
@@ -51,47 +69,60 @@ void ACrew::SetUp(Team newTeam, AGrid* newGrid, ACrewController* newController) 
 		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(location + FVector(0.f, 0.f, 20.f), rotation, params);
 		
 		newMember->setMeshAnimData((FCharacter) i, newTeam);
-		newMember->setController(controller);
+		newMember->setCrewController(controller);
 		newMember->SetTeam(newTeam);
 		crewMembers.Add(newMember);
 		newMember->setGridSpace(space);
 	}
 }
 
-// Return the current status of the action bar
+/**
+ * Return the current status of the action bar
+ * 
+ * @return an integer between 0-10, representing the amount of
+ *     action points this ACrew has left this turn.
+ */
 int32 ACrew::GetActionBarStatus() {
 	return actionBar;
 }
 
-// Update the action bar based on the moves performed 
+/**
+ * Update the action bar based on the moves performed.
+ * 
+ * @param update the number of action points to update the action bar by.
+ *     A negative value will subtract action points, a positive value will
+ *     add them.
+ */ 
 void ACrew::UpdateActionBar(int32 update) {
 	actionBar += update;
 }
 
-// //Return the location of the first crewMember 
+/**
+ * Return the location of the first crewMember (Pavo) in world coordinates.
+ * 
+ * @return the location of the first crewMember (Pavo) in world coordinates.
+ */
 FVector ACrew::GetStartingLocation() {
 	return crewMembers[0]->GetActorLocation();
 }
 
-// Called every frame
-void ACrew::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-}
-
-// Called to bind functionality to input
-void ACrew::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
 /**
- * Returns a reference to the currently selected ACrewMember.
+ * Returns a reference to the currently selected ACrewMember, which is the
+ * one that is currently being affected by input (if it's this ACrew's turn).
+ * 
+ * @return a pointer to the ACrewMember that is curretnly selected in
+ *     this ACrew.
  */
 ACrewMember* ACrew::getCurrentCrewMember() {
 	return crewMembers[selectedCharacter];
 }
 
 /**
- * Toggles the currently selected ACrewMember
+ * Toggles the currently selected ACrewMember to the next one in the order.
+ * Order: Pavo (0), Lyra (1), Nemus (2)
+ * 
+ * @return the integer representation of the newly selected ACrewMember
+ *     in this ACrew.
  */
 int ACrew::toggleSelectedCrewMember() {
 	selectedCharacter++;
@@ -101,13 +132,26 @@ int ACrew::toggleSelectedCrewMember() {
 	return selectedCharacter;
 }
 
+/**
+ * Sets the currently selected ACrewMember in this ACrew to the
+ * given integer representation of the ACrewMember.
+ * 
+ * @param current the integer represntion of the ACrewMemebr to choose
+ *     as the currently selected ACrewMember in this ACrew. 0 = Pavo,
+ *     1 = Lyra, 2 = Nembus.
+ */
 void ACrew::setSelectedCrewMember(int current) {
 	selectedCharacter = current;
-	controller->moveCameraToCrewMember();
+	controller->getInputController()->moveCameraToCrewMember();
 }
 
 /**
-* Moves the given ACrewMember (by array index) in the given direction
+* Moves the given ACrewMember (by array index) in the given direction.
+* 
+* @param crewMemberID the integer represention of the ACrewMember being
+*     moved. 0 = Pavo, 1 = Lyra, 2 = Nembus.
+* @param direction a unit vector represtenting the carindal direction to
+*     move the ACrewMember specified by crewMemberID.
 */
 void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 	if (crewMemberID >= crewMembers.Num()) { return; }
@@ -139,14 +183,20 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 }
 
 /**
-* Moves the currently selected ACrewMember in the given direction
+* Moves the currently selected ACrewMember in the given direction.
+* 
+* @param direction a unit vector represtenting the carindal direction to
+*     move the currently selected ACrewMember in this ACrew.
 */
 void ACrew::moveSelectedCrewMember(FVector2D direction) {
 	moveCrewMember(selectedCharacter, direction);
 }
 
 /**
-* Check if we are pushing core
+* Check if we are pushing core in the given direction.
+* 
+* @param directoin the unit vector representing the carindal direction
+*     in which we are checking if we're pushing an ACoreFragment.
 */
 bool ACrew::pushingCore(FVector2D direction) {
 	FVector2D crewMemberGridLocation = crewMembers[selectedCharacter]->getGridSpace()->getGridLocation();
@@ -156,18 +206,42 @@ bool ACrew::pushingCore(FVector2D direction) {
 	return false;
 }
 
+/**
+ * Sets the ACrewController that is possessiong this ACrew to the 
+ * provided ACrewController.
+ * 
+ * @param newController the ACrewController that is now possessing
+ *     this ACrew.
+ */
 void ACrew::setController(ACrewController* newController) {
 	controller = newController;
 }
 
+/**
+ * Get the integer represenation of the currently selected ACrewMember 
+ * in this ACrew.
+ * 
+ * @return the integer represtion of the currently selected ACrewMember 
+ *     in this ACrew. 0 = Pavo, 1 = Lyra, 2 = Nembus.
+ */
 int32 ACrew::getSelectedCrewMemberIndex() {
 	return selectedCharacter;
 }
 
+/**
+ * Returns the number of ACoreFramgents this ACrew has collected so far.
+ * 
+ * @return an integer representing the number of ACoreFragments this ACrew has
+ *     collected so far.
+ */
 int32 ACrew::getCoreCount() {
 	return cores;
 }
 
+/**
+ * Increment the number of ACoreFragments that have been collected by this ACrew
+ * by 1.
+ */
 void ACrew::incrementCores() {
 	cores += 1;
 }

@@ -10,6 +10,7 @@
 #include "Camera/CameraComponent.h"
 #include "../GameManagement/LaetusGameMode.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
 
 // Sets default values
 AGrenade::AGrenade() {
@@ -88,7 +89,7 @@ void AGrenade::Tick(float DeltaTime) {
  * Explode this grenade, and move the camera back the player.
  */
 void AGrenade::destroySelf() {
-	owner->getCrewController()->moveCameraSmoothly(owner);
+	owner->getCrewController()->getInputController()->moveCameraSmoothly(owner);
 	owner->getCrewController()->enableInputController();
 	//owner->getCrewController()->setStateToIdle();
 	//change turn if actionBar is 0
