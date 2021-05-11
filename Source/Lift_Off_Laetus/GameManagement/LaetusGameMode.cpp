@@ -14,6 +14,7 @@
 #include "Camera/CameraActor.h"
 #include "Engine/Engine.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "GameEnums.h"
 #include "LaetusGameInstance.h"
 
 ALaetusGameMode::ALaetusGameMode() {
@@ -25,12 +26,6 @@ ALaetusGameMode::ALaetusGameMode() {
 
 	static ConstructorHelpers::FClassFinder<UUserWidget>HUDBlueprintWidgetClass(TEXT("WidgetBlueprintGeneratedClass'/Game/UI/HUD.HUD_C'"));
 	HUDWidgetClass = HUDBlueprintWidgetClass.Class;
-
-	// set default pawn class to our Blueprinted character
-	/*static ConstructorHelpers::FClassFinder<APawn>PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
-	if (PlayerPawnBPClass.Class != nullptr) {
-		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}*/
 }
 
 /**
@@ -60,8 +55,8 @@ void ALaetusGameMode::BeginPlay() {
 	blueTeamController->Possess(blueCrew);
 
 	//Initialize Crews and Controllers
-	redCrew->SetUp(0, grid, redTeamController);
-	blueCrew->SetUp(1, grid, blueTeamController);
+	redCrew->SetUp(Team::Red, grid, redTeamController);
+	blueCrew->SetUp(Team::Blue, grid, blueTeamController);
 
 	//Initialize the input controller with info on both players of the game.
 	if (singleInput) {
@@ -190,9 +185,7 @@ void ALaetusGameMode::OnGameEnd(int32 winner) {
 	}
 }
 
-
-void ALaetusGameMode::ClearTurnActionStack()
-{
+void ALaetusGameMode::ClearTurnActionStack() {
 	// Remove all entries in turn action stack
 }
 
@@ -254,7 +247,7 @@ bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
 		visible = false;
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
 	}else { //not enough action points
-	 //show invalid move message 
+		//show invalid move message 
 		callHUDMessage(true, 0);
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, TEXT("Called display message"));
 
@@ -265,7 +258,5 @@ bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
 		return false;
 	}
 
-	//GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
-	//return true 
 	return true;
 }

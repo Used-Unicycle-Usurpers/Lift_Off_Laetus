@@ -65,7 +65,8 @@ void ACoreFragment::moveTo(AGridSpace* target, ACrewMember* pusher) {
 void ACoreFragment::moveForward() {
 	//Calculate how much to increment movement by in each iteration of the timer.
 	
-	moveIncrement = (newLocation - oldLocation) / 150;
+	incrementsLeft = numIncrements = 75;
+	moveIncrement = (newLocation - oldLocation) / numIncrements;
 
 	//Start the timer to increment the position up until we reach the destination
 	GetWorld()->GetTimerManager().SetTimer(moveTimerHandle, this, &ACoreFragment::incrementMoveForward, 0.01, true);
@@ -78,7 +79,8 @@ void ACoreFragment::incrementMoveForward() {
 	//If in a certain distance tolerance of the actual location, consider 
 	//the movement completed. This handles cases where moveIncrement does 
 	//not add up to exactly the destination location.
-	if (FMath::Abs(distance) > 30) {
+	incrementsLeft--;
+	if (incrementsLeft > 0) {
 		//Destination has not been reached, increment position
 		SetActorLocation(currentLocation + moveIncrement);
 	}
@@ -87,7 +89,7 @@ void ACoreFragment::incrementMoveForward() {
 		SetActorLocation(newLocation);//Snap to the exact location
 		GetWorld()->GetTimerManager().ClearTimer(moveTimerHandle);
 
-	// Check if the core fragment has been pushed into a receiver
+		// Check if the core fragment has been pushed into a receiver
 		if (targetLocation->getGridLocation().X == 0) {
 		}
 

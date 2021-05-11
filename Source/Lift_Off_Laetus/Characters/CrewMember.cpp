@@ -74,12 +74,12 @@ ACrewMember::ACrewMember() {
 	*/
 
 	//Set to blue team's (color 02) material 
-	static ConstructorHelpers::FObjectFinder<UMaterial>RedTeamMaterial(TEXT(RED_TEAM_MATERIAL));
-	RedTeamColor = (UMaterial*)RedTeamMaterial.Object;
-	skeletalMesh->SetMaterial(0, RedTeamColor);
+	//static ConstructorHelpers::FObjectFinder<UMaterial>RedTeamMaterial(TEXT(RED_TEAM_MATERIAL));
+	//RedTeamColor = (UMaterial*)RedTeamMaterial.Object;
+	//skeletalMesh->SetMaterial(0, RedTeamColor);
 
-	static ConstructorHelpers::FObjectFinder<UMaterial>BlueTeamMaterial(TEXT(BLUE_TEAM_MATERIAL));
-	BlueTeamColor = (UMaterial*)BlueTeamMaterial.Object;
+	//static ConstructorHelpers::FObjectFinder<UMaterial>BlueTeamMaterial(TEXT(BLUE_TEAM_MATERIAL));
+	//BlueTeamColor = (UMaterial*)BlueTeamMaterial.Object;
 
 	//physics 
 	TInlineComponentArray<UPrimitiveComponent*> Components;
@@ -93,7 +93,7 @@ ACrewMember::ACrewMember() {
 	facingDirection = Direction::Right;
 }
 
-void ACrewMember::setMeshAnimData(FCharacter character) {
+void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
 	UCharacterAnimDataAsset* data;
 	switch (character) {
 	case Pavo:
@@ -115,6 +115,7 @@ void ACrewMember::setMeshAnimData(FCharacter character) {
 	turnAroundMontage = data->turnAroundMontage;
 	stumbleMontage = data->stumbleMontage;
 	pushMontage = data->pushMontage;
+
 	skeletalMesh->SetSkeletalMesh(data->skeletalMesh);
 	skeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	skeletalMesh->SetAnimClass(data->animBP);
@@ -127,6 +128,49 @@ void ACrewMember::setMeshAnimData(FCharacter character) {
 
 	launcher->mesh->AttachToComponent(skeletalMesh, params, FName("GrenadeSocket"));
 	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
+
+	UE_LOG(LogTemp, Warning, TEXT("At switch with team: %d"), playerTeam);
+	switch (character) {
+	case Pavo:
+		if (playerTeam == Team::Red) {
+			skeletalMesh->SetMaterial(0, data->redTeamMainMaterial);
+			rifle->mesh->SetMaterial(0, data->redGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->redGunBodyMaterial);
+		}else {
+			skeletalMesh->SetMaterial(0, data->blueTeamMainMaterial);
+			rifle->mesh->SetMaterial(0, data->blueGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->blueGunBodyMaterial);
+		}
+		break;
+	case Lyra:
+		if (playerTeam == Team::Red) {
+			skeletalMesh->SetMaterial(0, data->redTeamMainMaterial);
+			skeletalMesh->SetMaterial(1, data->redTeamArmorMaterial);
+			rifle->mesh->SetMaterial(0, data->redGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->redGunBodyMaterial);
+		}else {
+			skeletalMesh->SetMaterial(0, data->blueTeamMainMaterial);
+			skeletalMesh->SetMaterial(1, data->blueTeamArmorMaterial);
+			rifle->mesh->SetMaterial(0, data->blueGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->blueGunBodyMaterial);
+		}
+		break;
+	default:
+		if (playerTeam == Team::Red) {
+			skeletalMesh->SetMaterial(0, data->redTeamMainMaterial);
+			skeletalMesh->SetMaterial(1, data->redTeamArmorMaterial);
+			rifle->mesh->SetMaterial(0, data->redGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->redGunBodyMaterial);
+		}else {
+			skeletalMesh->SetMaterial(0, data->blueTeamMainMaterial);
+			skeletalMesh->SetMaterial(1, data->blueTeamArmorMaterial);
+			rifle->mesh->SetMaterial(0, data->blueGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->blueGunBodyMaterial);
+		}
+		break;
+	}
+
+	
 }
 
 /**
@@ -135,7 +179,7 @@ void ACrewMember::setMeshAnimData(FCharacter character) {
  * @param newTeam the new team to assign to this ACrewMember.
  *     0 for red team, 1 for blue team.
  */
- void ACrewMember::SetTeam(int32 newTeam) {
+ void ACrewMember::SetTeam(Team newTeam) {
 	 if (newTeam) {
 		 team = newTeam;
 	 } 
@@ -143,11 +187,9 @@ void ACrewMember::setMeshAnimData(FCharacter character) {
 	 //Change appearance based on team
 	 //Red  - Color 01 - default
 	 //Blue - Color 02 - update material 
-	 if (team == 1) {
-		skeletalMesh->SetMaterial(0, BlueTeamColor);
+	 if (team == Team::Blue) {
 		facingDirection = Direction::Left;
 	 }else {
-		 skeletalMesh->SetMaterial(0, RedTeamColor);
 		 facingDirection = Direction::Right;
 	 }
 }
@@ -158,7 +200,7 @@ void ACrewMember::setMeshAnimData(FCharacter character) {
   * @return 0 if this ACrewMember is on the red team,
   *     1 if on the blue team.
   */
- int ACrewMember::getTeam() {
+ Team ACrewMember::getTeam() {
 	 return team;
  }
 
@@ -255,7 +297,7 @@ void ACrewMember::incrementMoveForward() {
 	//the movement completed. This handles cases where moveIncrement does 
 	//not add up to exactly the destination location.
 	incrementsLeft--;
-	if (/*FMath::Abs(distance) > 5 || */incrementsLeft > 0) {
+	if (incrementsLeft > 0) {
 		//Destination has not been reached, increment position
 		SetActorLocation(currentLocation + moveIncrement);
 	}else {
