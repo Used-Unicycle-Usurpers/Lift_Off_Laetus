@@ -21,8 +21,8 @@ UCharacterAnimDataAsset* pavoData;
 UCharacterAnimDataAsset* lyraData;
 UCharacterAnimDataAsset* nembusData;
 
-#define RED_TEAM_MATERIAL "Material'/Game/Characters/lambert1.lambert1'"
-#define BLUE_TEAM_MATERIAL "Material'/Game/Characters/lambert1_2.lambert1_2'"
+#define RED_TEAM_MATERIAL "Material'/Game/Characters/Pavo1.Pavo1'"
+#define BLUE_TEAM_MATERIAL "Material'/Game/Characters/Pavo2.Pavo2'"
 
 // Sets default values
 ACrewMember::ACrewMember() {
