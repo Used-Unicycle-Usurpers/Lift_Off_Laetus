@@ -56,8 +56,9 @@ public:
 	void Shoot(FVector2D target, bool useRifle);
 
 	/**
-	 * Punch at the ACrewMember in the adjacent AGridSpace in the given direction,
-	 * if there is indeed an ACrewMember ther.
+	 * Rotate the player in the given direction and then punch at the ACrewMember
+	 * in the adjacent AGridSpace in that given direction, if there is indeed an
+	 * ACrewMember ther.
 	 */
 	void Punch(FVector2D direction);
 	
@@ -225,8 +226,21 @@ private:
 	 */
 	void incrementMoveForward();
 	
+	/**
+	 * Play the punch montage, and set timers to deal damage and
+	 * re-enable input.
+	 */
 	void punchAtDirection();
 
+	/**
+	 * Deal punch damage to the occupant of targetLocation if
+	 * they are an ACrewMember.
+	 */
+	void dealPunchDamage();
+
+	/**
+	 * Re-enables input after the punch has occurred.
+	 */
 	void enableInputAfterPunch();
 
 	/**

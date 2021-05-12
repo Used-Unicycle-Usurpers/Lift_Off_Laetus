@@ -343,13 +343,13 @@ void ACrewMember::Shove() {
 }
 
 /**
- * Punch at the ACrewMember in the adjacent AGridSpace in the given direction,
- * if there is indeed an ACrewMember ther.
+ * Rotate the player in the given direction and then punch at the ACrewMember 
+ * in the adjacent AGridSpace in that given direction, if there is indeed an 
+ * ACrewMember ther.
  * 
  * @param direction the cardinal direction to punch towards.
  */
 void ACrewMember::Punch(FVector2D direction) {
-	UE_LOG(LogTemp, Warning, TEXT("In punch with direction: (%d,%d)"), direction.X, direction.Y);
 	controller->disableInputController();
 	targetLocation = grid->getTile(gridSpace->getGridLocation() + direction);
 	directionToFaceEnum = vectorToDirectionEnum(direction);
@@ -363,20 +363,39 @@ void ACrewMember::Punch(FVector2D direction) {
 	}
 }
 
+/**
+ * Play the punch montage, and set timers to deal damage and 
+ * re-enable input.
+ */
 void ACrewMember::punchAtDirection() {
 	rotateToDirection(directionToFaceEnum);
 	
 	float montageLength = playPunchMontage();
+	
+	//Halfway thorough the punch montage (about when the actual 
+	//punch happens), deal damage.
+	FTimerHandle damageTimer;
+	GetWorld()->GetTimerManager().SetTimer(damageTimer, this, &ACrewMember::dealPunchDamage, montageLength/2, false);
+
+	//Renable input after the montage had ended.
+	FTimerHandle enableTimer;
+	GetWorld()->GetTimerManager().SetTimer(enableTimer, this, &ACrewMember::enableInputAfterPunch, montageLength, false);
+}
+
+/**
+ * Deal punch damage to the occupant of targetLocation if 
+ * they are an ACrewMember.
+ */
+void ACrewMember::dealPunchDamage() {
 	ACrewMember* occupant = Cast<ACrewMember>(targetLocation->getOccupant());
 	if (occupant) {
 		occupant->takeDamage(1.0f);
 	}
-
-	//Start the timer to increment the position up until we reach the destination
-	FTimerHandle timerParams;
-	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACrewMember::enableInputAfterPunch, montageLength, false);
 }
 
+/**
+ * Re-enables input after the punch has occurred.
+ */
 void ACrewMember::enableInputAfterPunch() {
 	getCrewController()->enableInputController();
 }
