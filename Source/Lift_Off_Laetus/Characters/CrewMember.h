@@ -213,6 +213,14 @@ public:
 	//the ACrewMember actually throws the grenade.
 	float throwMontageDelay;
 
+	//The maximum amout of health an ACrewMember can have.
+	const float maxHealth = 10.0f;
+
+	/**
+	 * Returns the current amount of health this ACrewMember has.
+	 */
+	float getCurrentHealth();
+
 private:
 	/**
 	 * Play the walking animation and inch the ACrewMember forward to

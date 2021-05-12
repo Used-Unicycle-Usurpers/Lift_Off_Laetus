@@ -92,7 +92,7 @@ void ACrewMember::BeginPlay() {
 		grid = gameMode->getGameGrid();
 	}
 
-	health = 3.f;
+	health = maxHealth;
 }
 
 // Called every frame
@@ -408,14 +408,14 @@ void ACrewMember::enableInputAfterPunch() {
  */
 void ACrewMember::takeDamage(int32 damageTaken) {
 	health -= damageTaken;
+	float montageLength = playTakeDamageMontage();
 
 	if (health <= 0) {
-		//destroy actor?
-		UE_LOG(LogTemp, Warning, TEXT("Player died!"));
+		//Play death montage. After that ends, respawn but moving to 
+		//random space on your team's side of the map.
+		FTimerHandle f;
+		GetWorld()->GetTimerManager().SetTimer(f, this, &ACrewMember::die, montageLength, false);
 	}
-	float montageLength = playTakeDamageMontage();
-	FTimerHandle f;
-	GetWorld()->GetTimerManager().SetTimer(f, this, &ACrewMember::die, montageLength, false);
 }
 
 /**
@@ -439,7 +439,7 @@ void ACrewMember::respawn() {
 	SetActorLocation(newSpace->GetActorLocation() + FVector(0, 0, 20));
 	setGridSpace(newSpace);
 	getCrewController()->getInputController()->currentlySelectedTile = gridSpace;
-	health = 3;
+	health = maxHealth;
 }
 
 /**
@@ -727,4 +727,14 @@ void ACrewMember::setCrewController(ACrewController* newController) {
  */
 ACrewController* ACrewMember::getCrewController() {
 	return controller;
+}
+
+/**
+ * Returns the current amount of health this ACrewMember has.
+ * 
+ * @return a float representing the current amount of health 
+ *     this ACrewMember has.
+ */
+float ACrewMember::getCurrentHealth() {
+	return health;
 }

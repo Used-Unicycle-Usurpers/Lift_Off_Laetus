@@ -48,6 +48,9 @@ void AInputController::BeginPlay() {
 	if (gameMode) {
 		grid = gameMode->getGameGrid();
 	}
+	FInputModeGameAndUI b;
+	SetInputMode(b);
+	SetShowMouseCursor(true);
 }
 
 /**
@@ -93,9 +96,11 @@ void AInputController::changeTurn(int newTeam) {
 		if (newTeam == 0) {
 			currentTeamController = redTeamController;
 			controlledCrew = currentTeamController->getControlledCrew();
+			moveCameraToCrewMember();
 		}else {
 			currentTeamController = blueTeamController;
 			controlledCrew = currentTeamController->getControlledCrew();
+			moveCameraToCrewMember();
 		}
 	}
 	setTurnState(Idle);

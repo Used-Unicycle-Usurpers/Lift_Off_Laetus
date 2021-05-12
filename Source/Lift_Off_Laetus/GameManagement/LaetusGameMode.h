@@ -36,6 +36,23 @@ struct FsetHUDMessageParams {
 		int32 message;
 };
 
+//Params used to call setInputControllers in the UI.
+USTRUCT()
+struct FsetInputControllers {
+	GENERATED_BODY()
+		class AInputController* controller1;
+		class AInputController* controller2;
+		bool twoInputs;
+};
+
+//Params used to call setCrews in the UI.
+USTRUCT()
+struct FsetCrews {
+	GENERATED_BODY()
+		class ACrew* redCrew;
+		class ACrew* blueCrew;
+};
+
 /**
  * 
  */
@@ -117,4 +134,9 @@ private:
 	int32 message;
 	bool visible;
 	bool firstChangeTurn = true; //so message does not show up during startup
+
+	void callHUDSetInputControllers(class AInputController* c1, class AInputController* c2, bool singleInputOnly);
+
+	void callHUDSetCrews(class ACrew* c1, class ACrew* c2);
+
 };

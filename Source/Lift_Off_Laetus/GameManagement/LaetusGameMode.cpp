@@ -79,6 +79,9 @@ void ALaetusGameMode::BeginPlay() {
 	// Assign core fragment receivers to respective teams
 	grid->assignCoreFragmentReceivers(redCrew, blueCrew);
 
+	callHUDSetInputControllers(inputController, inputController2, singleInput);
+	callHUDSetCrews(redCrew, blueCrew);
+
 	//Begin first turn
 	currentCrew = -1;
 	ChangeTurn();
@@ -261,4 +264,21 @@ bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
 	}
 
 	return true;
+}
+
+void ALaetusGameMode::callHUDSetInputControllers(AInputController* c1, AInputController* c2, bool singleInputOnly) {
+	FsetInputControllers params;
+	params.controller1 = c1;
+	params.controller2 = c2;
+	params.twoInputs = singleInputOnly;
+	UFunction* setInputControllesFunction = hud->FindFunction(FName("setInputControllers"));
+	hud->ProcessEvent(setInputControllesFunction, &params);
+}
+
+void ALaetusGameMode::callHUDSetCrews(class ACrew* c1, class ACrew* c2) {
+	FsetCrews params;
+	params.redCrew = c1;
+	params.blueCrew = c2;
+	UFunction* setCrewsFunction = hud->FindFunction(FName("setCrews"));
+	hud->ProcessEvent(setCrewsFunction, &params);
 }

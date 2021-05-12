@@ -12,6 +12,7 @@
 #include "../Controllers/InputController.h"
 #include "Camera/CameraComponent.h"
 #include "../Characters/CoreFragment.h"
+#include "../GameManagement/GameEnums.h"
 
 // Sets default values
 ACrew::ACrew() {
@@ -244,4 +245,34 @@ int32 ACrew::getCoreCount() {
  */
 void ACrew::incrementCores() {
 	cores += 1;
+}
+
+/**
+ * Returns the percentage of health Pavo has remaining as a decimal.
+ * 
+ * @return a float between 0.0 and 1.0, representing the percentage of health
+ *     Pavo has remaining.
+ */
+float ACrew::getPavoPercentHealth() {
+	return crewMembers[Pavo]->getCurrentHealth() / crewMembers[Pavo]->maxHealth;
+}
+
+/**
+ * Returns the percentage of health Lyra has remaining as a decimal.
+ * 
+ * @return a float between 0.0 and 1.0, representing the percentage of health
+ *     Lyra has remaining.
+ */
+float ACrew::getLyraPercentHealth() {
+	return crewMembers[Lyra]->getCurrentHealth() / crewMembers[Lyra]->maxHealth;
+}
+
+/**
+ * Returns the percentage of health Nembus has remaining as a decimal.
+ * 
+ * @return a float between 0.0 and 1.0, representing the percentage of health
+ *     Nembus has remaining.
+ */
+float ACrew::getNembusPercentHealth() {
+	return crewMembers[Nembus]->getCurrentHealth() / crewMembers[Nembus]->maxHealth;
 }
