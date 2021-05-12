@@ -9,6 +9,7 @@
 #include "Grenade.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
 
 ULauncher::ULauncher() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>launcherMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/grenade.grenade'"));
@@ -30,6 +31,7 @@ int ULauncher::fire(FVector2D target) {
 	directionToFaceEnum = getDirectionToThrow(target);
 	float montageLength = owner->rotateWithAnimation(directionToFaceEnum);
 	targetSpace = target;
+	grid->clearGridOverlay();
 
 	if (montageLength > 0) {
 		FTimerHandle timerParams;
@@ -89,6 +91,7 @@ void ULauncher::launch() {
 		UGameplayStatics::PredictProjectilePath(GetWorld(), p, r);
 
 		//Spawn the grenade and pass the path for it to traverse.
+		grid->clearGridOverlay();
 		AGrenade* g = GetWorld()->SpawnActor<AGrenade>(mesh->GetComponentLocation(), FRotator(0, 0, 0));
 		g->path = r.PathData;
 		g->targetLocation = end;
@@ -98,7 +101,7 @@ void ULauncher::launch() {
 
 		//Now have the camera follow the grenade as it flies through the air.
 		ACrewController* controller = owner->getCrewController();
-		controller->moveCameraSmoothly(g);
+		controller->getInputController()->moveCameraSmoothly(g);
 	}
 
 	//Hide the grenade launcher, since we have now finished 

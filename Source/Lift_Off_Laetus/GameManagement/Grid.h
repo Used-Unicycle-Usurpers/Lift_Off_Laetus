@@ -16,7 +16,7 @@
 #define ROCK 6
 #define SHRUB 7
 
-class ACrew;
+//class ACrew;
 
 /**
  * Struct representing a single row of AGridSpaces in an FGrid.
@@ -91,6 +91,8 @@ public:
 	void clearGridOverlay();
 
 	bool areTilesWithinRange(FVector2D loc1, FVector2D loc2, int range);
+
+	bool canMove(AGridSpace* location, FVector2D direction);
 
 protected:
 	// Called when the game starts or when spawned
