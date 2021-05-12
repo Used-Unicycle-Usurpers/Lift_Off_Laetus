@@ -29,14 +29,6 @@ struct FSetEffectOverlayParams {
 	UTexture2D* overlayTexture;
 };
 
-enum FTurnState {
-	Idle,
-	CameraMovement,
-	Movement,
-	RifleAttack,
-	GrenadeAttack,
-	Harvest
-
 //Params used to update the action bar in the UI
 USTRUCT()
 struct FsetABParams {

@@ -138,9 +138,6 @@ private:
 	//Reference the map grid
 	class AGrid* grid;
 
-	//Reference to the game mode
-	class ALaetusGameMode* gameMode;
-
 	// Action Bar value, Turn will take care of creating 
 	int32 actionBar; 
 

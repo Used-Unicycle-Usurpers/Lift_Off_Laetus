@@ -25,7 +25,7 @@ void UPowerUpEffectData::ApplyCharacterEffect(ACrewMember* targetCrewMember) {
 			newEffect->RegisterComponent();
 			UE_LOG(LogTemp, Warning, TEXT("Rifle effect registered to %s"), *targetCrewMember->GetFName().ToString());
 			
-			targetCrewMember->getCrewController()->gameMode->callHUDSetEffectOverlay(targetCrewMember->getTeam(), targetCrewMember->getID(), portraitOverlay);
+			targetCrewMember->getGameMode()->callHUDSetEffectOverlay(targetCrewMember->getTeam(), targetCrewMember->getID(), portraitOverlay);
 		}
 	}
 }

@@ -44,6 +44,16 @@ public:
 	Team getTeam();
 
 	/**
+	 * Set the index of this ACrewMember in its team.
+	 */
+	void setID(int32 newidNum);
+
+	/**
+	 * Return the index of this ACrewMember in its team.
+	 */
+	int getID();
+
+	/**
 	 * Rotate this ACrewMember to the target direction and begin moving them forward
 	 * until they have reached the target AGridSpace.
 	 */
@@ -87,19 +97,7 @@ public:
 	 * Returns the ACrew (team) this ACrewMember is a part of.
 	 */
 	class ACrew* getCrew();
-
-	/**
-	 * Return the team this ACrewMember is a part of.
-	 */
-	int getTeam();
 	
-	void setID(int32 newidNum);
-
-	/**
-	 * Return the index of this ACrewMember in its team.
-	 */
-	int getID();
-
 	/**
 	 * Play the grenade throwing montage.
 	 */
@@ -238,6 +236,8 @@ public:
 	 */
 	float getCurrentHealth();
 
+	class ALaetusGameMode* getGameMode();
+
 private:
 	/**
 	 * Play the walking animation and inch the ACrewMember forward to
@@ -323,7 +323,7 @@ private:
 	class AGridSpace* gridSpace;
 
 	//	Weapon info
-	class PowerUpEffect* gunEffect;
+	class UPowerUpEffectData* weaponEffect;
 
 	//The team this CrewMember is on 
 	Team team;

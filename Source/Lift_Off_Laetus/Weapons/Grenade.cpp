@@ -71,6 +71,7 @@ void AGrenade::explode() {
 	//Reach end of path; at target. Damage nearby players.
 	mesh->SetVisibility(false);
 	FVector2D gridLocation = targetSpace->getGridLocation();
+	UPowerUpEffectData* effectToApply = owner->GetWeaponEffect();
 	for (int row = gridLocation.X - 1; row <= gridLocation.X + 1; row++) {
 		for (int column = gridLocation.Y - 1; column <= gridLocation.Y + 1; column++) {
 

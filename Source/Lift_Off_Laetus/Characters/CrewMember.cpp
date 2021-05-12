@@ -759,3 +759,7 @@ UPowerUpEffectData* ACrewMember::GetWeaponEffect() {
 void ACrewMember::ClearWeaponEffect() {
 	powerUp = nullptr;
 }
+
+ALaetusGameMode* ACrewMember::getGameMode() {
+	return gameMode;
+}
