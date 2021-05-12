@@ -63,12 +63,6 @@ AGridSpace::AGridSpace(){
 	collision->SetHiddenInGame(false);//Only visible for debugging
 	collision->SetVisibility(true);
 	collision->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
-	/*
-	collision->SetGenerateOverlapEvents(true);
-	collision->OnComponentBeginOverlap.AddDynamic(this, &AGridSpace::OnEnterGridSpace);
-	collision->OnComponentEndOverlap.AddDynamic(this, &AGridSpace::OnExitGridSpace);
-	collision->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
-	*/
 
 	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
 	cameraArm->SetupAttachment(mesh);
