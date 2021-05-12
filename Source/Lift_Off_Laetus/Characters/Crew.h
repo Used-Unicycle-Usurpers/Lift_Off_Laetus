@@ -102,6 +102,24 @@ public:
 	//The array fo crewMember that are in this ACrew.
 	TArray<class ACrewMember*> crewMembers; // for testing
 
+	/**
+	 * Returns the percentage of health Pavo has remaining as a decimal.
+	 */
+	UFUNCTION(BlueprintCallable)
+		float getPavoPercentHealth();
+
+	/**
+	 * Returns the percentage of health Lyra has remaining as a decimal.
+	 */
+	UFUNCTION(BlueprintCallable)
+		float getLyraPercentHealth();
+
+	/**
+	 * Returns the percentage of health Nembus has remaining as a decimal.
+	 */
+	UFUNCTION(BlueprintCallable)
+		float getNembusPercentHealth();
+
 private:
 	/**
 	 * Moves the given ACrewMember (by array index) in the given direction.

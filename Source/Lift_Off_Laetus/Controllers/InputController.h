@@ -85,37 +85,43 @@ public:
 	 * Set the current turn state to Movement, so input will be
 	 * interpreted in the context of movement.
 	 */
-	void setStateToMovement();
+	UFUNCTION(BlueprintCallable)
+		void setStateToMovement();
 
 	/**
 	 * Set the current turn state to Movement, so input will be interpreted
 	 * in the context of shooting the Rifle in one of four cardinal directions.
 	 */
-	void setStateToRifleAttack();
+	UFUNCTION(BlueprintCallable)
+		void setStateToRifleAttack();
 
 	/**
 	 * Set the current turn state to GrenadeAttack, so input will be interpreted
 	 * in the context of selecting a tile to throw a grenade to.
 	 */
-	void setStateToGrenadeAttack();
+	UFUNCTION(BlueprintCallable)
+		void setStateToGrenadeAttack();
 
 	/**
 	 * Set the current turn state to PunchAttack, so input will be interpreted
 	 * in the context of punching an ACrewMember in an adjacent AGridSpace.
 	 */
-	void setStateToPunchAttack();
+	UFUNCTION(BlueprintCallable)
+		void setStateToPunchAttack();
 
 	/**
 	 * Set the current turn state to Harvest, so input will be interpreted
 	 * in the context of harvest resources if within range of a harvest source.
 	 */
-	void setStateToHarvest();
+	UFUNCTION(BlueprintCallable)
+		void setStateToHarvest();
 
 	/**
 	 * Set the current turn state to Movement, so input will be
 	 * interpreted in the context of selecting an action.
 	 */
-	void setStateToIdle();
+	UFUNCTION(BlueprintCallable)
+		void setStateToIdle();
 
 	/**
 	 * Handle the "Up" input based on the current turn state this player is in.
