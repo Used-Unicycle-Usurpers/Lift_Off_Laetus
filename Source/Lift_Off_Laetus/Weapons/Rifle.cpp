@@ -9,11 +9,15 @@
 #include "../GameManagement/LaetusGameMode.h"
 #include "../GameManagement/Grid.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
 
 URifle::URifle() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>rifleMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/CHAR_Rifle.CHAR_Rifle'"));
 	mesh->SetStaticMesh(rifleMesh.Object);
 	//mesh->SetWorldScale3D(FVector(5.f, 5.f, 5.f));
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>effect(TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Monsters/FX_Monster_Gruntling/Bomber/GunMuzzle_VFX.GunMuzzle_VFX'"));
+	muzzleEffect = effect.Object;
 
 	range = 5;
 	damage = 1;
@@ -67,6 +71,9 @@ void URifle::shootRifle() {
 }
 
 void URifle::shoot(){
+	FTimerHandle effectTimer;
+	GetWorld()->GetTimerManager().SetTimer(effectTimer, this, &URifle::playMuzzleEffect, 0.2f, false);
+
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	FVector2D location = owner->getGridSpace()->getGridLocation();
 
@@ -95,6 +102,10 @@ void URifle::shoot(){
 		GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::endShooting, montageLength, false);
 	}
 	//owner->getCrewController()->getinputcontroler
+}
+
+void URifle::playMuzzleEffect() {
+	UGameplayStatics::SpawnEmitterAttached(muzzleEffect, mesh, "MuzzleSocket");
 }
 
 void URifle::endShooting() {

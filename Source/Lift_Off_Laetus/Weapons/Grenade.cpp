@@ -11,6 +11,8 @@
 #include "../GameManagement/LaetusGameMode.h"
 #include "../Controllers/CrewController.h"
 #include "../Controllers/InputController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 AGrenade::AGrenade() {
@@ -34,6 +36,9 @@ AGrenade::AGrenade() {
 
 	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	camera->AttachToComponent(cameraArm, FAttachmentTransformRules::KeepRelativeTransform, USpringArmComponent::SocketName);
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>explosion(TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Monsters/FX_Monster_Gruntling/Bomber/Grenade_VFX.Grenade_VFX'"));
+	grenadeExplosion = explosion.Object;
 }
 
 // Called when the game starts or when spawned
@@ -70,6 +75,8 @@ void AGrenade::Tick(float DeltaTime) {
 void AGrenade::explode() {
 	//Reach end of path; at target. Damage nearby players.
 	mesh->SetVisibility(false);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), grenadeExplosion, GetActorLocation());
+
 	FVector2D gridLocation = targetSpace->getGridLocation();
 	for (int row = gridLocation.X - 1; row <= gridLocation.X + 1; row++) {
 		for (int column = gridLocation.Y - 1; column <= gridLocation.Y + 1; column++) {

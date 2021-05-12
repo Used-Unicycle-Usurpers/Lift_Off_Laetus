@@ -49,5 +49,9 @@ private:
 
 	void shoot();
 
+	void playMuzzleEffect();
+
 	void endShooting();
+
+	class UParticleSystem* muzzleEffect;
 };
