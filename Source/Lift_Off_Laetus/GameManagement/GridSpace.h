@@ -44,6 +44,10 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
 
+	//For visual debugging
+	UPROPERTY(EditAnywhere)
+		class UStaticMeshComponent* overlayMesh;
+
 	void SetToRegularMaterial();
 
 	//For visual debugging
@@ -51,6 +55,13 @@ public:
 	void SetToRedOnTimer();
 	void SetToBlue();
 	void SetToGreen();
+
+	//Overlay colors for displaying valid/invalid tiles for actions
+	void ClearOverlay();
+	void RestoreOverlayColor();
+	void SetOverlayToRed(bool temp);
+	void SetOverlayToBlue(bool temp);
+	void SetOverlayToGreen(bool temp);
 
 	//Get and set the occupant of this AGridSpace
 	void setOccupant(AActor* newOccupant);
@@ -100,4 +111,6 @@ private:
 
 	//The additional cost of moving through this space
 	int32 extraMoveCost = 0;
+
+	UMaterial* mainOverlayColor;
 };

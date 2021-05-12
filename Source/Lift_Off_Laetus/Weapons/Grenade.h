@@ -55,9 +55,20 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	/**
+	 * Explode this grenade, damaging all players in its range.
+	 */
+	void explode();
 
 	/**
-	 * Explode this grenade, and move the camera back the player.
+	 * Move the camera back the player, re-enable their input, and
+	 * destroy this grenade.
 	 */
 	void destroySelf();
+
+	//A reference to the game mode for quick access.
+	class ALaetusGameMode* gameMode;
+
+	//True if this grenade has already exploded, false otherwise.
+	bool exploded;
 };

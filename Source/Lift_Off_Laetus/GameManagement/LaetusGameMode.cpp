@@ -14,6 +14,8 @@
 #include "Camera/CameraActor.h"
 #include "Engine/Engine.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "GameEnums.h"
+#include "LaetusGameInstance.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
@@ -24,12 +26,6 @@ ALaetusGameMode::ALaetusGameMode() {
 
 	static ConstructorHelpers::FClassFinder<UUserWidget>HUDBlueprintWidgetClass(TEXT("WidgetBlueprintGeneratedClass'/Game/UI/HUD.HUD_C'"));
 	HUDWidgetClass = HUDBlueprintWidgetClass.Class;
-
-	// set default pawn class to our Blueprinted character
-	/*static ConstructorHelpers::FClassFinder<APawn>PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
-	if (PlayerPawnBPClass.Class != nullptr) {
-		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}*/
 }
 
 /**
@@ -42,7 +38,10 @@ void ALaetusGameMode::BeginPlay() {
 	hud = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 	hud->AddToViewport();
 
-	singleInput = true;
+	//Based on the mode selected in the main menu, support keyboard only or keyboard 
+	//for player one / gamepad for player two
+	ULaetusGameInstance* gameInstance = Cast<ULaetusGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	singleInput = gameInstance->singleInput;
 
 	inputController = Cast<AInputController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
 
@@ -56,8 +55,8 @@ void ALaetusGameMode::BeginPlay() {
 	blueTeamController->Possess(blueCrew);
 
 	//Initialize Crews and Controllers
-	redCrew->SetUp(0, grid, redTeamController);
-	blueCrew->SetUp(1, grid, blueTeamController);
+	redCrew->SetUp(Team::Red, grid, redTeamController);
+	blueCrew->SetUp(Team::Blue, grid, blueTeamController);
 
 	//Initialize the input controller with info on both players of the game.
 	if (singleInput) {
@@ -80,6 +79,9 @@ void ALaetusGameMode::BeginPlay() {
 	// Assign core fragment receivers to respective teams
 	grid->assignCoreFragmentReceivers(redCrew, blueCrew);
 
+	callHUDSetInputControllers(inputController, inputController2, singleInput);
+	callHUDSetCrews(redCrew, blueCrew);
+
 	//Begin first turn
 	currentCrew = -1;
 	ChangeTurn();
@@ -87,11 +89,24 @@ void ALaetusGameMode::BeginPlay() {
 
 //Begin new turn
 void ALaetusGameMode::ChangeTurn() {
+	grid->clearGridOverlay();
+
+	//inform player we are switching turns 
+	if (firstChangeTurn) {
+		firstChangeTurn = false;
+	}else {
+		callHUDMessage(true, 10);
+	}
+
 	//Swap to the other team
 	currentCrew += 1;
 	if (currentCrew > crewCount - 1){
 		currentCrew = 0;
 	}	
+
+	//set actionbar to 10 and update hud 
+	actionbar = 10;
+	callHUDUpdateAB(actionbar);
 
 	ACrew* newCrew = crews[currentCrew];
 	newCrew->setSelectedCrewMember(0);
@@ -121,6 +136,13 @@ void ALaetusGameMode::ChangeTurn() {
 	hud->ProcessEvent(setTeamFunction, &params1);
 
 	callHUDSetPlayer(0);
+
+	//hide change turn message
+	if (!firstChangeTurn) {
+		message = 10;
+		visible = false;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.0f, false);
+	}
 }
 
 void ALaetusGameMode::EvaluateWin()
@@ -168,9 +190,7 @@ void ALaetusGameMode::OnGameEnd(int32 winner) {
 	}
 }
 
-
-void ALaetusGameMode::ClearTurnActionStack()
-{
+void ALaetusGameMode::ClearTurnActionStack() {
 	// Remove all entries in turn action stack
 }
 
@@ -191,6 +211,76 @@ void ALaetusGameMode::callHUDSetPlayer(int newPlayerIndex) {
 	params.playerIndex = newPlayerIndex;
 	UFunction* setPlayerFunction = hud->FindFunction(FName("setPlayer"));
 	hud->ProcessEvent(setPlayerFunction, &params);
+}
+
+void ALaetusGameMode::callHUDUpdateAB(int32 status) {
+	FsetABParams params;
+	params.status = status;
+	UFunction * updateActionBar = hud->FindFunction(FName("updateActionBar"));
+	hud->ProcessEvent(updateActionBar, &params);
+}
+
+void ALaetusGameMode::callHUDMessage(bool vis, int32 mess) {
+	FsetHUDMessageParams params;
+	params.visible = vis;
+	params.message = mess;
+	UFunction * displayMessage = hud->FindFunction(FName("displayMessage"));
+	hud->ProcessEvent(displayMessage, &params);
+}
+
+int32 ALaetusGameMode::getABStatus() {
+	return actionbar;
+}
+
+void ALaetusGameMode::callHUDTimer() {
+	callHUDMessage(visible, message);
+}
+
+// We check if we have enough action points to complete a move 
+// if so we update actionbar
+bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
+	int32 pointsLeft = actionbar - actionPrice;
+	if (pointsLeft >= 0) { //update actionbar, no need to change turn
+		actionbar -= actionPrice;
+		callHUDUpdateAB(actionbar);
+
+		//inform player of how many action point spent 
+		callHUDMessage(true, actionPrice);
+
+		//hide message after a bit
+		message = actionPrice;
+		visible = false;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
+	}else { //not enough action points
+		//show invalid move message 
+		callHUDMessage(true, 0);
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, TEXT("Called display message"));
+
+		//display invalid move message for a bit
+		visible = false;
+		message = 0;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
+		return false;
+	}
+
+	return true;
+}
+
+void ALaetusGameMode::callHUDSetInputControllers(AInputController* c1, AInputController* c2, bool singleInputOnly) {
+	FsetInputControllers params;
+	params.controller1 = c1;
+	params.controller2 = c2;
+	params.twoInputs = singleInputOnly;
+	UFunction* setInputControllesFunction = hud->FindFunction(FName("setInputControllers"));
+	hud->ProcessEvent(setInputControllesFunction, &params);
+}
+
+void ALaetusGameMode::callHUDSetCrews(class ACrew* c1, class ACrew* c2) {
+	FsetCrews params;
+	params.redCrew = c1;
+	params.blueCrew = c2;
+	UFunction* setCrewsFunction = hud->FindFunction(FName("setCrews"));
+	hud->ProcessEvent(setCrewsFunction, &params);
 }
 
 void ALaetusGameMode::callHUDSetEffectOverlay(int teamIndex, int playerIndex, UTexture2D* overlayTexture) {

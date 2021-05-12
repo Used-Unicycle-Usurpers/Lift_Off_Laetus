@@ -369,19 +369,84 @@ FVector2D AGrid::getUnitDifference(AGridSpace* source, AGridSpace* dest) {
 }
 
 AGridSpace* AGrid::getValidRespawnSpace(ACrewMember* crewMember) {
-	int column = numSteps;
+	int column = 0;
 	if (crewMember->getTeam() == 1) {
-		column = numColumns - numSteps - 1;
+		column = numColumns - 1;
 	}
 
 	bool spaceFound = false;
 	while (!spaceFound) {
 		int randRow = FMath::RandRange(0, numRows - 1);
 		AGridSpace* space = getTile(FVector2D(randRow, column));
-		if (!space->isOccupied()) {
+		if (space && !space->isOccupied()) {
 			spaceFound = true;
 			return space;
 		}
 	}
 	return nullptr;
+}
+
+void AGrid::colorGridInRange(FVector2D origin, int range) {
+	for (int i = 0; i < numRows; i++) {
+		for (int j = 0; j < numColumns; j++) {
+			AGridSpace* tile = getTile(FVector2D(i, j));
+			if (tile) {
+				int dX = FMath::Abs(origin.X - i);
+				int dY = FMath::Abs(origin.Y - j);
+				if (dX <= range && dY <= range) {	
+					tile->SetOverlayToBlue(false);
+				}
+			}
+		}
+	}
+}
+
+void AGrid::colorGridDirectionsInRange(const FVector2D origin, int range) {
+	UE_LOG(LogTemp, Warning, TEXT("Origin is: (%f,%f)"), origin.X, origin.Y);
+	for (int i = origin.X - range; i < origin.X + range+1; i++) {
+		UE_LOG(LogTemp, Warning, TEXT("Getting tile at (%d,%f)"), i, origin.Y);
+		AGridSpace* tile = getTile(FVector2D(i, origin.Y));
+		if (tile) {
+				tile->SetOverlayToBlue(false);
+		}
+	}
+
+	for (int j = origin.Y - range; j < origin.Y + range+1; j++) {
+		AGridSpace* tile = getTile(FVector2D(origin.X, j));
+		if (tile) {
+			tile->SetOverlayToBlue(false);
+		}
+	}
+}
+
+void AGrid::clearGridOverlay() {
+	for (int i = 0; i < numRows; i++) {
+		for (int j = 0; j < numColumns; j++) {
+			AGridSpace* tile = getTile(FVector2D(i, j));
+			if (tile) {
+				tile->ClearOverlay();
+			}
+		}
+	}
+}
+
+bool AGrid::areTilesWithinRange(FVector2D loc1, FVector2D loc2, int range) {
+	int dX = FMath::Abs(loc1.X - loc2.X);
+	int dY = FMath::Abs(loc1.Y - loc2.Y);
+	return (dX <= range && dY <= range);
+}
+
+bool AGrid::canMove(AGridSpace* location, FVector2D direction) {
+	FVector2D target = location->getGridLocation() + direction;
+	AGridSpace* dest = getTile(target);
+	if (dest) {
+		if (dest->containsFragment()) {
+			FVector2D fragTarget = target + direction;
+			return !getTile(fragTarget)->isOccupied();
+		}else {
+			return !getTile(target)->isOccupied();
+		}
+	}else {
+		return false;
+	}
 }

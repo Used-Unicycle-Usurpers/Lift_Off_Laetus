@@ -11,12 +11,18 @@
 #include "Kismet/GameplayStatics.h"
 
 URifle::URifle() {
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>rifleMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/gunMockup.gunMockup'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>rifleMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/CHAR_Rifle.CHAR_Rifle'"));
 	mesh->SetStaticMesh(rifleMesh.Object);
-	mesh->SetWorldScale3D(FVector(10.f, 10.f, 10.f));
+	//mesh->SetWorldScale3D(FVector(5.f, 5.f, 5.f));
 
 	range = 5;
 	damage = 1;
+}
+
+// Called when the game starts or when spawned
+void URifle::BeginPlay() {
+	Super::BeginPlay();
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 /**
@@ -36,7 +42,7 @@ int URifle::fire(FVector2D target) {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	owner->getCrewController()->disableInputController();
 	directionToShootEnum = owner->vectorToDirectionEnum(directionToShoot);
-	float montageLength = owner->rotateWithAnimation(directionToShootEnum);
+	montageLength = owner->rotateWithAnimation(directionToShootEnum);
 	
 	if (montageLength > 0) {
 		FTimerHandle timer;
@@ -54,7 +60,14 @@ int URifle::fire(FVector2D target) {
 void URifle::shootRifle() {
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	owner->rotateToDirection(directionToShootEnum);
-	float montageLength = owner->playShootRifleMontage();
+	montageLength = owner->playShootRifleMontage();
+
+	FTimerHandle timer;
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::shoot, montageLength / 2, false);
+}
+
+void URifle::shoot(){
+	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	FVector2D location = owner->getGridSpace()->getGridLocation();
 
 	//Iterate through the tiles in this direction upto range, checking for a player.
@@ -64,7 +77,7 @@ void URifle::shootRifle() {
 
 		AGridSpace* space = grid->getTile(location);
 		if (space) {
-			space->SetToRedOnTimer();
+			//space->SetToRedOnTimer();
 			AActor* occupant = space->getOccupant();
 			if (occupant) {
 				ACrewMember* crewMember = Cast<ACrewMember>(occupant);
@@ -86,7 +99,7 @@ void URifle::shootRifle() {
 		FTimerHandle timer;
 		GetWorld()->GetTimerManager().SetTimer(timer, this, &URifle::endShooting, montageLength, false);
 	}
-	//owner->getCrewController()->setStateToIdle();
+	//owner->getCrewController()->getinputcontroler
 }
 
 void URifle::endShooting() {
@@ -95,4 +108,6 @@ void URifle::endShooting() {
 		owner->getCrewController()->enableInputController();
 	}
 	mesh->SetVisibility(false);
+	//change turn if actionBar is 0
+	if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
 }

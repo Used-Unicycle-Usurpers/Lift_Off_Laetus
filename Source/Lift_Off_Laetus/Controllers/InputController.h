@@ -4,30 +4,51 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "../GameManagement/GameEnums.h"
 #include "InputController.generated.h"
 
 /**
- * 
+ * Controller for taking-in and interpreting player input based on the 
+ * current turn state.
  */
 UCLASS()
 class LIFT_OFF_LAETUS_API AInputController : public APlayerController {
 	GENERATED_BODY()
 
 public:
+	//A reference to the game mode for quick access.
+	class ALaetusGameMode* gameMode;
+
+	class AGrid* grid;
+
 	AInputController();
+
 	virtual void SetupInputComponent() override;
 
 	virtual void BeginPlay() override;
 
 	/**
-	 * Sets up the APlayerCameraManager reference so all controllers affect the
-	 * same camera manager.
-	 * TODO: Add info on parameters
+	 * Initializes this InputController and sets up which ACrewController to 
+	 * distribute input to. Sets up the APlayerCameraManager reference so 
+	 * all controllers affect the same camera manager.
+	 * 
+	 * NOTE: If only one controller is provided, all input will 
+	 * be passed to that controller, and the AInputController::ChangeTurn function 
+	 * will only set the turn state to idle. If both controllers are provided, then
+	 * input  will be distributed to the ACrewController whose turn it currently is, 
+	 * and AInputController::ChangeTurn will switch and distribute input to the team 
+	 * whose turn is now becomes.
 	 */
 	void init(class ACrewController* redController, ACrewController* blueController);
 
+	/**
+	 * Change whose turn it is, and who receives input, to the provided team.
+	 *
+	 * NOTE: If this AInputController is providing input to two ACrewControllers,
+	 * then this means that all input to this AInputController will now be forwarded
+	 * to that team. Otherwise, this function will only set the turn state to Idle.
+	 */
 	void changeTurn(int newTeam);
-
 
 	/**
 	 * Enable input on this controller.
@@ -44,6 +65,63 @@ public:
 	 * the other player.
 	 */
 	void endTurn();
+
+	/**
+	 * Toggle the currently selected crew member, set their turn state
+	 * to Idle, and focus the camera on them.
+	 */
+	void toggleCrewMember();
+
+	///////////////////////// TURN STATE MACHINE /////////////////////////////////
+	//The current state of their turn this player is currently in.
+	enum FTurnState currentTurnState;
+
+	/**
+	 * Set the state of the turn this player is in to the given state.
+	 */
+	void setTurnState(enum FTurnState newState);
+
+	/**
+	 * Set the current turn state to Movement, so input will be
+	 * interpreted in the context of movement.
+	 */
+	UFUNCTION(BlueprintCallable)
+		void setStateToMovement();
+
+	/**
+	 * Set the current turn state to Movement, so input will be interpreted
+	 * in the context of shooting the Rifle in one of four cardinal directions.
+	 */
+	UFUNCTION(BlueprintCallable)
+		void setStateToRifleAttack();
+
+	/**
+	 * Set the current turn state to GrenadeAttack, so input will be interpreted
+	 * in the context of selecting a tile to throw a grenade to.
+	 */
+	UFUNCTION(BlueprintCallable)
+		void setStateToGrenadeAttack();
+
+	/**
+	 * Set the current turn state to PunchAttack, so input will be interpreted
+	 * in the context of punching an ACrewMember in an adjacent AGridSpace.
+	 */
+	UFUNCTION(BlueprintCallable)
+		void setStateToPunchAttack();
+
+	/**
+	 * Set the current turn state to Harvest, so input will be interpreted
+	 * in the context of harvest resources if within range of a harvest source.
+	 */
+	UFUNCTION(BlueprintCallable)
+		void setStateToHarvest();
+
+	/**
+	 * Set the current turn state to Movement, so input will be
+	 * interpreted in the context of selecting an action.
+	 */
+	UFUNCTION(BlueprintCallable)
+		void setStateToIdle();
 
 	/**
 	 * Handle the "Up" input based on the current turn state this player is in.
@@ -66,44 +144,21 @@ public:
 	void handleDown();
 
 	/**
+	 * Moves the current ACrewMember in the given direction only if the move is valid
+	 * (i.e. moving onto an available space) and they have enough action points left
+	 * to do so.
+	 */
+	void moveIfValid(Direction direction);
+
+	/**
 	 * Handle the "Confim" input based on the current turn state this player is in.
 	 */
 	void handleConfirm();
 
-	/**
-	 * Sets up the APlayerCameraManager reference so all controllers affect the
-	 * same camera manager.
-	 */
-	void moveCameraToCrewMember();
-
-	/**
-	 * Moves the camera to the current ACrewMember.
-	 */
-	void toggleCrewMember();
-
+	///////////////////////// CAMERA MOVEMENT /////////////////////////////////
 	//The PlayerCameraManager that both Crews refernce to move the 
 	//shared camera.
 	class APlayerCameraManager* cameraManager;
-
-	//virtual void OnPossess(APawn* InPawn) override;
-
-	//The current state of their turn this player is currently in.
-	enum FTurnState currentTurnState;
-
-	/**
-	 * Set the state of the turn this player is in to the given state.
-	 */
-	void setTurnState(enum FTurnState newState);
-
-	//Helper functions for setTurnState to specify the state to switch to.
-	void setStateToMovement();
-	void setStateToRifleAttack();
-	void setStateToGrenadeAttack();
-	void setStateToHarvest();
-	void setStateToIdle();
-
-	//A reference to the game mode for quick access.
-	class ALaetusGameMode* gameMode;
 
 	/**
 	 * Move camera to the next AGridSpace in the specified direction.
@@ -116,15 +171,34 @@ public:
 	class AGridSpace* currentlySelectedTile;
 
 	/**
+	 * Sets up the APlayerCameraManager reference so all controllers affect the
+	 * same camera manager.
+	 */
+	void moveCameraToCrewMember();
+
+	/**
 	 * Move the camera smoothly from its current location to the target actor.
 	 */
 	void moveCameraSmoothly(AActor* target);
 
 private:
+	//The ACrewController that is possessing the red team ACrew
 	class ACrewController* redTeamController;
+
+	//The ACrewController that is possessing the blue team ACrew
 	class ACrewController* blueTeamController;
+
+	//The ACrewController that is possessing the ACrew whose turn it currently is.
 	class ACrewController* currentTeamController;
+
+	//The ACrew is turn it currently is.
 	class ACrew* controlledCrew;
+
+	//True if disitributing input for two players on the same input 
+	//device (i.e. keyboard), false otherwise
 	bool twoPlayers;
 
+	//The price (in action points) of the next action to be taken 
+	//for the action bar
+	int32 price = 0;
 };
