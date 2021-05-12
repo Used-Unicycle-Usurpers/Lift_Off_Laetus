@@ -94,10 +94,16 @@ public:
 	void setStateToRifleAttack();
 
 	/**
-	 * Set the current turn state to Movement, so input will be interpreted
+	 * Set the current turn state to GrenadeAttack, so input will be interpreted
 	 * in the context of selecting a tile to throw a grenade to.
 	 */
 	void setStateToGrenadeAttack();
+
+	/**
+	 * Set the current turn state to PunchAttack, so input will be interpreted
+	 * in the context of punching an ACrewMember in an adjacent AGridSpace.
+	 */
+	void setStateToPunchAttack();
 
 	/**
 	 * Set the current turn state to Harvest, so input will be interpreted

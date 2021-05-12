@@ -54,6 +54,13 @@ public:
 	 * Shoot one of this ACrewMember's weapons in the given direction
 	 */
 	void Shoot(FVector2D target, bool useRifle);
+
+	/**
+	 * Rotate the player in the given direction and then punch at the ACrewMember
+	 * in the adjacent AGridSpace in that given direction, if there is indeed an
+	 * ACrewMember ther.
+	 */
+	void Punch(FVector2D direction);
 	
 	/**
 	 * Shove the object that was in the AGridSpace this ACrewMember just moved
@@ -91,6 +98,11 @@ public:
 	 * Play the shooting rifle montage.
 	 */
 	float playShootRifleMontage();
+
+	/**
+	 * Play the punch montage.
+	 */
+	float playPunchMontage();
 
 	/**
 	 * Play the take damage montage.
@@ -213,6 +225,23 @@ private:
 	 * function moves the ACrewMember forward by the amount in moveIncrement.
 	 */
 	void incrementMoveForward();
+	
+	/**
+	 * Play the punch montage, and set timers to deal damage and
+	 * re-enable input.
+	 */
+	void punchAtDirection();
+
+	/**
+	 * Deal punch damage to the occupant of targetLocation if
+	 * they are an ACrewMember.
+	 */
+	void dealPunchDamage();
+
+	/**
+	 * Re-enables input after the punch has occurred.
+	 */
+	void enableInputAfterPunch();
 
 	/**
 	 * Called when this ACrewMember has died (i.e. health <= 0). Plays
@@ -283,6 +312,7 @@ private:
 	//Animation montages to play for using weapons
 	class UAnimMontage* throwMontage;
 	class UAnimMontage* shootRifleMontage;
+	class UAnimMontage* punchMontage;
 
 	//Animation montage for taking damage
 	class UAnimMontage* takeDamageMontage;

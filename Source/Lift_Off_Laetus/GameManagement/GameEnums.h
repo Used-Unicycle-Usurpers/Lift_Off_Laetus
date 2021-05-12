@@ -4,6 +4,17 @@
 #include "GameFramework/Pawn.h"
 #include "GameEnums.generated.h"
 
+
+enum FTurnState {
+	Idle,
+	CameraMovement,
+	Movement,
+	RifleAttack,
+	GrenadeAttack,
+	PunchAttack,
+	Harvest
+};
+
 //Enum detailing the diffirent possible types of harvest sources, plus
 //one for invalid type.
 UENUM()

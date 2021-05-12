@@ -35,6 +35,10 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* shootRifleMontage;
 
+	//The animation montage for punching.
+	UPROPERTY(EditAnywhere)
+		class UAnimMontage* punchMontage;
+
 	//Animation montage for rotating 90 degrees to the left.
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* turnLeftMontage;
