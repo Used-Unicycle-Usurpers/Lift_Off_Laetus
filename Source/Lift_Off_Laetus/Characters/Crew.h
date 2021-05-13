@@ -72,9 +72,9 @@ public:
 	void moveSelectedCrewMember(FVector2D direction);
 
 	/**
-	 * Check if we are pushing core in the given direction.
+	 * Check if we are pushing core in the given direction. Return the core if pushing one.
 	 */
-	bool pushingCore(FVector2D direction);
+	class ACoreFragment* pushingCore(FVector2D direction);
 
 	/**
 	 * Sets the ACrewController that is possessiong this ACrew to the

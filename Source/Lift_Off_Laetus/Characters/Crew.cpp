@@ -197,15 +197,20 @@ void ACrew::moveSelectedCrewMember(FVector2D direction) {
 /**
 * Check if we are pushing core in the given direction.
 * 
-* @param directoin the unit vector representing the carindal direction
+* @param direction the unit vector representing the cardinal direction
 *     in which we are checking if we're pushing an ACoreFragment.
+* @return the ACoreFragment pointer, if there is one.
 */
-bool ACrew::pushingCore(FVector2D direction) {
+ACoreFragment* ACrew::pushingCore(FVector2D direction) {
 	FVector2D crewMemberGridLocation = crewMembers[selectedCharacter]->getGridSpace()->getGridLocation();
-	AGridSpace * destination = grid->getTile(crewMemberGridLocation + direction);
-	if (destination && destination->containsFragment()) { return true; }
+	AGridSpace* destination = grid->getTile(crewMemberGridLocation + direction);
+	if (destination) {
+		ACoreFragment* fragment = Cast<ACoreFragment>(destination->getOccupant());
+		if (IsValid(fragment))
+			return fragment;
+	}
 	
-	return false;
+	return nullptr;
 }
 
 /**
