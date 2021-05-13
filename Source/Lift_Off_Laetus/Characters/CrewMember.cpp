@@ -41,6 +41,9 @@ ACrewMember::ACrewMember() {
 	static ConstructorHelpers::FObjectFinder<UCharacterAnimDataAsset>NembusData(TEXT("CharacterAnimDataAsset'/Game/Characters/NembusAnimDataAsset.NembusAnimDataAsset'"));
 	nembusData = NembusData.Object;
 
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_punch_Cue.AUD_punch_Cue'"));
+	punchSound = sound.Object;
+	
 	//Intialize the skeletal mesh component. The mesh itself will be specified
 	//in setMeshAnimData.
 	skeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
@@ -395,6 +398,7 @@ void ACrewMember::punchAtDirection() {
  * they are an ACrewMember.
  */
 void ACrewMember::dealPunchDamage() {
+	UGameplayStatics::PlaySound2D(GetWorld(), punchSound);
 	ACrewMember* occupant = Cast<ACrewMember>(targetLocation->getOccupant());
 	if (occupant) {
 		occupant->takeDamage(1.0f);
@@ -406,6 +410,9 @@ void ACrewMember::dealPunchDamage() {
  */
 void ACrewMember::enableInputAfterPunch() {
 	getCrewController()->enableInputController();
+
+	//change turn if actionBar is 0
+	if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
 }
 
 /**

@@ -385,4 +385,6 @@ private:
 
 	//Sound effect for when the ACrewMember is moving.
 	class USoundCue* footstepSound;
+
+	class USoundCue* punchSound;
 };

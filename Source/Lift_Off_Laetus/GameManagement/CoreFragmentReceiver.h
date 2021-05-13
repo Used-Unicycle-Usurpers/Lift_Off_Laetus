@@ -24,5 +24,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 private:
-	ACrew* ownedBy;
+	UPROPERTY(EditAnywhere);
+		ACrew* ownedBy;
+
+	USoundCue* scoreSound;
 };
