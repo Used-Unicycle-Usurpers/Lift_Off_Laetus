@@ -21,7 +21,7 @@ public:
 		uint8 maxTurnLifetime = 0;
 
 	// Decrement the lifetime counter if it has a limit
-	void DecrementLife();
+	void DecrementLife(class ALaetusGameMode* gameMode, int team, int playerID);
 
 	// Apply the effect
 	virtual void ApplyEffect();
@@ -33,7 +33,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-private:
+public:
 	// Number of turns remaining in lifetime
-	uint8 remainingTurns = 1;
+	uint8 remainingTurns = 2;
 };

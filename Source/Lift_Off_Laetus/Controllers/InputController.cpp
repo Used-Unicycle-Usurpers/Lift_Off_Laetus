@@ -135,7 +135,7 @@ void AInputController::endTurn() {
 	}
 
 	if (currentlySelectedTile) {
-		currentlySelectedTile->SetToRegularMaterial();
+		//currentlySelectedTile->SetToRegularMaterial();
 	}
 
 	gameMode->EvaluateWin();// Check for winner + change turn if no one won (order subject to change)
@@ -180,7 +180,7 @@ void AInputController::setStateToMovement() {
 	}
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		setTurnState(Movement);
@@ -198,7 +198,7 @@ void AInputController::setStateToRifleAttack() {
 	}
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		const FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
@@ -238,7 +238,7 @@ void AInputController::setStateToPunchAttack() {
 	}
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		const FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
@@ -259,7 +259,7 @@ void AInputController::setStateToHarvest() {
 
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		setTurnState(Harvest);
@@ -278,7 +278,7 @@ void AInputController::setStateToIdle() {
 
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		setTurnState(Idle);

@@ -30,6 +30,9 @@ class LIFT_OFF_LAETUS_API UPowerUpEffectData : public UDataAsset
 		TSubclassOf<class UTilePowerUpEffect> tileEffect;
 
 	UPROPERTY(EditAnywhere, Category = "Tile Effect")
+		UMaterial* tileMaterial;
+
+	UPROPERTY(EditAnywhere, Category = "Tile Effect")
 		UParticleSystem* impactParticles;
 
 

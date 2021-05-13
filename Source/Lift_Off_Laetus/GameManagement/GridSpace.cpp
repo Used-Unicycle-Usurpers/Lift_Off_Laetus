@@ -179,6 +179,12 @@ void AGridSpace::SetOverlayToRed(bool temp) {
 	}
 }
 
+void AGridSpace::SetOverlayToRedOnTimer(bool temp) {
+	SetOverlayToRed(temp);
+	FTimerHandle f;
+	GetWorld()->GetTimerManager().SetTimer(f, this, &AGridSpace::ClearOverlay, 2.0f, false);
+}
+
 void AGridSpace::SetOverlayToBlue(bool temp) {
 	overlayMesh->SetMaterial(0, translucentBlueMaterial);
 	if (!temp) {

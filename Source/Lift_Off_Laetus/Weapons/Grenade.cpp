@@ -92,7 +92,7 @@ void AGrenade::explode() {
 			if (space) {
 				//Valid space, temporarily highlight this tile as red
 				//to show it's been hit
-				space->SetToRedOnTimer();
+				space->SetOverlayToRedOnTimer(false);
 
 				if (effectToApply != nullptr)
 					effectToApply->ApplyTileEffect(space);

@@ -60,6 +60,7 @@ public:
 	void ClearOverlay();
 	void RestoreOverlayColor();
 	void SetOverlayToRed(bool temp);
+	void SetOverlayToRedOnTimer(bool temp);
 	void SetOverlayToBlue(bool temp);
 	void SetOverlayToGreen(bool temp);
 

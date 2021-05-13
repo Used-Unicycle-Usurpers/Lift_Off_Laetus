@@ -19,7 +19,7 @@ void UPowerUpEffectData::ApplyCharacterEffect(ACrewMember* targetCrewMember) {
 
 		UActorComponent* newEffect = NewObject<UActorComponent>(targetCrewMember, characterEffect.Get());
 
-		if (newEffect)
+		if (newEffect && targetCrewMember->GetComponentByClass(characterEffect.Get()) == nullptr)
 		{
 			targetCrewMember->AddOwnedComponent(newEffect);
 			newEffect->RegisterComponent();
@@ -43,6 +43,8 @@ void UPowerUpEffectData::ApplyTileEffect(AGridSpace* targetGridSpace) {
 			targetGridSpace->AddOwnedComponent(newEffect);
 			newEffect->RegisterComponent();
 			UE_LOG(LogTemp, Warning, TEXT("Grenade effect registered to %s"), *targetGridSpace->GetFName().ToString());
+
+			targetGridSpace->mesh->SetMaterial(0, tileMaterial);
 
 			if (UGameplayStatics::SpawnEmitterAtLocation(targetGridSpace->GetWorld(), impactParticles, targetGridSpace->GetActorTransform(), false) != nullptr)
 				UE_LOG(LogTemp, Warning, TEXT("Particles spawned at %s"), *targetGridSpace->GetFName().ToString());
