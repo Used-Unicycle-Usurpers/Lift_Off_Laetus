@@ -221,6 +221,13 @@ public:
 	 */
 	float getCurrentHealth();
 
+	/**
+	 * Returns true if this ACrewMember is currently standing in an AGridSpace
+	 * in which they can harvest from an adjacent AHarvestSource.
+	 */
+	UFUNCTION(BlueprintCallable)
+		bool isNextToHarvestSource();
+
 private:
 	/**
 	 * Play the walking animation and inch the ACrewMember forward to
