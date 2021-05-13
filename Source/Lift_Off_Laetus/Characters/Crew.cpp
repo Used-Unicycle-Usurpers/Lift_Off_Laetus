@@ -27,6 +27,8 @@ ACrew::ACrew() {
 // Called when the game starts or when spawned
 void ACrew::BeginPlay() {
 	Super::BeginPlay();
+
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 // Called every frame
@@ -251,6 +253,9 @@ int32 ACrew::getCoreCount() {
  */
 void ACrew::incrementCores() {
 	cores += 1;
+	if (gameMode) {
+		gameMode->EvaluateWin();
+	}
 }
 
 /**

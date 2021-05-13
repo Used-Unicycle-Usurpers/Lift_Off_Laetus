@@ -140,7 +140,7 @@ public:
 private:
 
 	// Game rule parameters
-	int32 coresToWin = 3;  // Number of cores needed to win
+	int32 coresToWin = 1;  // Number of cores needed to win
 
 	// Crew/turn parameters
 	//ACrew* crews;     // Array of crews, defined at runtime
