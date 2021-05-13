@@ -16,7 +16,7 @@ ULauncher::ULauncher() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>launcherMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/grenade.grenade'"));
 	mesh->SetStaticMesh(launcherMesh.Object);
 	mesh->SetWorldScale3D(FVector(25.f, 25.f, 25.f));
-	range = 2;
+	range = 3;
 
 	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_launcher02_Cue.AUD_launcher02_Cue'"));
 	launcherSound = sound.Object;
