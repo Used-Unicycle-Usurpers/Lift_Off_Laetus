@@ -3,7 +3,9 @@
 ## Notes
 1.) In the main menu and pause menu, you will find a How To Play screen that describes controls!
 
-2.) Click left/right ctrl to open the pause menu.
+2.) Quick notes on controls that were forgotten for the How To Play Screen: 
+- Click left/right ctrl to open the pause menu.
+- Click Tab / Right trigger to toggle characters
 
 3.) If keys/buttons don't seem to work, try clicking the mouse in the game first, then try again!
 
