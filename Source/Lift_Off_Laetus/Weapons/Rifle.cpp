@@ -10,6 +10,7 @@
 #include "../GameManagement/Grid.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
+#include "Sound/SoundCue.h"
 
 URifle::URifle() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>rifleMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/CHAR_Rifle.CHAR_Rifle'"));
@@ -18,6 +19,9 @@ URifle::URifle() {
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>effect(TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Monsters/FX_Monster_Gruntling/Bomber/GunMuzzle_VFX.GunMuzzle_VFX'"));
 	muzzleEffect = effect.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_rifle01_Cue.AUD_rifle01_Cue'"));
+	rifleSound = sound.Object;
 
 	range = 5;
 	damage = 1;
@@ -106,6 +110,7 @@ void URifle::shoot(){
 
 void URifle::playMuzzleEffect() {
 	UGameplayStatics::SpawnEmitterAttached(muzzleEffect, mesh, "MuzzleSocket");
+	UGameplayStatics::PlaySound2D(GetWorld(), rifleSound);
 }
 
 void URifle::endShooting() {

@@ -102,4 +102,20 @@ public:
 	//is on the blue team.
 	UPROPERTY(EditAnywhere)
 		class UMaterial* blueGunSightMaterial;
+	
+	//Sound effect for when the ACrewMember dies.
+	UPROPERTY(EditAnywhere)
+		class USoundCue* deathSound;
+
+	//Sound effect for when the ACrewMember take damage.
+	UPROPERTY(EditAnywhere)
+		class USoundCue* takeDamageSound;
+	
+	//Sound effect for when the ACrewMember slips on a tile.
+	UPROPERTY(EditAnywhere)
+		class USoundCue* slipSound;
+
+	//Sound effect for when the ACrewMember is moving.
+	UPROPERTY(EditAnywhere)
+		class USoundCue* footstepSound;
 };

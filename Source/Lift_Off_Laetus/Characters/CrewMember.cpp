@@ -16,6 +16,7 @@
 #include "../Controllers/CrewController.h"
 #include "../Controllers/InputController.h"
 #include "CharacterAnimDataAsset.h"
+#include "Sound/SoundCue.h"
 
 //Data assets with all mesh, material, and animation information
 //for each of the three characters.
@@ -143,6 +144,12 @@ void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
 	turnAroundMontage = data->turnAroundMontage;
 	stumbleMontage = data->stumbleMontage;
 	pushMontage = data->pushMontage;
+
+	//Get all sound effects for this particular character.
+	deathSound = data->deathSound;
+	takeDamageSound = data->takeDamageSound;
+	slipSound = data->slipSound;
+	footstepSound = data->footstepSound;
 
 	//Get the skeletal mesh, but don't assign the materials until we also 
 	//have the rifle mesh ready.
@@ -283,6 +290,7 @@ void ACrewMember::moveForward() {
 	setGridSpace(targetLocation);
 
 	//Start the timer to increment the position up until we reach the destination
+	UGameplayStatics::PlaySound2D(GetWorld(), footstepSound);
 	GetWorld()->GetTimerManager().SetTimer(moveTimerHandle, this, &ACrewMember::incrementMoveForward, 0.01, true);
 }
 
@@ -409,6 +417,7 @@ void ACrewMember::enableInputAfterPunch() {
 void ACrewMember::takeDamage(int32 damageTaken) {
 	health -= damageTaken;
 	float montageLength = playTakeDamageMontage();
+	UGameplayStatics::PlaySound2D(GetWorld(), takeDamageSound);
 
 	if (health <= 0) {
 		//Play death montage. After that ends, respawn but moving to 
@@ -424,6 +433,7 @@ void ACrewMember::takeDamage(int32 damageTaken) {
  */
 void ACrewMember::die() {
 	float montageLength = playDeathMontage();
+	UGameplayStatics::PlaySound2D(GetWorld(), deathSound);
 
 	FTimerHandle timerParams;
 	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACrewMember::respawn, montageLength, false);

@@ -10,12 +10,16 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "../Controllers/CrewController.h"
 #include "../Controllers/InputController.h"
+#include "Sound/SoundCue.h"
 
 ULauncher::ULauncher() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>launcherMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/grenade.grenade'"));
 	mesh->SetStaticMesh(launcherMesh.Object);
 	mesh->SetWorldScale3D(FVector(25.f, 25.f, 25.f));
 	range = 2;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_launcher01_Cue.AUD_launcher01_Cue'"));
+	launcherSound = sound.Object;
 }
 
 /**
@@ -55,6 +59,7 @@ void ULauncher::readyLaunch() {
 	mesh->SetVisibility(true);
 	
 	owner->playThrowMontage();
+	UGameplayStatics::PlaySound2D(GetWorld(), launcherSound);
 	FTimerHandle timerParams;
 	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, owner->throwMontageDelay, false);
 }

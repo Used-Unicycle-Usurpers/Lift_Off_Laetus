@@ -54,4 +54,6 @@ private:
 	void endShooting();
 
 	class UParticleSystem* muzzleEffect;
+
+	class USoundCue* rifleSound;
 };
