@@ -117,6 +117,7 @@ void ALaetusGameMode::ChangeTurn() {
 	}else {
 		callHUDMessage(true, 10);
 	}
+	callHUDToggleThrowGrenadeInstruction(ESlateVisibility::Hidden);
 
 	//Swap to the other team
 	currentCrew += 1;
@@ -133,18 +134,22 @@ void ALaetusGameMode::ChangeTurn() {
 	if (currentCrew == 0) {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, TEXT("Red Team's Turn"));
 		inputController->changeTurn(currentCrew);
+		inputController->resetInputMode();
 		if (!singleInput) {
 			inputController->enable();
 			inputController2->disable();
 			inputController2->changeTurn(currentCrew);
+			inputController2->resetInputMode();
 		}
 	}else {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, TEXT("Blue Team's Turn"));
 		inputController->changeTurn(currentCrew);
+		inputController->resetInputMode();
 		if (!singleInput) {
 			inputController->disable();
 			inputController2->enable();
 			inputController2->changeTurn(currentCrew);
+			inputController2->resetInputMode();
 		}
 	}
 
@@ -325,6 +330,13 @@ void ALaetusGameMode::callHUDSetCrews(class ACrew* c1, class ACrew* c2) {
 	params.redCrew = c1;
 	params.blueCrew = c2;
 	UFunction* setCrewsFunction = hud->FindFunction(FName("setCrews"));
+	hud->ProcessEvent(setCrewsFunction, &params);
+}
+
+void ALaetusGameMode::callHUDToggleThrowGrenadeInstruction(ESlateVisibility newVisibility) {
+	FsetThrowGrenadeVisibility params;
+	params.visibility = newVisibility;
+	UFunction* setCrewsFunction = hud->FindFunction(FName("setThrowGrenadeVisibility"));
 	hud->ProcessEvent(setCrewsFunction, &params);
 }
 

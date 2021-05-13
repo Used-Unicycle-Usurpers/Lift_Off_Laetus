@@ -83,7 +83,7 @@ void ACoreFragment::moveTo(AGridSpace* target, ACrewMember* pusher) {
 void ACoreFragment::moveForward() {
 	//Calculate how much to increment movement by in each iteration of the timer.
 	
-	incrementsLeft = numIncrements = 75;
+	incrementsLeft = numIncrements = 50;
 	moveIncrement = (newLocation - oldLocation) / numIncrements;
 
 	UGameplayStatics::PlaySound2D(GetWorld(), slidingSound);

@@ -91,7 +91,8 @@ public:
 	/**
 	 * Returns the number of ACoreFramgents this ACrew has collected so far.
 	 */
-	int32 getCoreCount();
+	UFUNCTION(BlueprintCallable)
+		int32 getCoreCount();
 
 	/**
 	 * Increment the number of ACoreFragments that have been collected by this ACrew
