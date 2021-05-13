@@ -267,6 +267,10 @@ void AGrid::placeEnvironmentObjects() {
 			AGridSpace* neighbor = getTile(FVector2D(row, column));
 			if (IsValid(neighbor) && IsValid(source)) {
 				neighbor->setHarvestSource(source);
+				
+				//Uncomment to see tiles that are next to a harvest
+				//source, for debugging:
+				//neighbor->SetToRed();
 			}else {
 				UE_LOG(LogTemp, Warning, TEXT("Error: invalid tile coordinates: (%d,%d)"), row, column);
 			}
