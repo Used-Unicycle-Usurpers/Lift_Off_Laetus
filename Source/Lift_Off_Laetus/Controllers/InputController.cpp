@@ -14,6 +14,8 @@
 #include "Components/SlateWrapperTypes.h"
 #include "../PowerUps/TileStickyEffect.h"
 #include "../PowerUps/CharacterStickyEffect.h"
+#include "../PowerUps/TileSlipperyEffect.h"
+#include "../PowerUps/CharacterSlipperyEffect.h"
 
 AInputController::AInputController() {
 
@@ -496,12 +498,22 @@ void AInputController::moveIfValid(Direction direction) {
 	
 	bool stickyCoreFragment = false;
 
+	bool slippyCharacter = (current->getGridSpace()->GetComponentByClass(UTileSlipperyEffect::StaticClass()) != nullptr);
+
+	if (slippyCharacter)
+		price = 0;
+
+	bool slipperyCoreFragment = false;
+
 	// Check for a core fragment
 	ACoreFragment* coreFragment = controlledCrew->pushingCore(directionVector);
 	if (coreFragment != nullptr) {
 		
+		slipperyCoreFragment = (coreFragment->getGridSpace()->GetComponentByClass(UTileStickyEffect::StaticClass()) != nullptr);
+
 		// Add to price if pushing
-		price += 1;
+		if (!slipperyCoreFragment)
+			price += 1;
 
 		// Check for stickiness on core fragment's tile
 		stickyCoreFragment = (coreFragment->getGridSpace()->GetComponentByClass(UTileStickyEffect::StaticClass()) != nullptr);
@@ -543,6 +555,10 @@ void AInputController::handleConfirm() {
 		break;
 	case Harvest:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in Harvest state"));
+		price = 1;
+		if (currentTeamController->getControlledCrew()->getCurrentCrewMember()->isNextToHarvestSource() && gameMode->checkLegalMove(price)) {
+			currentTeamController->harvest();
+		}
 		break;
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in default state"));

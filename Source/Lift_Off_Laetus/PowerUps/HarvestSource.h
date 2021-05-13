@@ -31,6 +31,9 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
 
+	UPROPERTY(EditAnywhere)
+		class UPowerUpEffectData* effectToGive;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

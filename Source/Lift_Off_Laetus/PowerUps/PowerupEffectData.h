@@ -14,6 +14,8 @@ class LIFT_OFF_LAETUS_API UPowerUpEffectData : public UDataAsset
 {
 	GENERATED_BODY()
 
+public:
+
 	UPROPERTY(EditAnywhere, Category="General")
 		FName effectName;
 
@@ -34,9 +36,6 @@ class LIFT_OFF_LAETUS_API UPowerUpEffectData : public UDataAsset
 
 	UPROPERTY(EditAnywhere, Category = "Tile Effect")
 		UParticleSystem* impactParticles;
-
-
-public:
 
 	void ApplyCharacterEffect(class ACrewMember* targetCrewMember);
 	void ApplyTileEffect(class AGridSpace* targetGridSpace);

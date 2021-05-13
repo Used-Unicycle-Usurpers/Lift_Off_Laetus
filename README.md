@@ -1,5 +1,17 @@
 # Lift_Off_Laetus
 
+## Notes
+1.) In the main menu and pause menu, you will find a How To Play screen that describes controls!
+
+2.) Click left/right ctrl to open the pause menu.
+
+3.) If keys/buttons don't seem to work, try clicking the mouse in the game first, then try again!
+
+## Credits
+1.) Sound effects obtained from https://www.zapsplat.com/ and http://www.orangefreesounds.com/
+
+2.) VFX obtained from Infinity Blade assets in the Unreal Marketplace.
+
 ## Map Layout Config  
 The layout of where to place GridSpace objects (tiles) is described in /Config/grid.txt. The first three lines 
 describe the number of rows on the grid, the number of columns in the grid, and then the starting location to start 

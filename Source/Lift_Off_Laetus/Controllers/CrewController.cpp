@@ -101,6 +101,13 @@ void ACrewController::punch(FVector2D direction) {
 	}
 }
 
+void ACrewController::harvest() {
+	if (controlledCrew->getCurrentCrewMember()->isNextToHarvestSource()) {
+		UE_LOG(LogTemp, Warning, TEXT("harvested"));
+		controlledCrew->getCurrentCrewMember()->SetWeaponEffect(controlledCrew->getCurrentCrewMember()->getGridSpace()->getHarvestSource()->effectToGive);
+	}
+}
+
 /**
  * Returns the ACrew that is currently controlled by this ACrewController.
  */

@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
+#include "../PowerUps/CharacterWeakenEffect.h"
 
 URifle::URifle() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>rifleMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/CHAR_Rifle.CHAR_Rifle'"));
@@ -94,7 +95,11 @@ void URifle::shoot(){
 				ACrewMember* crewMember = Cast<ACrewMember>(occupant);
 				if (crewMember) {
 					//TODO: determine damage to deal?
-					crewMember->takeDamage(damage);
+
+					if (crewMember->GetComponentByClass(UCharacterWeakenEffect::StaticClass()) != nullptr)
+						crewMember->takeDamage(damage*2);
+					else
+						crewMember->takeDamage(damage);
 					UPowerUpEffectData* effectToApply = owner->GetWeaponEffect();
 					if (effectToApply != nullptr) {
 						effectToApply->ApplyCharacterEffect(crewMember);

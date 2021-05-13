@@ -26,7 +26,7 @@ public:
 	 * NULL).
 	 */
 	UFUNCTION(BlueprintCallable)
-		void OnEnterGridSpace(AActor* whoEntered);
+		void OnEnterGridSpace(AActor* whoEntered, FVector2D direction);
 
 	/**
 	 * Called when the current occupant of this AGridSpace walks off. Occupant

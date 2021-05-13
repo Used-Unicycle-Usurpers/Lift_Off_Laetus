@@ -86,7 +86,7 @@ public:
 	 * Set the AGridSpace this ACrewMember is currently standing on to the given
 	 * AGridSpace.
 	 */
-	void setGridSpace(class AGridSpace* space);
+	void setGridSpace(class AGridSpace* space, FVector2D fromDirection);
 
 	/**
 	 * Get the AGridSpace this ACrewMember is currently standing on.
@@ -220,7 +220,8 @@ public:
         
     UPROPERTY(EditAnywhere)
 		class UPowerUpEffectData* powerUp;
-        
+       
+	void SetWeaponEffect(class UPowerUpEffectData* newEffect);
     class UPowerUpEffectData* GetWeaponEffect();
 	void ClearWeaponEffect();
 

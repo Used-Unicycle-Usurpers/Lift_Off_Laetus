@@ -303,7 +303,7 @@ void ACrewMember::moveForward() {
 	moveIncrement = (newLocation - oldLocation) / numIncrements;
 
 	// Reset pointers/references
-	setGridSpace(targetLocation);
+	setGridSpace(targetLocation, targetLocation->getGridLocation() - gridSpace->getGridLocation());
 
 	//Start the timer to increment the position up until we reach the destination
 	UGameplayStatics::PlaySound2D(GetWorld(), footstepSound);
@@ -467,7 +467,7 @@ void ACrewMember::die() {
 void ACrewMember::respawn() {
 	AGridSpace* newSpace = grid->getValidRespawnSpace(this);
 	SetActorLocation(newSpace->GetActorLocation() + FVector(0, 0, 20));
-	setGridSpace(newSpace);
+	setGridSpace(newSpace, FVector2D(0,0));
 	getCrewController()->getInputController()->currentlySelectedTile = gridSpace;
 	health = maxHealth;
 }
@@ -479,7 +479,7 @@ void ACrewMember::respawn() {
  * @param space a pointer to the new AGridSpace this ACrewMember is now
  *     standing on.
  */
-void ACrewMember::setGridSpace(class AGridSpace* space) {
+void ACrewMember::setGridSpace(class AGridSpace* space, FVector2D fromDirection) {
 	
 	if (space && !space->isOccupied()) {
 
@@ -487,7 +487,7 @@ void ACrewMember::setGridSpace(class AGridSpace* space) {
 			gridSpace->OnExitGridSpace(this);
 		}
 
-		space->OnEnterGridSpace(this);
+		space->OnEnterGridSpace(this, fromDirection);
 		gridSpace = space;
 	}
 }
@@ -767,6 +767,10 @@ ACrewController* ACrewMember::getCrewController() {
  */
 float ACrewMember::getCurrentHealth() {
 	return health;
+}
+
+void ACrewMember::SetWeaponEffect(UPowerUpEffectData* newEffect) {
+	powerUp = newEffect;
 }
 
 UPowerUpEffectData* ACrewMember::GetWeaponEffect() {

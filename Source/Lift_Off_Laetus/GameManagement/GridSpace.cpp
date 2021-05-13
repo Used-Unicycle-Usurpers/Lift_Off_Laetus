@@ -5,6 +5,12 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "../PowerUps/TilePowerUpEffect.h"
+#include "../PowerUps/TileSlipperyEffect.h"
+#include "../GameManagement/LaetusGameMode.h"
+#include "../GameManagement/Grid.h"
+#include "../GameManagement/GameEnums.h"
+#include "Kismet/GameplayStatics.h"
+#include "../PowerUps/TileDamagerEffect.h"
 
 static UMaterial* regularMaterial;
 static UMaterial* redMaterial;
@@ -95,15 +101,20 @@ void AGridSpace::BeginPlay(){
  * @param bFromSweep true if occured by a sweep, false otherwise
  * @param SweepResult the FHitResult containing the details about the overlap
  */
-void AGridSpace::OnEnterGridSpace(AActor* whoEntered) {
+void AGridSpace::OnEnterGridSpace(AActor* whoEntered, FVector2D direction) {
+
+	UTileSlipperyEffect* slipperyEffect = nullptr;
+	UActorComponent* slipperyEffectCheck = GetComponentByClass(UTileSlipperyEffect::StaticClass());
+	if (IsValid(slipperyEffectCheck))
+		slipperyEffect = Cast<UTileSlipperyEffect>(slipperyEffectCheck);
 
 	ACrewMember* crewMember = Cast<ACrewMember>(whoEntered);
 	if (IsValid(crewMember)) {
 		setOccupant(crewMember);
-		UActorComponent* powerUpComponent = FindComponentByClass<UTilePowerUpEffect>();
-		if (IsValid(powerUpComponent)) {
-			UTilePowerUpEffect* actualPowerUp = Cast<UTilePowerUpEffect>(powerUpComponent);
-			actualPowerUp->ApplyCharacterEffect(crewMember);
+
+		if (GetComponentByClass(UTileDamagerEffect::StaticClass()) != nullptr) {
+			UE_LOG(LogTemp, Warning, TEXT("Ouch"));
+			crewMember->takeDamage(1);
 		}
 	} else {
 		ACoreFragment* coreFragment = Cast<ACoreFragment>(whoEntered);
