@@ -17,6 +17,7 @@
 #include "GameEnums.h"
 #include "LaetusGameInstance.h"
 #include "Sound/SoundCue.h"
+#include "../PowerUps/CharacterPowerUpEffect.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
@@ -167,6 +168,27 @@ void ALaetusGameMode::ChangeTurn() {
 		visible = false;
 		GetWorldTimerManager().SetTimer(ChangeTurnTimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.0f, false);
 	}
+
+
+	UActorComponent* powerUp;
+
+	//TArray<class ACrewMember*> redTeam = crews[0]->crewMembers;
+	//TArray<class ACrewMember*> blueTeam = crews[1]->crewMembers;
+
+	for (int i = 0; i < 3; i++) {
+		powerUp = crews[0]->crewMembers[i]->GetComponentByClass(UBasePowerUpEffectComponent::StaticClass());
+		if (IsValid(powerUp)) {
+			UE_LOG(LogTemp, Warning, TEXT("Bonk 0"));
+			Cast<UBasePowerUpEffectComponent>(powerUp)->DecrementLife(this, 0, i);
+		}
+
+		powerUp = crews[1]->crewMembers[i]->GetComponentByClass(UBasePowerUpEffectComponent::StaticClass());
+		if (IsValid(powerUp)) {
+			UE_LOG(LogTemp, Warning, TEXT("Bonk 1"));
+			Cast<UBasePowerUpEffectComponent>(powerUp)->DecrementLife(this, 1, i);
+		}
+	}
+
 }
 
 void ALaetusGameMode::EvaluateWin()
@@ -316,6 +338,15 @@ void ALaetusGameMode::callHUDToggleThrowGrenadeInstruction(ESlateVisibility newV
 	params.visibility = newVisibility;
 	UFunction* setCrewsFunction = hud->FindFunction(FName("setThrowGrenadeVisibility"));
 	hud->ProcessEvent(setCrewsFunction, &params);
+}
+
+void ALaetusGameMode::callHUDSetEffectOverlay(int teamIndex, int playerIndex, UTexture2D* overlayTexture) {
+	FSetEffectOverlayParams params;
+	params.teamIndex = teamIndex;
+	params.playerIndex = playerIndex;
+	params.overlayTexture = overlayTexture;
+	UFunction* setOverlayFunction = hud->FindFunction(FName("SetEffectOverlay"));
+	hud->ProcessEvent(setOverlayFunction, &params);
 }
 
 void ALaetusGameMode::callPauseMenuToggleVisibility() {

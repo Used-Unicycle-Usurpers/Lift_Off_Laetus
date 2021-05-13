@@ -9,7 +9,7 @@
 /**
  * Base class for effects applied to characters
  */
-UCLASS(Abstract)
+UCLASS(Abstract, BlueprintType)
 class LIFT_OFF_LAETUS_API UCharacterPowerUpEffect : public UBasePowerUpEffectComponent
 {
 	GENERATED_BODY()

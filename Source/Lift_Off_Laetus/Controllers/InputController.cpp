@@ -4,6 +4,7 @@
 #include "InputController.h"
 #include "../Characters/Crew.h"
 #include "../Characters/CrewMember.h"
+#include "../Characters/CoreFragment.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
 #include "../GameManagement/LaetusGameMode.h"
@@ -11,6 +12,8 @@
 #include "../GameManagement/Grid.h"
 #include "../Controllers/CrewController.h"
 #include "Components/SlateWrapperTypes.h"
+#include "../PowerUps/TileStickyEffect.h"
+#include "../PowerUps/CharacterStickyEffect.h"
 
 AInputController::AInputController() {
 
@@ -139,7 +142,7 @@ void AInputController::endTurn() {
 	}
 
 	if (currentlySelectedTile) {
-		currentlySelectedTile->SetToRegularMaterial();
+		//currentlySelectedTile->SetToRegularMaterial();
 	}
 
 	gameMode->EvaluateWin();// Check for winner + change turn if no one won (order subject to change)
@@ -189,7 +192,7 @@ void AInputController::setStateToMovement() {
 
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		setTurnState(Movement);
@@ -212,7 +215,7 @@ void AInputController::setStateToRifleAttack() {
 
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		const FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
@@ -261,7 +264,7 @@ void AInputController::setStateToPunchAttack() {
 
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		const FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
@@ -286,7 +289,7 @@ void AInputController::setStateToHarvest() {
 
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		setTurnState(Harvest);
@@ -309,7 +312,7 @@ void AInputController::setStateToIdle() {
 
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
-			currentlySelectedTile->SetToRegularMaterial();
+			//currentlySelectedTile->SetToRegularMaterial();
 		}
 		moveCameraSmoothly(controlledCrew->getCurrentCrewMember());
 		setTurnState(Idle);
@@ -485,9 +488,29 @@ void AInputController::moveIfValid(Direction direction) {
 	//See if we are pushing core
 	price = 1;
 	FVector2D directionVector = DirectionToUnitVector(direction);
-	if (controlledCrew->pushingCore(directionVector)) { price = 2; }
 
 	ACrewMember* current = controlledCrew->getCurrentCrewMember();
+	
+	// Check for stickiness on the character itself or the character's tile
+	bool stickyCharacter = (current->GetComponentByClass(UCharacterStickyEffect::StaticClass()) != nullptr) || (current->getGridSpace()->GetComponentByClass(UTileStickyEffect::StaticClass()) != nullptr);
+	
+	bool stickyCoreFragment = false;
+
+	// Check for a core fragment
+	ACoreFragment* coreFragment = controlledCrew->pushingCore(directionVector);
+	if (coreFragment != nullptr) {
+		
+		// Add to price if pushing
+		price += 1;
+
+		// Check for stickiness on core fragment's tile
+		stickyCoreFragment = (coreFragment->getGridSpace()->GetComponentByClass(UTileStickyEffect::StaticClass()) != nullptr);
+	}
+
+	// Add to price if character OR core fragement is stuck
+	if (stickyCharacter || stickyCoreFragment)
+		price += 1;
+
 	bool canMove = grid->canMove(current->getGridSpace(), directionVector);
 	if (canMove && gameMode->checkLegalMove(price)) {
 		controlledCrew->moveSelectedCrewMember(directionVector);

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "PowerUpEffect.h"
+#include "PowerUpEffectData.h"
 #include "PowerUpActor.generated.h"
 
 UCLASS()
@@ -22,6 +22,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	PowerUpEffect* effect;
+	UPowerUpEffectData* effect;
 
 };

@@ -14,6 +14,7 @@
 #include "Components/TimelineComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Controllers/CrewController.h"
+#include "../PowerUps/PowerupEffectData.h"
 #include "../Controllers/InputController.h"
 #include "CharacterAnimDataAsset.h"
 #include "Sound/SoundCue.h"
@@ -171,6 +172,10 @@ void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
 	launcher->mesh->AttachToComponent(skeletalMesh, params, FName("GrenadeSocket"));
 	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
 
+	// Set the power up effect
+	// TODO: Remove this !!
+	weaponEffect = powerUp;
+
 	//Based on the provided team, assigned the corresponding materials to the
 	//skeletal mesh and rifle.
 	switch (character) {
@@ -234,6 +239,10 @@ void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
 	 }
 }
 
+ void ACrewMember::setID(int32 newidNum) {
+	 idNum = newidNum;
+ }
+
  /**
   * Return the team this ACrewMember is a part of.
   *
@@ -242,6 +251,10 @@ void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
   */
  Team ACrewMember::getTeam() {
 	 return team;
+ }
+ 
+ int ACrewMember::getID() {
+	 return idNum;
  }
 
 /**
@@ -471,10 +484,10 @@ void ACrewMember::setGridSpace(class AGridSpace* space) {
 	if (space && !space->isOccupied()) {
 
 		if (gridSpace) {
-			gridSpace->setOccupant(nullptr);
+			gridSpace->OnExitGridSpace(this);
 		}
 
-		space->setOccupant(this);
+		space->OnEnterGridSpace(this);
 		gridSpace = space;
 	}
 }
@@ -754,6 +767,18 @@ ACrewController* ACrewMember::getCrewController() {
  */
 float ACrewMember::getCurrentHealth() {
 	return health;
+}
+
+UPowerUpEffectData* ACrewMember::GetWeaponEffect() {
+	return powerUp;
+}
+
+void ACrewMember::ClearWeaponEffect() {
+	powerUp = nullptr;
+}
+
+ALaetusGameMode* ACrewMember::getGameMode() {
+	return gameMode;
 }
 
 /**

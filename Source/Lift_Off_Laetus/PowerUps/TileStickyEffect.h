@@ -14,11 +14,14 @@ class LIFT_OFF_LAETUS_API UTileStickyEffect : public UTilePowerUpEffect
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	// Apply the effect
 	virtual void ApplyEffect() override;
 
 	// Remove the effect
 	virtual void RemoveEffect() override;
-	
+
+	// Apply and remove effects on characters walking over
+	virtual void ApplyCharacterEffect(ACrewMember* crewMember) override;
+	virtual void RemoveCharacterEffect(ACrewMember* crewMember) override;
 };

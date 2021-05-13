@@ -14,7 +14,7 @@ class LIFT_OFF_LAETUS_API UTileDamagerEffect : public UTilePowerUpEffect
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	// Apply the effect
 	virtual void ApplyEffect() override;
 

@@ -10,11 +10,14 @@
 /**
  * Base class for effects applied to ground tiles
  */
-UCLASS(Abstract)
+UCLASS(Abstract, BlueprintType)
 class LIFT_OFF_LAETUS_API UTilePowerUpEffect : public UBasePowerUpEffectComponent
 {
 	GENERATED_BODY()
 
+public:
+	virtual void ApplyCharacterEffect(ACrewMember* crewMember);
+	virtual void RemoveCharacterEffect(ACrewMember* crewMember);
 protected:
 	AGridSpace* tileTarget;
 	virtual void OnRegister() override;

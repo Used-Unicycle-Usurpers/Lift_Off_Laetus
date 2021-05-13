@@ -22,6 +22,14 @@ struct FsetPlayerParams {
 		int playerIndex;
 };
 
+USTRUCT()
+struct FSetEffectOverlayParams {
+	GENERATED_BODY()
+	int teamIndex;
+	int playerIndex;
+	UTexture2D* overlayTexture;
+};
+
 //Params used to update the action bar in the UI
 USTRUCT()
 struct FsetABParams {
@@ -116,6 +124,7 @@ public:
 	class AGrid* getGameGrid();
 
 	void callHUDSetPlayer(int newPlayerIndex);
+	void callHUDSetEffectOverlay(int teamIndex, int playerIndex, UTexture2D* overlayTexture);
 
 	//for action bar
 	void callHUDUpdateAB(int32 status);
