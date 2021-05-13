@@ -6,7 +6,6 @@
 #include "GameFramework/Pawn.h"
 #include "../Weapons/Rifle.h"
 #include "../Weapons/Launcher.h"
-#include "../PowerUps/PowerUpEffect.h"
 #include "../GameManagement/GameEnums.h"
 #include "CrewMember.generated.h"
 
@@ -43,6 +42,16 @@ public:
 	 * Return the team this ACrewMember is a part of.
 	 */
 	Team getTeam();
+
+	/**
+	 * Set the index of this ACrewMember in its team.
+	 */
+	void setID(int32 newidNum);
+
+	/**
+	 * Return the index of this ACrewMember in its team.
+	 */
+	int getID();
 
 	/**
 	 * Rotate this ACrewMember to the target direction and begin moving them forward
@@ -88,7 +97,7 @@ public:
 	 * Returns the ACrew (team) this ACrewMember is a part of.
 	 */
 	class ACrew* getCrew();
-
+	
 	/**
 	 * Play the grenade throwing montage.
 	 */
@@ -208,6 +217,12 @@ public:
 	//The camera that follows this crew member
 	UPROPERTY(EditAnywhere)
 		class UCameraComponent* camera;
+        
+    UPROPERTY(EditAnywhere)
+		class UPowerUpEffectData* powerUp;
+        
+    class UPowerUpEffectData* GetWeaponEffect();
+	void ClearWeaponEffect();
 
 	//Amount of time, in seconds, into the throw grenade animation when
 	//the ACrewMember actually throws the grenade.
@@ -220,6 +235,8 @@ public:
 	 * Returns the current amount of health this ACrewMember has.
 	 */
 	float getCurrentHealth();
+
+	class ALaetusGameMode* getGameMode();
 
 	/**
 	 * Returns true if this ACrewMember is currently standing in an AGridSpace
@@ -301,7 +318,7 @@ private:
 	class ACrew* crew;
 
 	// Character ID (index in crewMember array)
-	int32 id;
+	int32 idNum;
 
 	// Remaining amount of heatlh
 	float health;
@@ -313,7 +330,7 @@ private:
 	class AGridSpace* gridSpace;
 
 	//	Weapon info
-	class PowerUpEffect* gunEffect;
+	class UPowerUpEffectData* weaponEffect;
 
 	//The team this CrewMember is on 
 	Team team;

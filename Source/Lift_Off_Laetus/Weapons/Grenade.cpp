@@ -8,6 +8,7 @@
 #include "../GameManagement/Grid.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "../PowerUps/PowerUpEffectData.h"
 #include "../GameManagement/LaetusGameMode.h"
 #include "../Controllers/CrewController.h"
 #include "../Controllers/InputController.h"
@@ -56,7 +57,6 @@ void AGrenade::BeginPlay() {
 void AGrenade::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	float distance = FVector::Dist(GetActorLocation(), targetLocation);
-	
 	if (!exploded) {
 		//If not reached the end of the path, keep going
 		if (current < path.Num()) {
@@ -83,6 +83,7 @@ void AGrenade::explode() {
 	UGameplayStatics::PlaySound2D(GetWorld(), explosionSound);
 
 	FVector2D gridLocation = targetSpace->getGridLocation();
+	UPowerUpEffectData* effectToApply = owner->GetWeaponEffect();
 	for (int row = gridLocation.X - 1; row <= gridLocation.X + 1; row++) {
 		for (int column = gridLocation.Y - 1; column <= gridLocation.Y + 1; column++) {
 
@@ -91,7 +92,10 @@ void AGrenade::explode() {
 			if (space) {
 				//Valid space, temporarily highlight this tile as red
 				//to show it's been hit
-				space->SetToRedOnTimer();
+				space->SetOverlayToRedOnTimer(false);
+
+				if (effectToApply != nullptr)
+					effectToApply->ApplyTileEffect(space);
 
 				//Check each tile for a player to damage
 				AActor* occupant = space->getOccupant();
@@ -105,6 +109,9 @@ void AGrenade::explode() {
 			}
 		}
 	}
+
+	if (effectToApply != nullptr)
+		owner->ClearWeaponEffect();
 
 	FTimerHandle timerParams;
 	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &AGrenade::destroySelf, 2.0f, false);

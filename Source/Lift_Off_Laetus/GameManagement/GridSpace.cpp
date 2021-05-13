@@ -4,6 +4,7 @@
 #include "../Characters/CoreFragment.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "../PowerUps/TilePowerUpEffect.h"
 
 static UMaterial* regularMaterial;
 static UMaterial* redMaterial;
@@ -94,10 +95,21 @@ void AGridSpace::BeginPlay(){
  * @param bFromSweep true if occured by a sweep, false otherwise
  * @param SweepResult the FHitResult containing the details about the overlap
  */
-void AGridSpace::OnEnterGridSpace(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	ACrewMember* newOccupant = Cast<ACrewMember>(OtherActor);
-	if (IsValid(newOccupant)) {
-		setOccupant(newOccupant);
+void AGridSpace::OnEnterGridSpace(AActor* whoEntered) {
+
+	ACrewMember* crewMember = Cast<ACrewMember>(whoEntered);
+	if (IsValid(crewMember)) {
+		setOccupant(crewMember);
+		UActorComponent* powerUpComponent = FindComponentByClass<UTilePowerUpEffect>();
+		if (IsValid(powerUpComponent)) {
+			UTilePowerUpEffect* actualPowerUp = Cast<UTilePowerUpEffect>(powerUpComponent);
+			actualPowerUp->ApplyCharacterEffect(crewMember);
+		}
+	} else {
+		ACoreFragment* coreFragment = Cast<ACoreFragment>(whoEntered);
+		if (IsValid(coreFragment)) {
+			setOccupant(coreFragment);
+		}
 	}
 }
 
@@ -113,8 +125,21 @@ void AGridSpace::OnEnterGridSpace(UPrimitiveComponent* OverlappedComponent, AAct
  * @param OtherBodyIndex
  * @param bFromSweep
  */
-void AGridSpace::OnExitGridSpace(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+void AGridSpace::OnExitGridSpace(AActor* whoLeft) {
+
+	if (occupant == nullptr || whoLeft != occupant)
+		return;
+
 	setOccupant(nullptr);
+
+	ACrewMember* crewMember = Cast<ACrewMember>(whoLeft);
+	if (IsValid(crewMember)) {
+		UActorComponent* powerUpComponent = FindComponentByClass<UTilePowerUpEffect>();
+		if (IsValid(powerUpComponent)) {
+			UTilePowerUpEffect* actualPowerUp = Cast<UTilePowerUpEffect>(powerUpComponent);
+			actualPowerUp->RemoveCharacterEffect(crewMember);
+		}
+	}
 }
 
 void AGridSpace::SetToRegularMaterial() {
@@ -152,6 +177,12 @@ void AGridSpace::SetOverlayToRed(bool temp) {
 	if (!temp) {
 		mainOverlayColor = translucentRedMaterial;
 	}
+}
+
+void AGridSpace::SetOverlayToRedOnTimer(bool temp) {
+	SetOverlayToRed(temp);
+	FTimerHandle f;
+	GetWorld()->GetTimerManager().SetTimer(f, this, &AGridSpace::ClearOverlay, 2.0f, false);
 }
 
 void AGridSpace::SetOverlayToBlue(bool temp) {

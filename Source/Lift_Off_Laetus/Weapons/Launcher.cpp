@@ -74,7 +74,7 @@ void ULauncher::launch() {
 	AGridSpace* space = grid->getTile(targetSpace);
 
 	if (space) {
-		space->SetToRed();
+		//space->SetToRed();
 		FVector start = mesh->GetComponentLocation();
 		FVector end = space->GetActorLocation();
 
@@ -97,6 +97,7 @@ void ULauncher::launch() {
 
 		//Spawn the grenade and pass the path for it to traverse.
 		grid->clearGridOverlay();
+		space->SetOverlayToRed(false);
 		AGrenade* g = GetWorld()->SpawnActor<AGrenade>(mesh->GetComponentLocation(), FRotator(0, 0, 0));
 		g->path = r.PathData;
 		g->targetLocation = end;
