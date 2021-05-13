@@ -53,12 +53,14 @@ public:
 	/**
 	 * Enable input on this controller.
 	 */
-	void enable();
+	UFUNCTION(BlueprintCallable)
+		void enable();
 
 	/**
 	 * Disable input on this controller.
 	 */
-	void disable();
+	UFUNCTION(BlueprintCallable)
+		void disable();
 
 	/**
 	 * Tell the game mode to end this players turn and switch control over to
@@ -151,9 +153,14 @@ public:
 	void moveIfValid(Direction direction);
 
 	/**
-	 * Handle the "Confim" input based on the current turn state this player is in.
+	 * Handle the "Confirm" input based on the current turn state this player is in.
 	 */
 	void handleConfirm();
+
+	/**
+	 * Handles the "Pause" input.
+	 */
+	void handlePause();
 
 	///////////////////////// CAMERA MOVEMENT /////////////////////////////////
 	//The PlayerCameraManager that both Crews refernce to move the 

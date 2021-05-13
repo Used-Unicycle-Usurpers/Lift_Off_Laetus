@@ -17,6 +17,7 @@
 #include "../PowerUps/PowerupEffectData.h"
 #include "../Controllers/InputController.h"
 #include "CharacterAnimDataAsset.h"
+#include "Sound/SoundCue.h"
 
 //Data assets with all mesh, material, and animation information
 //for each of the three characters.
@@ -41,6 +42,9 @@ ACrewMember::ACrewMember() {
 	static ConstructorHelpers::FObjectFinder<UCharacterAnimDataAsset>NembusData(TEXT("CharacterAnimDataAsset'/Game/Characters/NembusAnimDataAsset.NembusAnimDataAsset'"));
 	nembusData = NembusData.Object;
 
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_punch_Cue.AUD_punch_Cue'"));
+	punchSound = sound.Object;
+	
 	//Intialize the skeletal mesh component. The mesh itself will be specified
 	//in setMeshAnimData.
 	skeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
@@ -144,6 +148,12 @@ void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
 	turnAroundMontage = data->turnAroundMontage;
 	stumbleMontage = data->stumbleMontage;
 	pushMontage = data->pushMontage;
+
+	//Get all sound effects for this particular character.
+	deathSound = data->deathSound;
+	takeDamageSound = data->takeDamageSound;
+	slipSound = data->slipSound;
+	footstepSound = data->footstepSound;
 
 	//Get the skeletal mesh, but don't assign the materials until we also 
 	//have the rifle mesh ready.
@@ -296,6 +306,7 @@ void ACrewMember::moveForward() {
 	setGridSpace(targetLocation);
 
 	//Start the timer to increment the position up until we reach the destination
+	UGameplayStatics::PlaySound2D(GetWorld(), footstepSound);
 	GetWorld()->GetTimerManager().SetTimer(moveTimerHandle, this, &ACrewMember::incrementMoveForward, 0.01, true);
 }
 
@@ -400,6 +411,7 @@ void ACrewMember::punchAtDirection() {
  * they are an ACrewMember.
  */
 void ACrewMember::dealPunchDamage() {
+	UGameplayStatics::PlaySound2D(GetWorld(), punchSound);
 	ACrewMember* occupant = Cast<ACrewMember>(targetLocation->getOccupant());
 	if (occupant) {
 		occupant->takeDamage(1.0f);
@@ -411,6 +423,9 @@ void ACrewMember::dealPunchDamage() {
  */
 void ACrewMember::enableInputAfterPunch() {
 	getCrewController()->enableInputController();
+
+	//change turn if actionBar is 0
+	if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
 }
 
 /**
@@ -422,6 +437,7 @@ void ACrewMember::enableInputAfterPunch() {
 void ACrewMember::takeDamage(int32 damageTaken) {
 	health -= damageTaken;
 	float montageLength = playTakeDamageMontage();
+	UGameplayStatics::PlaySound2D(GetWorld(), takeDamageSound);
 
 	if (health <= 0) {
 		//Play death montage. After that ends, respawn but moving to 
@@ -437,6 +453,7 @@ void ACrewMember::takeDamage(int32 damageTaken) {
  */
 void ACrewMember::die() {
 	float montageLength = playDeathMontage();
+	UGameplayStatics::PlaySound2D(GetWorld(), deathSound);
 
 	FTimerHandle timerParams;
 	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACrewMember::respawn, montageLength, false);

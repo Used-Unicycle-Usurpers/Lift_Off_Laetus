@@ -8,6 +8,7 @@
 #include "../Characters/CrewMember.h"
 #include "Kismet/GameplayStatics.h"
 #include "../GameManagement/CoreFragmentReceiver.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ACoreFragment::ACoreFragment() {
@@ -18,6 +19,9 @@ ACoreFragment::ACoreFragment() {
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>CubeMeshAsset(TEXT("StaticMesh'/Game/Geometry/Meshes/TEAM_CoreFragment__2_.TEAM_CoreFragment__2_'"));
 	mesh->SetStaticMesh(CubeMeshAsset.Object);
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/AUD_core_slide01_Cue.AUD_core_slide01_Cue'"));
+	slidingSound = sound.Object;
 }
 
 // Called when the game starts or when spawned
@@ -81,6 +85,8 @@ void ACoreFragment::moveForward() {
 	
 	incrementsLeft = numIncrements = 75;
 	moveIncrement = (newLocation - oldLocation) / numIncrements;
+
+	UGameplayStatics::PlaySound2D(GetWorld(), slidingSound);
 
 	//Start the timer to increment the position up until we reach the destination
 	GetWorld()->GetTimerManager().SetTimer(moveTimerHandle, this, &ACoreFragment::incrementMoveForward, 0.01, true);

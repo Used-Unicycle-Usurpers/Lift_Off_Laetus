@@ -50,4 +50,6 @@ private:
 	 * matches that direction to face.
 	 */
 	enum Direction getDirectionToThrow(FVector2D target);
+
+	class USoundCue* launcherSound;
 };

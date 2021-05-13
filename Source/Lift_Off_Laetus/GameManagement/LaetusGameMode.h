@@ -61,6 +61,13 @@ struct FsetCrews {
 		class ACrew* blueCrew;
 };
 
+//Params used to call setCrews in the UI.
+USTRUCT()
+struct FplayWinningVideo {
+	GENERATED_BODY()
+		int winningTeam;
+};
+
 /**
  * 
  */
@@ -87,11 +94,23 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UCameraComponent* camera;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 		TSubclassOf<class UUserWidget> HUDWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+		TSubclassOf<class UUserWidget> PauseMenuWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+		TSubclassOf<class UUserWidget> VictoryVideoWidgetClass;
 
 	UPROPERTY()
 		class UUserWidget* hud;
+
+	UPROPERTY()
+		class UUserWidget* pauseMenu;
+
+	UPROPERTY()
+		class UUserWidget* victoryVideo;
 
 	class AGrid* getGameGrid();
 
@@ -105,10 +124,12 @@ public:
 	int32 getABStatus();
 	bool checkLegalMove(int32 actionPrice);
 
+	void callPauseMenuToggleVisibility();
+
 private:
 
 	// Game rule parameters
-	int32 coresToWin = 1;  // Number of cores needed to win
+	int32 coresToWin = 3;  // Number of cores needed to win
 
 	// Crew/turn parameters
 	//ACrew* crews;     // Array of crews, defined at runtime
@@ -135,11 +156,13 @@ private:
 	virtual APawn* SpawnDefaultPawnFor(AController* NewPlayer, AActor* StartSpot);
 	virtual UClass* GetDefaultPawnClassForController(AController* InController);
 
-	void OnGameEnd(int32 winner);
-
 	bool singleInput;
 
-	FTimerHandle TimerHandle;
+	void OnGameEnd(int32 winner);
+
+	FTimerHandle ActionPriceTimerHandle;
+	FTimerHandle NoPointsTimerHandle;
+	FTimerHandle ChangeTurnTimerHandle;
 	int32 message;
 	bool visible;
 	bool firstChangeTurn = true; //so message does not show up during startup
@@ -148,4 +171,12 @@ private:
 
 	void callHUDSetCrews(class ACrew* c1, class ACrew* c2);
 
+	void callVictoryVideoPlayWinningVideo(int team);
+
+	//Sound that is played while changing turns.
+	class USoundCue* changingTurnSound;
+
+	//Sound that is played when someone tries to take an action 
+	//for which they do not have enough action points.
+	class USoundCue* errorSound;
 };

@@ -149,10 +149,10 @@ void AGrid::placeGridSpaces() {
 
 				AGridSpace* tile;
 
-				if (i == halfWidth && (j == 0 || j == numTilesLength - 1)) {
+				if ( ((i == 0) || ((i + 1) % 4 == 0)) && (j == 0 || j == numTilesLength - 1)) {
 					
 					ACoreFragmentReceiver* coreRec = GetWorld()->SpawnActor<ACoreFragmentReceiver>(location, rotation);
-					tile = coreRec; // Cast<AGridSpace>(coreRec);
+					tile = coreRec;
 
 					if (j == 0) {
 						receiver0 = coreRec;
@@ -179,8 +179,25 @@ void AGrid::placeGridSpaces() {
 }
 
 void AGrid::assignCoreFragmentReceivers(ACrew* crew0, ACrew* crew1) {
-	receiver0->SetCrew(crew0);
-	receiver1->SetCrew(crew1);
+	for (int i = 0; i < numRows; i++) {
+		//Assign the one on the left side to the red team.
+		AGridSpace* space = getTile(FVector2D(i, 0));
+		if (space) {
+			ACoreFragmentReceiver* receiver = Cast<ACoreFragmentReceiver>(space);
+			if (receiver) {
+				receiver->SetCrew(crew0);
+			}
+		}
+
+		//Assign the one on the left side to the blue team.
+		space = getTile(FVector2D(i, numColumns - 1));
+		if (space) {
+			ACoreFragmentReceiver* receiver = Cast<ACoreFragmentReceiver>(space);
+			if (receiver) {
+				receiver->SetCrew(crew1);
+			}
+		}
+	}
 }
 
 /**
