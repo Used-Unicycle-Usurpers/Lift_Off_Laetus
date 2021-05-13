@@ -779,6 +779,7 @@ void ACrewMember::ClearWeaponEffect() {
 
 ALaetusGameMode* ACrewMember::getGameMode() {
 	return gameMode;
+}
 
 /**
  * Returns true if this ACrewMember is currently standing in an AGridSpace
