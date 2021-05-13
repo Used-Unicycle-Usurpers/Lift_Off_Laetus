@@ -69,7 +69,7 @@ void ACoreFragment::moveTo(AGridSpace* target, ACrewMember* pusher) {
 	//Wait to move until the player has finished rotating (if they need to rotate)
 	if (needsRotate) {
 		FTimerHandle timerParams;
-		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACoreFragment::moveForward, 1.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACoreFragment::moveForward, 0.7f, false);
 	}else {
 		moveForward();
 	}
@@ -83,7 +83,7 @@ void ACoreFragment::moveTo(AGridSpace* target, ACrewMember* pusher) {
 void ACoreFragment::moveForward() {
 	//Calculate how much to increment movement by in each iteration of the timer.
 	
-	incrementsLeft = numIncrements = 50;
+	incrementsLeft = numIncrements = 60;
 	moveIncrement = (newLocation - oldLocation) / numIncrements;
 
 	UGameplayStatics::PlaySound2D(GetWorld(), slidingSound);
