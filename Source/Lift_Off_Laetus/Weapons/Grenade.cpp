@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
+#include "../PowerUps/CharacterWeakenEffect.h"
 
 // Sets default values
 AGrenade::AGrenade() {
@@ -103,7 +104,10 @@ void AGrenade::explode() {
 					ACrewMember* crewMember = Cast<ACrewMember>(occupant);
 					if (crewMember) {
 						//TODO: determine damage
-						crewMember->takeDamage(1.0f);
+						if (crewMember->GetComponentByClass(UCharacterWeakenEffect::StaticClass()) != nullptr)
+							crewMember->takeDamage(2.0f);
+						else
+							crewMember->takeDamage(1.0f);
 					}
 				}
 			}

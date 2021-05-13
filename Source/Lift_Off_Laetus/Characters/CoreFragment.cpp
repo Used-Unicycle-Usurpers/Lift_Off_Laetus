@@ -60,7 +60,10 @@ void ACoreFragment::moveTo(AGridSpace* target, ACrewMember* pusher) {
 	//If the pusher needs to rotate before the begin pushing, we need to wait
 	//on moving until they are ready to push.
 	FVector2D unitDirection = grid->getUnitDifference(gridSpace, target);
-	bool needsRotate = pusher->needToRotate(unitDirection);
+	bool needsRotate = false;
+	
+	if (pusher != nullptr)
+		needsRotate = pusher->needToRotate(unitDirection);
 
 	// Reset pointers/references. Do this now so the crew member pushing this
 	// doesn't interpret this space as being occupied.

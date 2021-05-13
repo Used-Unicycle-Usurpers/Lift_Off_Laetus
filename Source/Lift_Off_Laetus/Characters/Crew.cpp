@@ -74,7 +74,7 @@ void ACrew::SetUp(Team newTeam, AGrid* newGrid, ACrewController* newController) 
 		newMember->SetTeam(newTeam);
 		newMember->setID(i);
 		crewMembers.Add(newMember);
-		newMember->setGridSpace(space);
+		newMember->setGridSpace(space, FVector2D(0, 0));
 	}
 }
 
@@ -158,11 +158,11 @@ void ACrew::setSelectedCrewMember(int current) {
 void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 	if (crewMemberID >= crewMembers.Num()) { return; }
 
-	FVector2D crewMemberGridLocation = crewMembers[selectedCharacter]->getGridSpace()->getGridLocation();
+	FVector2D crewMemberGridLocation = crewMembers[crewMemberID]->getGridSpace()->getGridLocation();
 	AGridSpace* destination = grid->getTile(crewMemberGridLocation + direction);
 
 	if (destination && !(destination->isOccupied())) {
-		crewMembers[selectedCharacter]->MoveTo(destination, false);
+		crewMembers[crewMemberID]->MoveTo(destination, false);
 	}else {
 
 		if (destination && destination->containsFragment()) {
@@ -176,8 +176,8 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 				if (fragment) {
 					//Move the core fragment first so that space is no longer occupired and thus
 					//the crew member can move as well.
-					fragment->moveTo(fragmentDest, crewMembers[selectedCharacter]);
-					crewMembers[selectedCharacter]->MoveTo(destination, true);
+					fragment->moveTo(fragmentDest, crewMembers[crewMemberID]);
+					crewMembers[crewMemberID]->MoveTo(destination, true);
 				}
 			}
 		}

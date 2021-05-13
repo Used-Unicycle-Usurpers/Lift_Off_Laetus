@@ -3,6 +3,7 @@
 
 #include "SlimeTree.h"
 #include "SlimeOrb.h"
+#include "EngineUtils.h"
 
 //References to random meshes to pick from on construction.
 static TArray<FString> treeMeshReferences = {
@@ -15,6 +16,18 @@ static TArray<FString> treeMeshReferences = {
 ASlimeTree::ASlimeTree() {
 	setHarvestSourceType(HarvestSourceType::SlimeTree);
 	
+	TArray<UObject*> effects;
+	EngineUtils::FindOrLoadAssetsByPath(TEXT("/Game/Effects"), effects, EngineUtils::ATL_Regular);
+
+	for (auto asset : effects)
+	{
+		UPowerUpEffectData* effectType = Cast<UPowerUpEffectData>(asset);
+		if (effectType != nullptr && effectType->effectName.IsEqual(TEXT("Sticky"))) {
+			effectToGive = effectType;
+			break;
+		}
+	}
+
 	//Pick a random mesh
 	int randomIdx = FMath::RandRange(0, treeMeshReferences.Num() - 1);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>randMesh1(*treeMeshReferences[0]);

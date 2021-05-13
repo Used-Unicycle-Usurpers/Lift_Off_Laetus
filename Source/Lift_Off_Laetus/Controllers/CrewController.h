@@ -54,6 +54,8 @@ public:
 	 */
 	void punch(FVector2D direction);
 
+	void harvest();
+
 	/**
 	 * Returns the ACrew that is currently controlled by this ACrewController.
 	 */

@@ -2,6 +2,7 @@
 
 
 #include "HarvestSource.h"
+#include "PowerupEffectData.h"
 
 // Sets default values
 AHarvestSource::AHarvestSource() {
