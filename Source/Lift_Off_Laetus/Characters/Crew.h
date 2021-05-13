@@ -144,4 +144,6 @@ private:
 
 	//The ACrewController that is possessiong this ACrew.
 	class ACrewController* controller;
+
+	class ALaetusGameMode* gameMode;
 };
