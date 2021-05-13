@@ -286,7 +286,7 @@ void ACrewMember::MoveTo(AGridSpace * target, bool pushingCoreFragment) {
  */
 void ACrewMember::moveForward() {
 	rotateToDirection(directionToFaceEnum);
-	if (targetLocation == nullptr || targetLocation->isOccupied()) {
+	if (targetLocation == nullptr || targetLocation->isOccupied() || gridSpace == nullptr) {
 		return;
 	}
 

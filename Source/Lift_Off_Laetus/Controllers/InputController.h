@@ -62,6 +62,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void disable();
 
+	void resetInputMode();
+
 	/**
 	 * Tell the game mode to end this players turn and switch control over to
 	 * the other player.
