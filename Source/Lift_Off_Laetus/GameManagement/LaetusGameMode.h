@@ -151,7 +151,9 @@ private:
 
 	void OnGameEnd(int32 winner);
 
-	FTimerHandle TimerHandle;
+	FTimerHandle ActionPriceTimerHandle;
+	FTimerHandle NoPointsTimerHandle;
+	FTimerHandle ChangeTurnTimerHandle;
 	int32 message;
 	bool visible;
 	bool firstChangeTurn = true; //so message does not show up during startup

@@ -160,7 +160,7 @@ void ALaetusGameMode::ChangeTurn() {
 	if (!firstChangeTurn) {
 		message = 10;
 		visible = false;
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.0f, false);
+		GetWorldTimerManager().SetTimer(ChangeTurnTimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.0f, false);
 	}
 }
 
@@ -270,7 +270,7 @@ bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
 		//hide message after a bit
 		message = actionPrice;
 		visible = false;
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
+		GetWorldTimerManager().SetTimer(ActionPriceTimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
 	}else { //not enough action points
 		//show invalid move message and play error sound
 		callHUDMessage(true, 0);
@@ -280,7 +280,9 @@ bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
 		//display invalid move message for a bit
 		visible = false;
 		message = 0;
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
+		if (!GetWorld()->GetTimerManager().IsTimerActive(NoPointsTimerHandle)) {
+			GetWorldTimerManager().SetTimer(NoPointsTimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
+		}
 		return false;
 	}
 

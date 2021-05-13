@@ -4,6 +4,8 @@
 #include "CoreFragmentReceiver.h"
 #include "Lift_Off_Laetus/Characters/Crew.h"
 #include "Lift_Off_Laetus/Characters/CoreFragment.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 ACoreFragmentReceiver::ACoreFragmentReceiver() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>receiverMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/ENV_Tile/ENV_Goal_Tile.ENV_Goal_Tile'"));
@@ -18,6 +20,9 @@ ACoreFragmentReceiver::ACoreFragmentReceiver() {
 	collision->SetRelativeScale3D(FVector(3.f, 3.f, 2.f));
 	overlayMesh->SetRelativeScale3D(FVector(2.f, 2.f, 1.f));
 	overlayMesh->SetRelativeLocation(FVector(0.f, 0.f, 3.f));
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/AUD_score_point_Cue.AUD_score_point_Cue'"));
+	scoreSound = sound.Object;
 }
 
 void ACoreFragmentReceiver::BeginPlay() {
@@ -31,10 +36,16 @@ void ACoreFragmentReceiver::SetCrew(ACrew* crew) {
 }
 
 void ACoreFragmentReceiver::OnCoreFragmentReceived(ACoreFragment* core) {
+	//Play the score sound
+	UGameplayStatics::PlaySound2D(GetWorld(), scoreSound);
 
 	// Increase core count by 1
-	ownedBy->incrementCores();
+	if (ownedBy) {
+		ownedBy->incrementCores();
+	}else {
+		UE_LOG(LogTemp, Warning, TEXT("ownedBy was null for ACoreFragmentReceiver: %s"), *GetName());
+	}
 
-	// Destroy the 
+	// Destroy the fragment core
 	GetWorld()->DestroyActor(core);
 }
