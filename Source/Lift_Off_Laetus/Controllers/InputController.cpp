@@ -30,6 +30,7 @@ void AInputController::SetupInputComponent() {
 	InputComponent->BindAction("Down", IE_Pressed, this, &AInputController::handleDown);
 
 	InputComponent->BindAction("Confirm", IE_Pressed, this, &AInputController::handleConfirm);
+	InputComponent->BindAction("Pause", IE_Pressed, this, &AInputController::handlePause);
 
 	//For debugging, these keybinds allow you to manually set the state, rather then selecting move, 
 	//attack, or collect on the UI
@@ -460,7 +461,7 @@ void AInputController::moveIfValid(Direction direction) {
 }
 
 /**
- * Handle the "Confim" input based on the current turn state this player is in.
+ * Handle the "Confirm" input based on the current turn state this player is in.
  */
 void AInputController::handleConfirm() {
 	switch (currentTurnState) {
@@ -488,6 +489,15 @@ void AInputController::handleConfirm() {
 		break;
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("No actions for pressing Confirm in default state"));
+	}
+}
+
+/**
+ * Handles the "Pause" input.
+ */
+void AInputController::handlePause() {
+	if (gameMode) {
+		gameMode->callPauseMenuToggleVisibility();
 	}
 }
 

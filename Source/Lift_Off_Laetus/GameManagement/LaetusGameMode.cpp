@@ -16,6 +16,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameEnums.h"
 #include "LaetusGameInstance.h"
+#include "Sound/SoundCue.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
@@ -26,6 +27,18 @@ ALaetusGameMode::ALaetusGameMode() {
 
 	static ConstructorHelpers::FClassFinder<UUserWidget>HUDBlueprintWidgetClass(TEXT("WidgetBlueprintGeneratedClass'/Game/UI/HUD.HUD_C'"));
 	HUDWidgetClass = HUDBlueprintWidgetClass.Class;
+
+	static ConstructorHelpers::FClassFinder<UUserWidget>PauseMenuBlueprintWidgetClass(TEXT("WidgetBlueprint'/Game/UI/PauseMenu.PauseMenu_C'"));
+	PauseMenuWidgetClass = PauseMenuBlueprintWidgetClass.Class;
+
+	static ConstructorHelpers::FClassFinder<UUserWidget>VictoryVideoBlueprintWidgetClass(TEXT("WidgetBlueprint'/Game/Videos/VictoryVideoWidget.VictoryVideoWidget_C'"));
+	VictoryVideoWidgetClass = VictoryVideoBlueprintWidgetClass.Class;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>turn(TEXT("SoundCue'/Game/Audio/AUD_changing_turn01_Cue.AUD_changing_turn01_Cue'"));
+	changingTurnSound = turn.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>error(TEXT("SoundCue'/Game/Audio/AUD_error01_Cue.AUD_error01_Cue'"));
+	errorSound = error.Object;
 }
 
 /**
@@ -37,6 +50,11 @@ void ALaetusGameMode::BeginPlay() {
 
 	hud = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 	hud->AddToViewport();
+
+	pauseMenu = CreateWidget<UUserWidget>(GetWorld(), PauseMenuWidgetClass);
+	pauseMenu->AddToViewport();
+
+	victoryVideo = CreateWidget<UUserWidget>(GetWorld(), VictoryVideoWidgetClass);
 
 	//Based on the mode selected in the main menu, support keyboard only or keyboard 
 	//for player one / gamepad for player two
@@ -89,6 +107,7 @@ void ALaetusGameMode::BeginPlay() {
 
 //Begin new turn
 void ALaetusGameMode::ChangeTurn() {
+	UGameplayStatics::PlaySound2D(GetWorld(), changingTurnSound);
 	grid->clearGridOverlay();
 
 	//inform player we are switching turns 
@@ -175,16 +194,17 @@ void ALaetusGameMode::EvaluateWin()
 }
 
 void ALaetusGameMode::OnGameEnd(int32 winner) {
-
-	// TODO: End turn, lock inputs
-
-	//redTeamController->disable();
-	//blueTeamController->disable();
+	inputController->disable();
+	if (inputController2) {
+		inputController2->disable();
+	}
 
 	if (winner == 0) {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, TEXT("Red Team Won!"));
+		callVictoryVideoPlayWinningVideo(0);
 	} else if (winner == 1) {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, TEXT("Blue Team Won!"));
+		callVictoryVideoPlayWinningVideo(1);
 	} else {
 		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, TEXT("Error: Unrecognized team won"));
 	}
@@ -252,9 +272,10 @@ bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
 		visible = false;
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
 	}else { //not enough action points
-		//show invalid move message 
+		//show invalid move message and play error sound
 		callHUDMessage(true, 0);
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, TEXT("Called display message"));
+		UGameplayStatics::PlaySound2D(GetWorld(), errorSound);
+		//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, TEXT("Called display message"));
 
 		//display invalid move message for a bit
 		visible = false;
@@ -281,4 +302,17 @@ void ALaetusGameMode::callHUDSetCrews(class ACrew* c1, class ACrew* c2) {
 	params.blueCrew = c2;
 	UFunction* setCrewsFunction = hud->FindFunction(FName("setCrews"));
 	hud->ProcessEvent(setCrewsFunction, &params);
+}
+
+void ALaetusGameMode::callPauseMenuToggleVisibility() {
+	UFunction* setCrewsFunction = pauseMenu->FindFunction(FName("toggleVisibility"));
+	pauseMenu->ProcessEvent(setCrewsFunction, nullptr);
+}
+
+void ALaetusGameMode::callVictoryVideoPlayWinningVideo(int team) {
+	victoryVideo->AddToViewport();
+	FplayWinningVideo params;
+	params.winningTeam = team;
+	UFunction* playWinningVideoFunction = victoryVideo->FindFunction(FName("playWinningVideo"));
+	victoryVideo->ProcessEvent(playWinningVideoFunction, &params);
 }

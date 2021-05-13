@@ -149,10 +149,10 @@ void AGrid::placeGridSpaces() {
 
 				AGridSpace* tile;
 
-				if (i == halfWidth && (j == 0 || j == numTilesLength - 1)) {
+				if ( ((i == 0) || ((i + 1) % 4 == 0)) && (j == 0 || j == numTilesLength - 1)) {
 					
 					ACoreFragmentReceiver* coreRec = GetWorld()->SpawnActor<ACoreFragmentReceiver>(location, rotation);
-					tile = coreRec; // Cast<AGridSpace>(coreRec);
+					tile = coreRec;
 
 					if (j == 0) {
 						receiver0 = coreRec;

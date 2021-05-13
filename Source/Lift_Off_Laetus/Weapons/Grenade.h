@@ -71,4 +71,8 @@ private:
 
 	//True if this grenade has already exploded, false otherwise.
 	bool exploded;
+
+	class UParticleSystem* grenadeExplosion;
+
+	class USoundCue* explosionSound;
 };

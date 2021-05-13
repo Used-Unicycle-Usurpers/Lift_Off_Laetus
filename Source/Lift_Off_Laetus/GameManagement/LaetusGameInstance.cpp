@@ -3,3 +3,6 @@
 
 #include "LaetusGameInstance.h"
 
+ULaetusGameInstance::ULaetusGameInstance() {
+	singleInput = true;
+}

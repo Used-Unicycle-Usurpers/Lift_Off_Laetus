@@ -95,4 +95,6 @@ private:
 	//FTimerHandle for the looping time that moves the ACoreFragment from
 	//oldLocation to newLocation.
 	FTimerHandle moveTimerHandle;
+
+	class USoundCue* slidingSound;
 };

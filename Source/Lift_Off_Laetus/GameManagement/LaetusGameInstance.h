@@ -15,6 +15,8 @@ class LIFT_OFF_LAETUS_API ULaetusGameInstance : public UGameInstance {
 
 public:
 
+	ULaetusGameInstance();
+
 	UPROPERTY(BlueprintReadWrite)
 		bool singleInput;
 };

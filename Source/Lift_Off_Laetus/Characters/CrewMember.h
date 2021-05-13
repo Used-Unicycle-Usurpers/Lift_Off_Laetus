@@ -373,4 +373,16 @@ private:
 	//True if this ACrewMember is going to be pushing an ACoreFragment
 	//when they start moving, false otherwise.
 	bool pushing;
+
+	//Sound effect for when the ACrewMember dies.
+	class USoundCue* deathSound;
+
+	//Sound effect for when the ACrewMember take damage.
+	class USoundCue* takeDamageSound;
+
+	//Sound effect for when the ACrewMember slips on a tile.
+	class USoundCue* slipSound;
+
+	//Sound effect for when the ACrewMember is moving.
+	class USoundCue* footstepSound;
 };
