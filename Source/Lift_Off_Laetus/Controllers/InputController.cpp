@@ -223,7 +223,7 @@ void AInputController::setStateToGrenadeAttack() {
 		currentlySelectedTile = controlledCrew->getCurrentCrewMember()->getGridSpace();
 		moveCameraSmoothly(currentlySelectedTile);
 		setTurnState(GrenadeAttack);
-		gameMode->getGameGrid()->colorGridInRange(currentlySelectedTile->getGridLocation(), 2);
+		gameMode->getGameGrid()->colorGridInRange(currentlySelectedTile->getGridLocation(), 3);
 	}
 }
 
@@ -539,7 +539,7 @@ void AInputController::moveCameraToTile(Direction direction) {
 
 	//Check this target tile is within grenade-throwing range
 	FVector2D origin = controlledCrew->getCurrentCrewMember()->getGridSpace()->getGridLocation();
-	if (grid->areTilesWithinRange(origin, newLocation, 2)) {
+	if (grid->areTilesWithinRange(origin, newLocation, 3)) {
 
 		AGridSpace* newSpace = grid->getTile(newLocation);
 		if (newSpace) {

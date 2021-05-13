@@ -779,4 +779,11 @@ void ACrewMember::ClearWeaponEffect() {
 
 ALaetusGameMode* ACrewMember::getGameMode() {
 	return gameMode;
+
+/**
+ * Returns true if this ACrewMember is currently standing in an AGridSpace
+ * in which they can harvest from an adjacent AHarvestSource.
+ */
+bool ACrewMember::isNextToHarvestSource() {
+	return IsValid(gridSpace->getHarvestSource());
 }
