@@ -161,4 +161,11 @@ private:
 	void callHUDSetCrews(class ACrew* c1, class ACrew* c2);
 
 	void callVictoryVideoPlayWinningVideo(int team);
+
+	//Sound that is played while changing turns.
+	class USoundCue* changingTurnSound;
+
+	//Sound that is played when someone tries to take an action 
+	//for which they do not have enough action points.
+	class USoundCue* errorSound;
 };

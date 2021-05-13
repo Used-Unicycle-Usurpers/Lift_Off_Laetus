@@ -16,6 +16,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameEnums.h"
 #include "LaetusGameInstance.h"
+#include "Sound/SoundCue.h"
 
 ALaetusGameMode::ALaetusGameMode() {
 	// use our custom PlayerController class
@@ -32,6 +33,12 @@ ALaetusGameMode::ALaetusGameMode() {
 
 	static ConstructorHelpers::FClassFinder<UUserWidget>VictoryVideoBlueprintWidgetClass(TEXT("WidgetBlueprint'/Game/Videos/VictoryVideoWidget.VictoryVideoWidget_C'"));
 	VictoryVideoWidgetClass = VictoryVideoBlueprintWidgetClass.Class;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>turn(TEXT("SoundCue'/Game/Audio/AUD_changing_turn01_Cue.AUD_changing_turn01_Cue'"));
+	changingTurnSound = turn.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>error(TEXT("SoundCue'/Game/Audio/AUD_error01_Cue.AUD_error01_Cue'"));
+	errorSound = error.Object;
 }
 
 /**
@@ -100,6 +107,7 @@ void ALaetusGameMode::BeginPlay() {
 
 //Begin new turn
 void ALaetusGameMode::ChangeTurn() {
+	UGameplayStatics::PlaySound2D(GetWorld(), changingTurnSound);
 	grid->clearGridOverlay();
 
 	//inform player we are switching turns 
@@ -264,9 +272,10 @@ bool ALaetusGameMode::checkLegalMove(int32 actionPrice) {
 		visible = false;
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &ALaetusGameMode::callHUDTimer, 1.5f, false);
 	}else { //not enough action points
-		//show invalid move message 
+		//show invalid move message and play error sound
 		callHUDMessage(true, 0);
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, TEXT("Called display message"));
+		UGameplayStatics::PlaySound2D(GetWorld(), errorSound);
+		//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, TEXT("Called display message"));
 
 		//display invalid move message for a bit
 		visible = false;

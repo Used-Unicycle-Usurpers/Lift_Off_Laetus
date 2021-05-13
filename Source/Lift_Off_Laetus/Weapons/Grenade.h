@@ -73,4 +73,6 @@ private:
 	bool exploded;
 
 	class UParticleSystem* grenadeExplosion;
+
+	class USoundCue* explosionSound;
 };

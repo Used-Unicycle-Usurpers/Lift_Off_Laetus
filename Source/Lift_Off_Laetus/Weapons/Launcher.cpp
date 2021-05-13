@@ -18,7 +18,7 @@ ULauncher::ULauncher() {
 	mesh->SetWorldScale3D(FVector(25.f, 25.f, 25.f));
 	range = 2;
 
-	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_launcher01_Cue.AUD_launcher01_Cue'"));
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_launcher02_Cue.AUD_launcher02_Cue'"));
 	launcherSound = sound.Object;
 }
 
@@ -59,7 +59,6 @@ void ULauncher::readyLaunch() {
 	mesh->SetVisibility(true);
 	
 	owner->playThrowMontage();
-	UGameplayStatics::PlaySound2D(GetWorld(), launcherSound);
 	FTimerHandle timerParams;
 	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ULauncher::launch, owner->throwMontageDelay, false);
 }
@@ -69,6 +68,7 @@ void ULauncher::readyLaunch() {
  * and throw the grenade.
  */
 void ULauncher::launch() {
+	UGameplayStatics::PlaySound2D(GetWorld(), launcherSound);
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	FVector2D location = owner->getGridSpace()->getGridLocation();
 	AGridSpace* space = grid->getTile(targetSpace);
