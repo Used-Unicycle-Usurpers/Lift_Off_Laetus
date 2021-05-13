@@ -55,7 +55,7 @@ AGridSpace::AGridSpace(){
 	overlayMesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
 	overlayMesh->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
 	overlayMesh->SetRelativeLocation(FVector(0.f, 0.f, 300.f));
-	overlayMesh->GetStaticMesh()->SetMaterial(0, translucentInvisibleMaterial);
+	overlayMesh->SetMaterial(0, translucentInvisibleMaterial);
 	
 	//Set up box collision component, which will be used to keep track of the current
 	//occupant of this AGridSpace, if any.
