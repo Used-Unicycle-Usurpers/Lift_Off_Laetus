@@ -26,14 +26,14 @@ public:
 	 * NULL).
 	 */
 	UFUNCTION(BlueprintCallable)
-		void OnEnterGridSpace(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+		void OnEnterGridSpace(AActor* whoEntered, FVector2D direction);
 
 	/**
 	 * Called when the current occupant of this AGridSpace walks off. Occupant
 	 * is set to nullptr.
 	 */
 	UFUNCTION(BlueprintCallable)
-		void OnExitGridSpace(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+		void OnExitGridSpace(AActor* whoLeft);
 	
 	//Hitbox used to set the current occupant of this AGridSpace as players 
 	//move around the board.
@@ -44,6 +44,10 @@ public:
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
 
+	//For visual debugging
+	UPROPERTY(EditAnywhere)
+		class UStaticMeshComponent* overlayMesh;
+
 	void SetToRegularMaterial();
 
 	//For visual debugging
@@ -51,6 +55,14 @@ public:
 	void SetToRedOnTimer();
 	void SetToBlue();
 	void SetToGreen();
+
+	//Overlay colors for displaying valid/invalid tiles for actions
+	void ClearOverlay();
+	void RestoreOverlayColor();
+	void SetOverlayToRed(bool temp);
+	void SetOverlayToRedOnTimer(bool temp);
+	void SetOverlayToBlue(bool temp);
+	void SetOverlayToGreen(bool temp);
 
 	//Get and set the occupant of this AGridSpace
 	void setOccupant(AActor* newOccupant);
@@ -100,4 +112,6 @@ private:
 
 	//The additional cost of moving through this space
 	int32 extraMoveCost = 0;
+
+	UMaterial* mainOverlayColor;
 };

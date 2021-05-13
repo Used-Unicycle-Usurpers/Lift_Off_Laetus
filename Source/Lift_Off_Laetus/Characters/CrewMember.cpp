@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "CrewMember.h"
 #include "Crew.h"
 #include "../Weapons/Launcher.h"
@@ -15,20 +14,27 @@
 #include "Components/TimelineComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Controllers/CrewController.h"
+#include "../PowerUps/PowerupEffectData.h"
+#include "../Controllers/InputController.h"
 #include "CharacterAnimDataAsset.h"
+#include "Sound/SoundCue.h"
 
+//Data assets with all mesh, material, and animation information
+//for each of the three characters.
 UCharacterAnimDataAsset* pavoData;
 UCharacterAnimDataAsset* lyraData;
 UCharacterAnimDataAsset* nembusData;
 
-#define RED_TEAM_MATERIAL "Material'/Game/Characters/lambert1.lambert1'"
-#define BLUE_TEAM_MATERIAL "Material'/Game/Characters/lambert1_2.lambert1_2'"
+#define RED_TEAM_MATERIAL "Material'/Game/Characters/Pavo1.Pavo1'"
+#define BLUE_TEAM_MATERIAL "Material'/Game/Characters/Pavo2.Pavo2'"
 
 // Sets default values
 ACrewMember::ACrewMember() {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//Get the data assets for all three charcters. Will be loaded up later
+	//when we know which character this is.
 	static ConstructorHelpers::FObjectFinder<UCharacterAnimDataAsset>PavoData(TEXT("CharacterAnimDataAsset'/Game/Characters/PavoAnimDataAsset.PavoAnimDataAsset'"));
 	pavoData = PavoData.Object;
 	static ConstructorHelpers::FObjectFinder<UCharacterAnimDataAsset>LyraData(TEXT("CharacterAnimDataAsset'/Game/Characters/LyraAnimDataAsset.LyraAnimDataAsset'"));
@@ -36,11 +42,18 @@ ACrewMember::ACrewMember() {
 	static ConstructorHelpers::FObjectFinder<UCharacterAnimDataAsset>NembusData(TEXT("CharacterAnimDataAsset'/Game/Characters/NembusAnimDataAsset.NembusAnimDataAsset'"));
 	nembusData = NembusData.Object;
 
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_punch_Cue.AUD_punch_Cue'"));
+	punchSound = sound.Object;
+	
+	//Intialize the skeletal mesh component. The mesh itself will be specified
+	//in setMeshAnimData.
 	skeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
 	skeletalMesh->SetEnableGravity(true);
 	skeletalMesh->SetSimulatePhysics(false);
 	skeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	RootComponent = skeletalMesh;
 
+	//Add a camera with a spring arm so we can move the camera to this ACrewMember.
 	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
 	cameraArm->SetupAttachment(skeletalMesh);
 	cameraArm->SetAbsolute(false, true, false);
@@ -53,33 +66,14 @@ ACrewMember::ACrewMember() {
 
 	Speed = 0.f;
 
-	RootComponent = skeletalMesh;
-
 	//Create and attach the rifle and grenade
 	rifle = CreateDefaultSubobject<URifle>("Rifle");
 	rifle->mesh->SetVisibility(false);
 	rifle->mesh->SetSimulatePhysics(false);
-	/*
-	rifle->mesh->SetupAttachment(skeletalMesh, FName("GunSocket"));
-	rifle->mesh->SetRelativeLocation(FVector(0, 0, 0));
-	rifle->mesh->SetWorldRotation(FRotator(0, 180, 0));
-	*/
 	
 	launcher = CreateDefaultSubobject<ULauncher>("Launcher");
 	launcher->mesh->SetSimulatePhysics(false);
 	launcher->mesh->SetVisibility(false);
-	/*
-	launcher->mesh->SetupAttachment(skeletalMesh, FName("GrenadeSocket"));
-	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
-	*/
-
-	//Set to blue team's (color 02) material 
-	static ConstructorHelpers::FObjectFinder<UMaterial>RedTeamMaterial(TEXT(RED_TEAM_MATERIAL));
-	RedTeamColor = (UMaterial*)RedTeamMaterial.Object;
-	skeletalMesh->SetMaterial(0, RedTeamColor);
-
-	static ConstructorHelpers::FObjectFinder<UMaterial>BlueTeamMaterial(TEXT(BLUE_TEAM_MATERIAL));
-	BlueTeamColor = (UMaterial*)BlueTeamMaterial.Object;
 
 	//physics 
 	TInlineComponentArray<UPrimitiveComponent*> Components;
@@ -93,86 +87,17 @@ ACrewMember::ACrewMember() {
 	facingDirection = Direction::Right;
 }
 
-void ACrewMember::setMeshAnimData(FCharacter character) {
-	UCharacterAnimDataAsset* data;
-	switch (character) {
-	case Pavo:
-		data = pavoData;
-		break;
-	case Lyra:
-		data = lyraData;
-		break;
-	default:
-		data = nembusData;
-		break;
-	}
-
-	throwMontage = data->throwMontage;
-	throwMontageDelay = data->throwMontageDelay;
-	shootRifleMontage = data->shootRifleMontage;
-	turnLeftMontage = data->turnLeftMontage;
-	turnRightMontage = data->turnRightMontage;
-	turnAroundMontage = data->turnAroundMontage;
-	stumbleMontage = data->stumbleMontage;
-	pushMontage = data->pushMontage;
-	skeletalMesh->SetSkeletalMesh(data->skeletalMesh);
-	skeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	skeletalMesh->SetAnimClass(data->animBP);
-
-	FAttachmentTransformRules params = FAttachmentTransformRules(EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, false);
-
-	rifle->mesh->AttachToComponent(skeletalMesh, params, FName("GunSocket"));
-	rifle->mesh->SetRelativeLocation(FVector(0, 0, 0));
-	rifle->mesh->SetRelativeRotation(FRotator(0, 0, 0));
-
-	launcher->mesh->AttachToComponent(skeletalMesh, params, FName("GrenadeSocket"));
-	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
-}
-
-/**
- * Set this ACrewMember's team to the given team
- * 
- * @param newTeam the new team to assign to this ACrewMember.
- *     0 for red team, 1 for blue team.
- */
- void ACrewMember::SetTeam(int32 newTeam) {
-	 if (newTeam) {
-		 team = newTeam;
-	 } 
-
-	 //Change appearance based on team
-	 //Red  - Color 01 - default
-	 //Blue - Color 02 - update material 
-	 if (team == 1) {
-		skeletalMesh->SetMaterial(0, BlueTeamColor);
-		facingDirection = Direction::Left;
-	 }else {
-		 skeletalMesh->SetMaterial(0, RedTeamColor);
-		 facingDirection = Direction::Right;
-	 }
-}
-
- /**
-  * Return the team this ACrewMember is a part of.
-  *
-  * @return 0 if this ACrewMember is on the red team,
-  *     1 if on the blue team.
-  */
- int ACrewMember::getTeam() {
-	 return team;
- }
 
 // Called when the game starts or when spawned
 void ACrewMember::BeginPlay() {
 	Super::BeginPlay();
 
-	ALaetusGameMode* gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (gameMode) {
 		grid = gameMode->getGameGrid();
 	}
 
-	health = 3.f;
-	
+	health = maxHealth;
 }
 
 // Called every frame
@@ -186,6 +111,151 @@ void ACrewMember::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindKey(EKeys::A, IE_Released, this, &ACrewMember::Shove);
 }
+
+/**
+ * Loads up the CharacterAnimDataAsset and assigns the corresponding
+ * meshes, materials, and animations beased on the provided character
+ * and team.
+ * 
+ * @param character the character this ACrewMember will be. The mesh,
+ *     materials, and animations for this character will be loaded and 
+ *     assigned to this ACrewMember.
+ */
+void ACrewMember::setMeshAnimData(FCharacter character, Team playerTeam) {
+	//Pick the corresonding CharacterAnimDataAsset.
+	UCharacterAnimDataAsset* data;
+	switch (character) {
+	case Pavo:
+		data = pavoData;
+		break;
+	case Lyra:
+		data = lyraData;
+		break;
+	default:
+		data = nembusData;
+		break;
+	}
+
+	//Get all the animation montages.
+	throwMontage = data->throwMontage;
+	throwMontageDelay = data->throwMontageDelay;
+	shootRifleMontage = data->shootRifleMontage;
+	punchMontage = data->punchMontage;
+	takeDamageMontage = data->takeDamageMontage;
+	deathMontage = data->deathMontage;
+	turnLeftMontage = data->turnLeftMontage;
+	turnRightMontage = data->turnRightMontage;
+	turnAroundMontage = data->turnAroundMontage;
+	stumbleMontage = data->stumbleMontage;
+	pushMontage = data->pushMontage;
+
+	//Get all sound effects for this particular character.
+	deathSound = data->deathSound;
+	takeDamageSound = data->takeDamageSound;
+	slipSound = data->slipSound;
+	footstepSound = data->footstepSound;
+
+	//Get the skeletal mesh, but don't assign the materials until we also 
+	//have the rifle mesh ready.
+	skeletalMesh->SetSkeletalMesh(data->skeletalMesh);
+	skeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	skeletalMesh->SetAnimClass(data->animBP);
+
+	//Create and attach the rifle and grenade to their respective sockets on
+	//the skeletal mesh.
+	FAttachmentTransformRules params = FAttachmentTransformRules(EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, false);
+
+	rifle->mesh->AttachToComponent(skeletalMesh, params, FName("GunSocket"));
+	rifle->mesh->SetRelativeLocation(FVector(0, 0, 0));
+	rifle->mesh->SetRelativeRotation(FRotator(0, 0, 0));
+
+	launcher->mesh->AttachToComponent(skeletalMesh, params, FName("GrenadeSocket"));
+	launcher->mesh->SetRelativeLocation(FVector(0, 0, 0));
+
+	// Set the power up effect
+	// TODO: Remove this !!
+	weaponEffect = powerUp;
+
+	//Based on the provided team, assigned the corresponding materials to the
+	//skeletal mesh and rifle.
+	switch (character) {
+	case Pavo:
+		if (playerTeam == Team::Red) {
+			skeletalMesh->SetMaterial(0, data->redTeamMainMaterial);
+			rifle->mesh->SetMaterial(0, data->redGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->redGunBodyMaterial);
+		}else {
+			skeletalMesh->SetMaterial(0, data->blueTeamMainMaterial);
+			rifle->mesh->SetMaterial(0, data->blueGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->blueGunBodyMaterial);
+		}
+		break;
+	case Lyra:
+		if (playerTeam == Team::Red) {
+			skeletalMesh->SetMaterial(0, data->redTeamMainMaterial);
+			skeletalMesh->SetMaterial(1, data->redTeamArmorMaterial);
+			rifle->mesh->SetMaterial(0, data->redGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->redGunBodyMaterial);
+		}else {
+			skeletalMesh->SetMaterial(0, data->blueTeamMainMaterial);
+			skeletalMesh->SetMaterial(1, data->blueTeamArmorMaterial);
+			rifle->mesh->SetMaterial(0, data->blueGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->blueGunBodyMaterial);
+		}
+		break;
+	default:
+		if (playerTeam == Team::Red) {
+			skeletalMesh->SetMaterial(0, data->redTeamMainMaterial);
+			skeletalMesh->SetMaterial(1, data->redTeamArmorMaterial);
+			rifle->mesh->SetMaterial(0, data->redGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->redGunBodyMaterial);
+		}else {
+			skeletalMesh->SetMaterial(0, data->blueTeamMainMaterial);
+			skeletalMesh->SetMaterial(1, data->blueTeamArmorMaterial);
+			rifle->mesh->SetMaterial(0, data->blueGunSightMaterial);
+			rifle->mesh->SetMaterial(1, data->blueGunBodyMaterial);
+		}
+		break;
+	}
+}
+
+/**
+ * Set this ACrewMember's team to the given team
+ * 
+ * @param newTeam the new team to assign to this ACrewMember.
+ */
+ void ACrewMember::SetTeam(Team newTeam) {
+	 if (newTeam) {
+		 team = newTeam;
+	 } 
+
+	 //Change appearance based on team
+	 //Red  - Color 01 - default
+	 //Blue - Color 02 - update material 
+	 if (team == Team::Blue) {
+		facingDirection = Direction::Left;
+	 }else {
+		 facingDirection = Direction::Right;
+	 }
+}
+
+ void ACrewMember::setID(int32 newidNum) {
+	 idNum = newidNum;
+ }
+
+ /**
+  * Return the team this ACrewMember is a part of.
+  *
+  * @return 0 if this ACrewMember is on the red team,
+  *     1 if on the blue team.
+  */
+ Team ACrewMember::getTeam() {
+	 return team;
+ }
+ 
+ int ACrewMember::getID() {
+	 return idNum;
+ }
 
 /**
  * Rotate this ACrewMember to the target direction and begin moving them forward 
@@ -216,7 +286,7 @@ void ACrewMember::MoveTo(AGridSpace * target, bool pushingCoreFragment) {
  */
 void ACrewMember::moveForward() {
 	rotateToDirection(directionToFaceEnum);
-	if (targetLocation == nullptr || targetLocation->isOccupied()) {
+	if (targetLocation == nullptr || targetLocation->isOccupied() || gridSpace == nullptr) {
 		return;
 	}
 
@@ -233,9 +303,10 @@ void ACrewMember::moveForward() {
 	moveIncrement = (newLocation - oldLocation) / numIncrements;
 
 	// Reset pointers/references
-	setGridSpace(targetLocation);
+	setGridSpace(targetLocation, targetLocation->getGridLocation() - gridSpace->getGridLocation());
 
 	//Start the timer to increment the position up until we reach the destination
+	UGameplayStatics::PlaySound2D(GetWorld(), footstepSound);
 	GetWorld()->GetTimerManager().SetTimer(moveTimerHandle, this, &ACrewMember::incrementMoveForward, 0.01, true);
 }
 
@@ -255,7 +326,7 @@ void ACrewMember::incrementMoveForward() {
 	//the movement completed. This handles cases where moveIncrement does 
 	//not add up to exactly the destination location.
 	incrementsLeft--;
-	if (/*FMath::Abs(distance) > 5 || */incrementsLeft > 0) {
+	if (incrementsLeft > 0) {
 		//Destination has not been reached, increment position
 		SetActorLocation(currentLocation + moveIncrement);
 	}else {
@@ -264,6 +335,8 @@ void ACrewMember::incrementMoveForward() {
 		SetActorLocation(newLocation);//Snap to the exact location
 		GetWorld()->GetTimerManager().ClearTimer(moveTimerHandle);
 		controller->enableInputController();
+		//change turn if actionBar is 0
+		if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
 	}
 }
 
@@ -294,6 +367,68 @@ void ACrewMember::Shove() {
 }
 
 /**
+ * Rotate the player in the given direction and then punch at the ACrewMember 
+ * in the adjacent AGridSpace in that given direction, if there is indeed an 
+ * ACrewMember ther.
+ * 
+ * @param direction the cardinal direction to punch towards.
+ */
+void ACrewMember::Punch(FVector2D direction) {
+	controller->disableInputController();
+	targetLocation = grid->getTile(gridSpace->getGridLocation() + direction);
+	directionToFaceEnum = vectorToDirectionEnum(direction);
+	float montageLength = rotateWithAnimation(directionToFaceEnum);
+
+	if (montageLength > 0) {
+		FTimerHandle timerParams;
+		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACrewMember::punchAtDirection, montageLength, false);
+	}else {
+		punchAtDirection();
+	}
+}
+
+/**
+ * Play the punch montage, and set timers to deal damage and 
+ * re-enable input.
+ */
+void ACrewMember::punchAtDirection() {
+	rotateToDirection(directionToFaceEnum);
+	
+	float montageLength = playPunchMontage();
+	
+	//Halfway thorough the punch montage (about when the actual 
+	//punch happens), deal damage.
+	FTimerHandle damageTimer;
+	GetWorld()->GetTimerManager().SetTimer(damageTimer, this, &ACrewMember::dealPunchDamage, montageLength/2, false);
+
+	//Renable input after the montage had ended.
+	FTimerHandle enableTimer;
+	GetWorld()->GetTimerManager().SetTimer(enableTimer, this, &ACrewMember::enableInputAfterPunch, montageLength, false);
+}
+
+/**
+ * Deal punch damage to the occupant of targetLocation if 
+ * they are an ACrewMember.
+ */
+void ACrewMember::dealPunchDamage() {
+	UGameplayStatics::PlaySound2D(GetWorld(), punchSound);
+	ACrewMember* occupant = Cast<ACrewMember>(targetLocation->getOccupant());
+	if (occupant) {
+		occupant->takeDamage(1.0f);
+	}
+}
+
+/**
+ * Re-enables input after the punch has occurred.
+ */
+void ACrewMember::enableInputAfterPunch() {
+	getCrewController()->enableInputController();
+
+	//change turn if actionBar is 0
+	if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
+}
+
+/**
  * Reduce this ACrewMember's health by the given damage.
  * 
  * @param damageTaken the amount of damage to reduce this ACrewMember's 
@@ -301,21 +436,40 @@ void ACrewMember::Shove() {
  */
 void ACrewMember::takeDamage(int32 damageTaken) {
 	health -= damageTaken;
+	float montageLength = playTakeDamageMontage();
+	UGameplayStatics::PlaySound2D(GetWorld(), takeDamageSound);
 
 	if (health <= 0) {
-		//destroy actor?
-		UE_LOG(LogTemp, Warning, TEXT("Player died!"));
+		//Play death montage. After that ends, respawn but moving to 
+		//random space on your team's side of the map.
+		FTimerHandle f;
+		GetWorld()->GetTimerManager().SetTimer(f, this, &ACrewMember::die, montageLength, false);
 	}
-	float montageLength = playStumbleMontage();
-	FTimerHandle f;
-	GetWorld()->GetTimerManager().SetTimer(f, this, &ACrewMember::die, montageLength);
 }
 
+/**
+ * Called when this ACrewMember has died (i.e. health <= 0). Plays 
+ * the death montage and calls respawn once montage has ended.
+ */
 void ACrewMember::die() {
+	float montageLength = playDeathMontage();
+	UGameplayStatics::PlaySound2D(GetWorld(), deathSound);
+
+	FTimerHandle timerParams;
+	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &ACrewMember::respawn, montageLength, false);
+}
+
+/**
+ * Find a valid respawn point, and move this ACrewMember there. Also resets 
+ * the corresponding AInputController's currentlySelectedTile to this new 
+ * location.
+ */
+void ACrewMember::respawn() {
 	AGridSpace* newSpace = grid->getValidRespawnSpace(this);
 	SetActorLocation(newSpace->GetActorLocation() + FVector(0, 0, 20));
-	setGridSpace(newSpace);
-	health = 3;
+	setGridSpace(newSpace, FVector2D(0,0));
+	getCrewController()->getInputController()->currentlySelectedTile = gridSpace;
+	health = maxHealth;
 }
 
 /**
@@ -325,15 +479,15 @@ void ACrewMember::die() {
  * @param space a pointer to the new AGridSpace this ACrewMember is now
  *     standing on.
  */
-void ACrewMember::setGridSpace(class AGridSpace* space) {
+void ACrewMember::setGridSpace(class AGridSpace* space, FVector2D fromDirection) {
 	
 	if (space && !space->isOccupied()) {
 
 		if (gridSpace) {
-			gridSpace->setOccupant(nullptr);
+			gridSpace->OnExitGridSpace(this);
 		}
 
-		space->setOccupant(this);
+		space->OnEnterGridSpace(this, fromDirection);
 		gridSpace = space;
 	}
 }
@@ -372,7 +526,28 @@ float ACrewMember::playShootRifleMontage() {
 }
 
 /**
- * Play the stumble montage (used when taking damage).
+ * Play the punch montage.
+ */
+float ACrewMember::playPunchMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(punchMontage);
+}
+
+/**
+ * Play the take damage montage.
+ */
+float ACrewMember::playTakeDamageMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(takeDamageMontage);
+}
+
+/**
+ * Play the death montage.
+ */
+float ACrewMember::playDeathMontage() {
+	return skeletalMesh->GetAnimInstance()->Montage_Play(deathMontage);
+}
+
+/**
+ * Play the stumble montage.
  */
 float ACrewMember::playStumbleMontage() {
 	return skeletalMesh->GetAnimInstance()->Montage_Play(stumbleMontage);
@@ -482,27 +657,6 @@ Direction ACrewMember::vectorToDirectionEnum(FVector2D direction) {
 }
 
 /**
- * Returns the current value of the Speed variable.
- * 
- * NOTE: Currently this variable is not used during movement, so it
- * is only used to tell the animation blueprint that this ACrewMember
- * is currently moving or not.
- * 
- * TODO: Switch to a boolean if we never end up using this for anything else.
- */
-float ACrewMember::getSpeed() {
-	return Speed;
-}
-
-/**
- * Callback for when an animation montage ends. Currently not being used, but
- * might be used in the near future. If not, this can be taken out.
- */
-void ACrewMember::onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted) {
-	UE_LOG(LogTemp, Warning, TEXT("In callback from %s"), *montage->GetName());
-}
-
-/**
  * Rotates this ACrewMember in world space to given direction.
  * 
  * @param direction the new direction this ACrewMember should face. If 
@@ -527,20 +681,58 @@ void ACrewMember::rotateToDirection(Direction direction) {
 	}
 }
 
+/**
+ * Rotate this ACrewMember to face upward i.e. away from the screen.
+ */
 void ACrewMember::rotateUp() {
 	skeletalMesh->SetWorldRotation(upRotation);
 }
 
+/**
+ * Rotate this ACrewMember to face left.
+ */
 void ACrewMember::rotateLeft() {
 	skeletalMesh->SetWorldRotation(leftRotation);
 }
 
+/**
+ * Rotate this ACrewMember to face right.
+ */
 void ACrewMember::rotateRight() {
 	skeletalMesh->SetWorldRotation(rightRotation);
 }
 
+/**
+ * Rotate this ACrewMember to face downward i.e. towards the screen.
+ */
 void ACrewMember::rotateDown() {
 	skeletalMesh->SetWorldRotation(downRotation);
+}
+
+/**
+ * Callback for when an animation montage ends. Currently not being used, but
+ * might be used in the near future. If not, this can be taken out.
+ */
+void ACrewMember::onRotationAnimationEnd(UAnimMontage* montage, bool wasInteruppted) {
+	UE_LOG(LogTemp, Warning, TEXT("In callback from %s"), *montage->GetName());
+}
+
+bool ACrewMember::needToRotate(FVector2D newDirection) {
+	Direction newDirectionEnum = vectorToDirectionEnum(newDirection);
+	return facingDirection != newDirectionEnum;
+}
+
+/**
+ * Returns the current value of the Speed variable.
+ *
+ * NOTE: Currently this variable is not used during movement, so it
+ * is only used to tell the animation blueprint that this ACrewMember
+ * is currently moving or not.
+ *
+ * TODO: Switch to a boolean if we never end up using this for anything else.
+ */
+float ACrewMember::getSpeed() {
+	return Speed;
 }
 
 /**
@@ -552,7 +744,7 @@ void ACrewMember::rotateDown() {
  * @param newController a reference to the controller for the ACrew that this 
  *     ACrewMember is a part of.
  */
-void ACrewMember::setController(ACrewController* newController) {
+void ACrewMember::setCrewController(ACrewController* newController) {
 	controller = newController;
 }
 
@@ -567,7 +759,36 @@ ACrewController* ACrewMember::getCrewController() {
 	return controller;
 }
 
-bool ACrewMember::needToRotate(FVector2D newDirection) {
-	Direction newDirectionEnum = vectorToDirectionEnum(newDirection);
-	return facingDirection != newDirectionEnum;
+/**
+ * Returns the current amount of health this ACrewMember has.
+ * 
+ * @return a float representing the current amount of health 
+ *     this ACrewMember has.
+ */
+float ACrewMember::getCurrentHealth() {
+	return health;
+}
+
+void ACrewMember::SetWeaponEffect(UPowerUpEffectData* newEffect) {
+	powerUp = newEffect;
+}
+
+UPowerUpEffectData* ACrewMember::GetWeaponEffect() {
+	return powerUp;
+}
+
+void ACrewMember::ClearWeaponEffect() {
+	powerUp = nullptr;
+}
+
+ALaetusGameMode* ACrewMember::getGameMode() {
+	return gameMode;
+}
+
+/**
+ * Returns true if this ACrewMember is currently standing in an AGridSpace
+ * in which they can harvest from an adjacent AHarvestSource.
+ */
+bool ACrewMember::isNextToHarvestSource() {
+	return IsValid(gridSpace->getHarvestSource());
 }

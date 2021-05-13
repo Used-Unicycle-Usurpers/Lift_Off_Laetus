@@ -9,8 +9,10 @@
 #include "../GameManagement/LaetusGameMode.h"
 #include "../GameManagement/Grid.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
 #include "Camera/CameraComponent.h"
 #include "../Characters/CoreFragment.h"
+#include "../GameManagement/GameEnums.h"
 
 // Sets default values
 ACrew::ACrew() {
@@ -25,52 +27,8 @@ ACrew::ACrew() {
 // Called when the game starts or when spawned
 void ACrew::BeginPlay() {
 	Super::BeginPlay();
-}
 
-//Setup Crew Members 
-void ACrew::SetUp(int32 newTeam, AGrid* newGrid, ACrewController* newController) {
-	team = newTeam;
-	grid = newGrid;
-	setController(newController);
-	TArray<int32> startingRows = grid->getStartingRows();
-	
-	//Set to left side, facing right
-	int column = grid->getNumSteps();
-	FRotator rotation = FRotator(0, 270, 0);
-	if (team == 1) { // Team 1, so set to right side, facing left
-		column = grid->getNumColumns() - grid->getNumSteps() - 1;
-		rotation = FRotator(0, 90, 0);
-	}
-
-	//For each crew member, spawn at the next starting point and set reference to GridSpace
-	for (int i = 0; i < 3; i++) {
-		AGridSpace* space = grid->getTile(FVector2D(startingRows[i], column));
-		FVector location = space->GetActorLocation();
-		FActorSpawnParameters params;
-		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(location + FVector(0.f, 0.f, 20.f), rotation, params);
-		
-		newMember->setMeshAnimData((FCharacter) i);
-		newMember->setController(controller);
-		newMember->SetTeam(newTeam);
-		crewMembers.Add(newMember);
-		newMember->setGridSpace(space);
-	}
-}
-
-// Return the current status of the action bar
-int32 ACrew::GetActionBarStatus() {
-	return actionBar;
-}
-
-// Update the action bar based on the moves performed 
-void ACrew::UpdateActionBar(int32 update) {
-	actionBar += update;
-}
-
-// //Return the location of the first crewMember 
-FVector ACrew::GetStartingLocation() {
-	return crewMembers[0]->GetActorLocation();
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 // Called every frame
@@ -84,14 +42,91 @@ void ACrew::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 }
 
 /**
- * Returns a reference to the currently selected ACrewMember.
+ * Sets up this ACrew with information pertaining to the team it represents,
+ * the game grid, and the ACrewController this is going to possess this ACrew.
+ * 
+ * @param newTeam the team this ACrew is on.
+ * @param newGrid the game grid that will be used in this game.
+ * @param newController the ACrewController that will be possessing this ACrew.
+ */
+void ACrew::SetUp(Team newTeam, AGrid* newGrid, ACrewController* newController) {
+	team = newTeam;
+	grid = newGrid;
+	setController(newController);
+	TArray<int32> startingRows = grid->getStartingRows();
+	
+	//Set to left side, facing right
+	int column = grid->getNumSteps();
+	FRotator rotation = FRotator(0, 270, 0);
+	if (team == Team::Blue) { // Team 1, so set to right side, facing left
+		column = grid->getNumColumns() - grid->getNumSteps() - 1;
+		rotation = FRotator(0, 90, 0);
+	}
+
+	//For each crew member, spawn at the next starting point and set reference to GridSpace
+	for (int i = 0; i < 3; i++) {
+		AGridSpace* space = grid->getTile(FVector2D(startingRows[i], column));
+		FVector location = space->GetActorLocation();
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		ACrewMember* newMember = GetWorld()->SpawnActor<ACrewMember>(location + FVector(0.f, 0.f, 20.f), rotation, params);
+		
+		newMember->setMeshAnimData((FCharacter) i, newTeam);
+		newMember->setCrewController(controller);
+		newMember->SetTeam(newTeam);
+		newMember->setID(i);
+		crewMembers.Add(newMember);
+		newMember->setGridSpace(space, FVector2D(0, 0));
+	}
+}
+
+/**
+ * Return the current status of the action bar
+ * 
+ * @return an integer between 0-10, representing the amount of
+ *     action points this ACrew has left this turn.
+ */
+int32 ACrew::GetActionBarStatus() {
+	return actionBar;
+}
+
+/**
+ * Update the action bar based on the moves performed.
+ * 
+ * @param update the number of action points to update the action bar by.
+ *     A negative value will subtract action points, a positive value will
+ *     add them.
+ */ 
+void ACrew::UpdateActionBar(int32 update) {
+	actionBar += update;
+}
+
+/**
+ * Return the location of the first crewMember (Pavo) in world coordinates.
+ * 
+ * @return the location of the first crewMember (Pavo) in world coordinates.
+ */
+FVector ACrew::GetStartingLocation() {
+	return crewMembers[0]->GetActorLocation();
+}
+
+/**
+ * Returns a reference to the currently selected ACrewMember, which is the
+ * one that is currently being affected by input (if it's this ACrew's turn).
+ * 
+ * @return a pointer to the ACrewMember that is curretnly selected in
+ *     this ACrew.
  */
 ACrewMember* ACrew::getCurrentCrewMember() {
 	return crewMembers[selectedCharacter];
 }
 
 /**
- * Toggles the currently selected ACrewMember
+ * Toggles the currently selected ACrewMember to the next one in the order.
+ * Order: Pavo (0), Lyra (1), Nemus (2)
+ * 
+ * @return the integer representation of the newly selected ACrewMember
+ *     in this ACrew.
  */
 int ACrew::toggleSelectedCrewMember() {
 	selectedCharacter++;
@@ -101,22 +136,35 @@ int ACrew::toggleSelectedCrewMember() {
 	return selectedCharacter;
 }
 
+/**
+ * Sets the currently selected ACrewMember in this ACrew to the
+ * given integer representation of the ACrewMember.
+ * 
+ * @param current the integer represntion of the ACrewMemebr to choose
+ *     as the currently selected ACrewMember in this ACrew. 0 = Pavo,
+ *     1 = Lyra, 2 = Nembus.
+ */
 void ACrew::setSelectedCrewMember(int current) {
 	selectedCharacter = current;
-	controller->moveCameraToCrewMember();
+	controller->getInputController()->moveCameraToCrewMember();
 }
 
 /**
-* Moves the given ACrewMember (by array index) in the given direction
+* Moves the given ACrewMember (by array index) in the given direction.
+* 
+* @param crewMemberID the integer represention of the ACrewMember being
+*     moved. 0 = Pavo, 1 = Lyra, 2 = Nembus.
+* @param direction a unit vector represtenting the carindal direction to
+*     move the ACrewMember specified by crewMemberID.
 */
 void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 	if (crewMemberID >= crewMembers.Num()) { return; }
 
-	FVector2D crewMemberGridLocation = crewMembers[selectedCharacter]->getGridSpace()->getGridLocation();
+	FVector2D crewMemberGridLocation = crewMembers[crewMemberID]->getGridSpace()->getGridLocation();
 	AGridSpace* destination = grid->getTile(crewMemberGridLocation + direction);
 
 	if (destination && !(destination->isOccupied())) {
-		crewMembers[selectedCharacter]->MoveTo(destination, false);
+		crewMembers[crewMemberID]->MoveTo(destination, false);
 	}else {
 
 		if (destination && destination->containsFragment()) {
@@ -130,8 +178,8 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 				if (fragment) {
 					//Move the core fragment first so that space is no longer occupired and thus
 					//the crew member can move as well.
-					fragment->moveTo(fragmentDest, crewMembers[selectedCharacter]);
-					crewMembers[selectedCharacter]->MoveTo(destination, true);
+					fragment->moveTo(fragmentDest, crewMembers[crewMemberID]);
+					crewMembers[crewMemberID]->MoveTo(destination, true);
 				}
 			}
 		}
@@ -139,24 +187,103 @@ void ACrew::moveCrewMember(int32 crewMemberID, FVector2D direction) {
 }
 
 /**
-* Moves the currently selected ACrewMember in the given direction
+* Moves the currently selected ACrewMember in the given direction.
+* 
+* @param direction a unit vector represtenting the carindal direction to
+*     move the currently selected ACrewMember in this ACrew.
 */
 void ACrew::moveSelectedCrewMember(FVector2D direction) {
 	moveCrewMember(selectedCharacter, direction);
 }
 
+/**
+* Check if we are pushing core in the given direction.
+* 
+* @param direction the unit vector representing the cardinal direction
+*     in which we are checking if we're pushing an ACoreFragment.
+* @return the ACoreFragment pointer, if there is one.
+*/
+ACoreFragment* ACrew::pushingCore(FVector2D direction) {
+	FVector2D crewMemberGridLocation = crewMembers[selectedCharacter]->getGridSpace()->getGridLocation();
+	AGridSpace* destination = grid->getTile(crewMemberGridLocation + direction);
+	if (destination) {
+		ACoreFragment* fragment = Cast<ACoreFragment>(destination->getOccupant());
+		if (IsValid(fragment))
+			return fragment;
+	}
+	
+	return nullptr;
+}
+
+/**
+ * Sets the ACrewController that is possessiong this ACrew to the 
+ * provided ACrewController.
+ * 
+ * @param newController the ACrewController that is now possessing
+ *     this ACrew.
+ */
 void ACrew::setController(ACrewController* newController) {
 	controller = newController;
 }
 
+/**
+ * Get the integer represenation of the currently selected ACrewMember 
+ * in this ACrew.
+ * 
+ * @return the integer represtion of the currently selected ACrewMember 
+ *     in this ACrew. 0 = Pavo, 1 = Lyra, 2 = Nembus.
+ */
 int32 ACrew::getSelectedCrewMemberIndex() {
 	return selectedCharacter;
 }
 
+/**
+ * Returns the number of ACoreFramgents this ACrew has collected so far.
+ * 
+ * @return an integer representing the number of ACoreFragments this ACrew has
+ *     collected so far.
+ */
 int32 ACrew::getCoreCount() {
 	return cores;
 }
 
+/**
+ * Increment the number of ACoreFragments that have been collected by this ACrew
+ * by 1.
+ */
 void ACrew::incrementCores() {
 	cores += 1;
+	if (gameMode) {
+		gameMode->EvaluateWin();
+	}
+}
+
+/**
+ * Returns the percentage of health Pavo has remaining as a decimal.
+ * 
+ * @return a float between 0.0 and 1.0, representing the percentage of health
+ *     Pavo has remaining.
+ */
+float ACrew::getPavoPercentHealth() {
+	return crewMembers[Pavo]->getCurrentHealth() / crewMembers[Pavo]->maxHealth;
+}
+
+/**
+ * Returns the percentage of health Lyra has remaining as a decimal.
+ * 
+ * @return a float between 0.0 and 1.0, representing the percentage of health
+ *     Lyra has remaining.
+ */
+float ACrew::getLyraPercentHealth() {
+	return crewMembers[Lyra]->getCurrentHealth() / crewMembers[Lyra]->maxHealth;
+}
+
+/**
+ * Returns the percentage of health Nembus has remaining as a decimal.
+ * 
+ * @return a float between 0.0 and 1.0, representing the percentage of health
+ *     Nembus has remaining.
+ */
+float ACrew::getNembusPercentHealth() {
+	return crewMembers[Nembus]->getCurrentHealth() / crewMembers[Nembus]->maxHealth;
 }

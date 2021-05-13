@@ -7,7 +7,8 @@
 #include "CrewController.generated.h"
 
 /**
- * 
+ * Controller that possesses an ACrew an forwards input to the currently 
+ * selected ACrewMember.
  */
 UCLASS()
 class LIFT_OFF_LAETUS_API ACrewController : public APlayerController {
@@ -27,27 +28,16 @@ public:
 	 */
 	void init(class ACrew* newControlledCrew, class AInputController* newInputController);
 	
+	/**
+	 * Enables input on the AInputController that is providing input to this ACrewController.
+	 */
 	void enableInputController();
+
+	/**
+	 * Disables input on the AInputController that is providing input to this ACrewController.
+	 */
 	void disableInputController();
-
-	/**
-	 * Sets up the APlayerCameraManager reference so all controllers affect the
-	 * same camera manager.
-	 */
-	void moveCameraToCrewMember();
-
-	/**
-	 * Moves the camera to the current ACrewMember.
-	 */
-	void toggleCrewMember();
 	
-	//The PlayerCameraManager that both Crews refernce to move the 
-	//shared camera.
-	class APlayerCameraManager* cameraManager;
-
-	//A reference to the game mode for quick access.
-	class ALaetusGameMode* gameMode;
-
 	/**
 	 * Have the currently selected crew member shoot their rifle in the given direction.
 	 */
@@ -59,25 +49,41 @@ public:
 	void launch(FVector2D target);
 
 	/**
-	 * Move camera to the next AGridSpace in the specified direction.
+	 * Have the currently selected crew member punch at the ACrewMember in 
+	 * the adjacent cell in the given direction.
 	 */
-	void moveCameraToTile(enum Direction direction);
+	void punch(FVector2D direction);
+
+	void harvest();
 
 	/**
-	 * The tile that is currently being highlighted in GrenadeAttack mode.
+	 * Returns the ACrew that is currently controlled by this ACrewController.
 	 */
-	class AGridSpace* currentlySelectedTile;
-
-	/**
-	 * Move the camera smoothly from its current location to the target actor.
-	 */
-	void moveCameraSmoothly(AActor* target);
-
 	class ACrew* getControlledCrew();
 
+	/**
+	 * Returns the AInputController that is currently forwarding inputs to
+	 * this ACrewController.
+	 */
+	class AInputController* getInputController();
+
 private:
+	//The ACrew this is currently being controlled by this ACrewController.
 	class ACrew* controlledCrew;
+
+	//The AInputController that is forwarding inputs to this ACrewController.
 	class AInputController* inputController;
+
+	/**
+	 * Sets the ACrew being controlled to the provided ACrew.
+	 * NOTE: This NOT the same as Possess(), this only provides a refernce
+	 * to the ACrew to this ACrewController.
+	 */
 	void setControlledCrew(class ACrew* newControlledCrew);
+
+	/**
+	 * Sets the AInputController that is forwarding inputs to this ACrewController to
+	 * the provided AInputController.
+	 */
 	void setInputController(class AInputController* newInputController);
 };

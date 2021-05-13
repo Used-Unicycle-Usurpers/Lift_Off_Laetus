@@ -5,17 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "PowerUpActor.h"
+#include "../GameManagement/GameEnums.h"
 #include "HarvestSource.generated.h"
-
-//Enum detailing the diffirent possible types of harvest sources, plus
-//one for invalid type.
-UENUM()
-enum HarvestSourceType {
-	Rock,
-	SlimeTree,
-	Shrub,
-	Invalid
-};
 
 UCLASS()
 class LIFT_OFF_LAETUS_API AHarvestSource : public AActor {
@@ -39,6 +30,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		class UStaticMeshComponent* mesh;
+
+	UPROPERTY(EditAnywhere)
+		class UPowerUpEffectData* effectToGive;
 
 protected:
 	// Called when the game starts or when spawned

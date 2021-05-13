@@ -9,12 +9,17 @@
 #include "Grenade.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
+#include "Sound/SoundCue.h"
 
 ULauncher::ULauncher() {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>launcherMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/grenade.grenade'"));
 	mesh->SetStaticMesh(launcherMesh.Object);
 	mesh->SetWorldScale3D(FVector(25.f, 25.f, 25.f));
-	range = 2;
+	range = 3;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_launcher02_Cue.AUD_launcher02_Cue'"));
+	launcherSound = sound.Object;
 }
 
 /**
@@ -30,6 +35,7 @@ int ULauncher::fire(FVector2D target) {
 	directionToFaceEnum = getDirectionToThrow(target);
 	float montageLength = owner->rotateWithAnimation(directionToFaceEnum);
 	targetSpace = target;
+	grid->clearGridOverlay();
 
 	if (montageLength > 0) {
 		FTimerHandle timerParams;
@@ -62,12 +68,13 @@ void ULauncher::readyLaunch() {
  * and throw the grenade.
  */
 void ULauncher::launch() {
+	UGameplayStatics::PlaySound2D(GetWorld(), launcherSound);
 	ACrewMember* owner = Cast<ACrewMember>(GetOwner());
 	FVector2D location = owner->getGridSpace()->getGridLocation();
 	AGridSpace* space = grid->getTile(targetSpace);
 
 	if (space) {
-		space->SetToRed();
+		//space->SetToRed();
 		FVector start = mesh->GetComponentLocation();
 		FVector end = space->GetActorLocation();
 
@@ -89,6 +96,8 @@ void ULauncher::launch() {
 		UGameplayStatics::PredictProjectilePath(GetWorld(), p, r);
 
 		//Spawn the grenade and pass the path for it to traverse.
+		grid->clearGridOverlay();
+		space->SetOverlayToRed(false);
 		AGrenade* g = GetWorld()->SpawnActor<AGrenade>(mesh->GetComponentLocation(), FRotator(0, 0, 0));
 		g->path = r.PathData;
 		g->targetLocation = end;
@@ -98,7 +107,7 @@ void ULauncher::launch() {
 
 		//Now have the camera follow the grenade as it flies through the air.
 		ACrewController* controller = owner->getCrewController();
-		controller->moveCameraSmoothly(g);
+		controller->getInputController()->moveCameraSmoothly(g);
 	}
 
 	//Hide the grenade launcher, since we have now finished 

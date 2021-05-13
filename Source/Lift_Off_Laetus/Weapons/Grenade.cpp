@@ -8,7 +8,14 @@
 #include "../GameManagement/Grid.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "../PowerUps/PowerUpEffectData.h"
+#include "../GameManagement/LaetusGameMode.h"
 #include "../Controllers/CrewController.h"
+#include "../Controllers/InputController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Sound/SoundCue.h"
+#include "../PowerUps/CharacterWeakenEffect.h"
 
 // Sets default values
 AGrenade::AGrenade() {
@@ -32,63 +39,102 @@ AGrenade::AGrenade() {
 
 	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	camera->AttachToComponent(cameraArm, FAttachmentTransformRules::KeepRelativeTransform, USpringArmComponent::SocketName);
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>explosion(TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Monsters/FX_Monster_Gruntling/Bomber/Grenade_VFX.Grenade_VFX'"));
+	grenadeExplosion = explosion.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>sound(TEXT("SoundCue'/Game/Audio/Weapons/AUD_explosion01_Cue.AUD_explosion01_Cue'"));
+	explosionSound = sound.Object;
 }
 
 // Called when the game starts or when spawned
 void AGrenade::BeginPlay() {
 	Super::BeginPlay();
 	current = 0;
+	gameMode = Cast<ALaetusGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 // Called every frame
 void AGrenade::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	float distance = FVector::Dist(GetActorLocation(), targetLocation);
-	
-	//If not reached the end of the path, keep going
-	if (current < path.Num() && distance > 10) {
-		//Still travelling on path, keep going
-		SetActorLocation(path[current].Location);
-		current++;
-	}else {
-		//Reach end of path; at target. Damage nearby players.
-		FVector2D gridLocation = targetSpace->getGridLocation();
-		for (int row = gridLocation.X - 1; row <= gridLocation.X + 1; row++) {
-			for (int column = gridLocation.Y - 1; column <= gridLocation.Y + 1; column++) {
-				
-				//Check this tile isn't a hole in the map.
-				AGridSpace* space = grid->getTile(FVector2D(row, column));
-				if (space) {
-					//Valid space, temporarily highlight this tile as red
-					//to show it's been hit
-					space->SetToRedOnTimer();
-					
-					//Check each tile for a player to damage
-					AActor* occupant = space->getOccupant();
-					if (occupant) {
-						ACrewMember* crewMember = Cast<ACrewMember>(occupant);
-						if (crewMember) {
-							//TODO: determine damage
-							crewMember->takeDamage(1.0f);
-						}
-					}
-				}
-			}
+	if (!exploded) {
+		//If not reached the end of the path, keep going
+		if (current < path.Num()) {
+			//Still travelling on path, keep going
+			SetActorLocation(path[current].Location);
+			current++;
 		}
-		
-		//Wait a few seconds, then let the grenade explode.
-		FTimerHandle timerParams;
-		GetWorld()->GetTimerManager().SetTimer(timerParams, this, &AGrenade::destroySelf, 2.0f, false);
+		else {
+			//Wait a few seconds, then let the grenade explode.
+			exploded = true;
+			FTimerHandle timerParams;
+			GetWorld()->GetTimerManager().SetTimer(timerParams, this, &AGrenade::explode, 1.0f, false);
+		}
 	}
 }
 
 /**
- * Explode this grenade, and move the camera back the player.
+ * Explode this grenade, damaging all players in its range.
+ */
+void AGrenade::explode() {
+	//Reach end of path; at target. Damage nearby players.
+	mesh->SetVisibility(false);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), grenadeExplosion, GetActorLocation());
+	UGameplayStatics::PlaySound2D(GetWorld(), explosionSound);
+
+	FVector2D gridLocation = targetSpace->getGridLocation();
+	UPowerUpEffectData* effectToApply = owner->GetWeaponEffect();
+	for (int row = gridLocation.X - 1; row <= gridLocation.X + 1; row++) {
+		for (int column = gridLocation.Y - 1; column <= gridLocation.Y + 1; column++) {
+
+			//Check this tile isn't a hole in the map.
+			AGridSpace* space = grid->getTile(FVector2D(row, column));
+			if (space) {
+				//Valid space, temporarily highlight this tile as red
+				//to show it's been hit
+				space->SetOverlayToRedOnTimer(false);
+
+				if (effectToApply != nullptr)
+					effectToApply->ApplyTileEffect(space);
+
+				//Check each tile for a player to damage
+				AActor* occupant = space->getOccupant();
+				if (occupant) {
+					ACrewMember* crewMember = Cast<ACrewMember>(occupant);
+					if (crewMember) {
+						//TODO: determine damage
+						if (crewMember->GetComponentByClass(UCharacterWeakenEffect::StaticClass()) != nullptr)
+							crewMember->takeDamage(2.0f);
+						else
+							crewMember->takeDamage(1.0f);
+					}
+				}
+			}
+		}
+	}
+
+	if (effectToApply != nullptr)
+		owner->ClearWeaponEffect();
+
+	FTimerHandle timerParams;
+	GetWorld()->GetTimerManager().SetTimer(timerParams, this, &AGrenade::destroySelf, 2.0f, false);
+}
+
+/**
+ * Move the camera back the player, re-enable their input, and 
+ * destroy this grenade.
  */
 void AGrenade::destroySelf() {
-	owner->getCrewController()->moveCameraSmoothly(owner);
+	//Move camera back to thrower and re-enable input
+	owner->getCrewController()->getInputController()->setStateToIdle();
 	owner->getCrewController()->enableInputController();
-	//owner->getCrewController()->setStateToIdle();
+	
+	//Reset currently selected tile.
+	owner->getCrewController()->getInputController()->currentlySelectedTile = owner->getGridSpace();
+	
+	//change turn if actionBar is 0
+	if (gameMode->getABStatus() == 0) { gameMode->ChangeTurn(); }
 	GetWorld()->DestroyActor(this);
 }
 

@@ -5,11 +5,25 @@
 
 void UTileStickyEffect::ApplyEffect()
 {
-	this->tileTarget->SetExtraMoveCost(1);
+	UE_LOG(LogTemp, Warning, TEXT("Tile is sticky"));
+	tileTarget->SetExtraMoveCost(1);
 }
 
 void UTileStickyEffect::RemoveEffect()
 {
-	this->tileTarget->SetExtraMoveCost(0);
+	UE_LOG(LogTemp, Warning, TEXT("Tile is not sticky"));
+	tileTarget->SetExtraMoveCost(0);
+}
+
+void UTileStickyEffect::ApplyCharacterEffect(ACrewMember* crewMember)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Character entered sticky tile"));
+
+}
+
+void UTileStickyEffect::RemoveCharacterEffect(ACrewMember* crewMember)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Character left sticky tile"));
+
 }
 

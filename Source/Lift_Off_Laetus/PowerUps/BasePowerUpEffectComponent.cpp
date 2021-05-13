@@ -2,6 +2,7 @@
 
 
 #include "BasePowerUpEffectComponent.h"
+#include "../GameManagement/LaetusGameMode.h"
 
 // Sets default values for this component's properties
 UBasePowerUpEffectComponent::UBasePowerUpEffectComponent()
@@ -15,11 +16,12 @@ void UBasePowerUpEffectComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UBasePowerUpEffectComponent::DecrementLife() {
+void UBasePowerUpEffectComponent::DecrementLife(ALaetusGameMode* gameMode, int team, int playerID) {
 	if (maxTurnLifetime != 0) {
 		remainingTurns -= 1;
 
 		if (remainingTurns <= 0) {
+			gameMode->callHUDSetEffectOverlay(team, playerID, nullptr); // Incredibly cursed
 			this->DestroyComponent();
 		}
 	}

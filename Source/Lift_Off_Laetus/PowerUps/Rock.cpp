@@ -3,6 +3,8 @@
 
 #include "Rock.h"
 #include "EnergizedOre.h"
+#include "PowerupEffectData.h"
+#include "EngineUtils.h"
 
 static TArray<FString> rockMeshReferences = {
 	"StaticMesh'/Game/Geometry/Map/HarvestSourceMeshes/ENV_Rock1.ENV_Rock1'",
@@ -11,6 +13,17 @@ static TArray<FString> rockMeshReferences = {
 
 ARock::ARock() {
 	setHarvestSourceType(HarvestSourceType::Rock);
+	TArray<UObject*> effects;
+	EngineUtils::FindOrLoadAssetsByPath(TEXT("/Game/Effects"), effects, EngineUtils::ATL_Regular);
+
+	for (auto asset : effects)
+	{
+		UPowerUpEffectData* effectType = Cast<UPowerUpEffectData>(asset);
+		if (effectType != nullptr && effectType->effectName.IsEqual(TEXT("Weaken"))) {
+			effectToGive = effectType;
+			break;
+		}
+	}
 
 	//Pick a random mesh
 	int randomIdx = FMath::RandRange(0, rockMeshReferences.Num() - 1);

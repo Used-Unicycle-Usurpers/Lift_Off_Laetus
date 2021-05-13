@@ -4,11 +4,22 @@
 #include "../Characters/CoreFragment.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "../PowerUps/TilePowerUpEffect.h"
+#include "../PowerUps/TileSlipperyEffect.h"
+#include "../GameManagement/LaetusGameMode.h"
+#include "../GameManagement/Grid.h"
+#include "../GameManagement/GameEnums.h"
+#include "Kismet/GameplayStatics.h"
+#include "../PowerUps/TileDamagerEffect.h"
 
 static UMaterial* regularMaterial;
 static UMaterial* redMaterial;
 static UMaterial* blueMaterial;
 static UMaterial* greenMaterial;
+static UMaterial* translucentRedMaterial;
+static UMaterial* translucentBlueMaterial;
+static UMaterial* translucentGreenMaterial;
+static UMaterial* translucentInvisibleMaterial;
 
 // Sets default values
 AGridSpace::AGridSpace(){
@@ -16,6 +27,8 @@ AGridSpace::AGridSpace(){
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GridMesh"));
 	mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	overlayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OverlayMesh"));
+	overlayMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//collision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 
 	//Get the color materials for visual debugging of the grid spaces
@@ -27,6 +40,14 @@ AGridSpace::AGridSpace(){
 	blueMaterial = blue.Object;
 	static ConstructorHelpers::FObjectFinder<UMaterial>green(TEXT("Material'/Game/GreenMaterial.GreenMaterial'"));
 	greenMaterial = green.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterial>translucentRed(TEXT("Material'/Game/Translucent_RedMaterial.Translucent_RedMaterial'"));
+	translucentRedMaterial = translucentRed.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterial>translucentBlue(TEXT("Material'/Game/Translucent_BlueMaterial.Translucent_BlueMaterial'"));
+	translucentBlueMaterial = translucentBlue.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterial>translucentGreen(TEXT("Material'/Game/Translucent_GreenMaterial.Translucent_GreenMaterial'"));
+	translucentGreenMaterial = translucentGreen.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterial>translucentInvisible(TEXT("Material'/Game/Translucent_InvisibleMaterial.Translucent_InvisibleMaterial'"));
+	translucentInvisibleMaterial = translucentInvisible.Object;
 
 	//Get mesh for visual debugging
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>CubeMeshAsset(TEXT("StaticMesh'/Game/Geometry/Meshes/1M_Cube.1M_Cube'"));
@@ -35,6 +56,12 @@ AGridSpace::AGridSpace(){
 	SetToRegularMaterial();
 
 	RootComponent = mesh;
+
+	overlayMesh->SetStaticMesh(CubeMeshAsset.Object);
+	overlayMesh->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
+	overlayMesh->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
+	overlayMesh->SetRelativeLocation(FVector(0.f, 0.f, 300.f));
+	overlayMesh->SetMaterial(0, translucentInvisibleMaterial);
 	
 	//Set up box collision component, which will be used to keep track of the current
 	//occupant of this AGridSpace, if any.
@@ -43,12 +70,6 @@ AGridSpace::AGridSpace(){
 	collision->SetHiddenInGame(false);//Only visible for debugging
 	collision->SetVisibility(true);
 	collision->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
-	/*
-	collision->SetGenerateOverlapEvents(true);
-	collision->OnComponentBeginOverlap.AddDynamic(this, &AGridSpace::OnEnterGridSpace);
-	collision->OnComponentEndOverlap.AddDynamic(this, &AGridSpace::OnExitGridSpace);
-	collision->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
-	*/
 
 	cameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraSpringArm");
 	cameraArm->SetupAttachment(mesh);
@@ -80,10 +101,26 @@ void AGridSpace::BeginPlay(){
  * @param bFromSweep true if occured by a sweep, false otherwise
  * @param SweepResult the FHitResult containing the details about the overlap
  */
-void AGridSpace::OnEnterGridSpace(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	ACrewMember* newOccupant = Cast<ACrewMember>(OtherActor);
-	if (IsValid(newOccupant)) {
-		setOccupant(newOccupant);
+void AGridSpace::OnEnterGridSpace(AActor* whoEntered, FVector2D direction) {
+
+	UTileSlipperyEffect* slipperyEffect = nullptr;
+	UActorComponent* slipperyEffectCheck = GetComponentByClass(UTileSlipperyEffect::StaticClass());
+	if (IsValid(slipperyEffectCheck))
+		slipperyEffect = Cast<UTileSlipperyEffect>(slipperyEffectCheck);
+
+	ACrewMember* crewMember = Cast<ACrewMember>(whoEntered);
+	if (IsValid(crewMember)) {
+		setOccupant(crewMember);
+
+		if (GetComponentByClass(UTileDamagerEffect::StaticClass()) != nullptr) {
+			UE_LOG(LogTemp, Warning, TEXT("Ouch"));
+			crewMember->takeDamage(1);
+		}
+	} else {
+		ACoreFragment* coreFragment = Cast<ACoreFragment>(whoEntered);
+		if (IsValid(coreFragment)) {
+			setOccupant(coreFragment);
+		}
 	}
 }
 
@@ -99,8 +136,21 @@ void AGridSpace::OnEnterGridSpace(UPrimitiveComponent* OverlappedComponent, AAct
  * @param OtherBodyIndex
  * @param bFromSweep
  */
-void AGridSpace::OnExitGridSpace(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+void AGridSpace::OnExitGridSpace(AActor* whoLeft) {
+
+	if (occupant == nullptr || whoLeft != occupant)
+		return;
+
 	setOccupant(nullptr);
+
+	ACrewMember* crewMember = Cast<ACrewMember>(whoLeft);
+	if (IsValid(crewMember)) {
+		UActorComponent* powerUpComponent = FindComponentByClass<UTilePowerUpEffect>();
+		if (IsValid(powerUpComponent)) {
+			UTilePowerUpEffect* actualPowerUp = Cast<UTilePowerUpEffect>(powerUpComponent);
+			actualPowerUp->RemoveCharacterEffect(crewMember);
+		}
+	}
 }
 
 void AGridSpace::SetToRegularMaterial() {
@@ -126,6 +176,42 @@ void AGridSpace::SetToBlue() {
 
 void AGridSpace::SetToGreen() {
 	mesh->SetMaterial(0, greenMaterial);
+}
+
+void AGridSpace::ClearOverlay() {
+	overlayMesh->SetMaterial(0, translucentInvisibleMaterial);
+	mainOverlayColor = translucentInvisibleMaterial;
+}
+
+void AGridSpace::SetOverlayToRed(bool temp) {
+	overlayMesh->SetMaterial(0, translucentRedMaterial);
+	if (!temp) {
+		mainOverlayColor = translucentRedMaterial;
+	}
+}
+
+void AGridSpace::SetOverlayToRedOnTimer(bool temp) {
+	SetOverlayToRed(temp);
+	FTimerHandle f;
+	GetWorld()->GetTimerManager().SetTimer(f, this, &AGridSpace::ClearOverlay, 2.0f, false);
+}
+
+void AGridSpace::SetOverlayToBlue(bool temp) {
+	overlayMesh->SetMaterial(0, translucentBlueMaterial);
+	if (!temp) {
+		mainOverlayColor = translucentBlueMaterial;
+	}
+}
+
+void AGridSpace::SetOverlayToGreen(bool temp) {
+	overlayMesh->SetMaterial(0, translucentGreenMaterial);
+	if (!temp) {
+		mainOverlayColor = translucentGreenMaterial;
+	}
+}
+
+void AGridSpace::RestoreOverlayColor() {
+	overlayMesh->SetMaterial(0, mainOverlayColor);
 }
 
 /**

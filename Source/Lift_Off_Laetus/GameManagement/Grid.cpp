@@ -149,10 +149,10 @@ void AGrid::placeGridSpaces() {
 
 				AGridSpace* tile;
 
-				if (i == halfWidth && (j == 0 || j == numTilesLength - 1)) {
+				if ( ((i == 0) || ((i + 1) % 4 == 0)) && (j == 0 || j == numTilesLength - 1)) {
 					
 					ACoreFragmentReceiver* coreRec = GetWorld()->SpawnActor<ACoreFragmentReceiver>(location, rotation);
-					tile = coreRec; // Cast<AGridSpace>(coreRec);
+					tile = coreRec;
 
 					if (j == 0) {
 						receiver0 = coreRec;
@@ -179,8 +179,25 @@ void AGrid::placeGridSpaces() {
 }
 
 void AGrid::assignCoreFragmentReceivers(ACrew* crew0, ACrew* crew1) {
-	receiver0->SetCrew(crew0);
-	receiver1->SetCrew(crew1);
+	for (int i = 0; i < numRows; i++) {
+		//Assign the one on the left side to the red team.
+		AGridSpace* space = getTile(FVector2D(i, 0));
+		if (space) {
+			ACoreFragmentReceiver* receiver = Cast<ACoreFragmentReceiver>(space);
+			if (receiver) {
+				receiver->SetCrew(crew0);
+			}
+		}
+
+		//Assign the one on the left side to the blue team.
+		space = getTile(FVector2D(i, numColumns - 1));
+		if (space) {
+			ACoreFragmentReceiver* receiver = Cast<ACoreFragmentReceiver>(space);
+			if (receiver) {
+				receiver->SetCrew(crew1);
+			}
+		}
+	}
 }
 
 /**
@@ -250,6 +267,10 @@ void AGrid::placeEnvironmentObjects() {
 			AGridSpace* neighbor = getTile(FVector2D(row, column));
 			if (IsValid(neighbor) && IsValid(source)) {
 				neighbor->setHarvestSource(source);
+				
+				//Uncomment to see tiles that are next to a harvest
+				//source, for debugging:
+				//neighbor->SetToRed();
 			}else {
 				UE_LOG(LogTemp, Warning, TEXT("Error: invalid tile coordinates: (%d,%d)"), row, column);
 			}
@@ -369,19 +390,94 @@ FVector2D AGrid::getUnitDifference(AGridSpace* source, AGridSpace* dest) {
 }
 
 AGridSpace* AGrid::getValidRespawnSpace(ACrewMember* crewMember) {
-	int column = numSteps;
+	int column = 0;
 	if (crewMember->getTeam() == 1) {
-		column = numColumns - numSteps - 1;
+		column = numColumns - 1;
 	}
 
 	bool spaceFound = false;
 	while (!spaceFound) {
 		int randRow = FMath::RandRange(0, numRows - 1);
 		AGridSpace* space = getTile(FVector2D(randRow, column));
-		if (!space->isOccupied()) {
+		if (space && !space->isOccupied()) {
 			spaceFound = true;
 			return space;
 		}
 	}
 	return nullptr;
+}
+
+void AGrid::colorGridInRange(FVector2D origin, int range) {
+	for (int i = 0; i < numRows; i++) {
+		for (int j = 0; j < numColumns; j++) {
+			AGridSpace* tile = getTile(FVector2D(i, j));
+			if (tile) {
+				int dX = FMath::Abs(origin.X - i);
+				int dY = FMath::Abs(origin.Y - j);
+				if (dX <= range && dY <= range) {	
+					tile->SetOverlayToBlue(false);
+				}
+			}
+		}
+	}
+}
+
+void AGrid::colorGridDirectionsInRange(const FVector2D origin, int range) {
+	UE_LOG(LogTemp, Warning, TEXT("Origin is: (%f,%f)"), origin.X, origin.Y);
+	for (int i = origin.X - range; i < origin.X + range+1; i++) {
+		UE_LOG(LogTemp, Warning, TEXT("Getting tile at (%d,%f)"), i, origin.Y);
+		AGridSpace* tile = getTile(FVector2D(i, origin.Y));
+		if (tile) {
+				tile->SetOverlayToBlue(false);
+		}
+	}
+
+	for (int j = origin.Y - range; j < origin.Y + range+1; j++) {
+		AGridSpace* tile = getTile(FVector2D(origin.X, j));
+		if (tile) {
+			tile->SetOverlayToBlue(false);
+		}
+	}
+}
+
+void AGrid::clearGridOverlay() {
+	for (int i = 0; i < numRows; i++) {
+		for (int j = 0; j < numColumns; j++) {
+			AGridSpace* tile = getTile(FVector2D(i, j));
+			if (tile) {
+				tile->ClearOverlay();
+			}
+		}
+	}
+}
+
+bool AGrid::areTilesWithinRange(FVector2D loc1, FVector2D loc2, int range) {
+	int dX = FMath::Abs(loc1.X - loc2.X);
+	int dY = FMath::Abs(loc1.Y - loc2.Y);
+	return (dX <= range && dY <= range);
+}
+
+bool AGrid::canMove(AGridSpace* location, FVector2D direction) {
+	FVector2D target = location->getGridLocation() + direction;
+	AGridSpace* dest = getTile(target);
+	if (dest) {
+		if (dest->containsFragment()) {
+			FVector2D fragTarget = target + direction;
+			AGridSpace* fragSpace = getTile(fragTarget);
+			if (IsValid(fragSpace)) {
+				return !fragSpace->isOccupied();
+			}else{
+				return false;
+			}
+		}else {
+			AGridSpace* targetSpace = getTile(target);
+			if (IsValid(targetSpace)) {
+				return !targetSpace->isOccupied();
+			}else {
+				return false;
+			}
+		}
+	}else {
+		return false;
+	}
 }
