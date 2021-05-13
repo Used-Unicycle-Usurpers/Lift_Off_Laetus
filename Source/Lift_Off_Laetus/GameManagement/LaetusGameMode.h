@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Components/SlateWrapperTypes.h"
 #include "LaetusGameMode.generated.h"
 
 
@@ -53,11 +54,19 @@ struct FsetCrews {
 		class ACrew* blueCrew;
 };
 
-//Params used to call setCrews in the UI.
+//Params used to play the winning team cinematic.
 USTRUCT()
 struct FplayWinningVideo {
 	GENERATED_BODY()
 		int winningTeam;
+};
+
+//Params used to set the visibility of the throw grenade 
+//instruction in the HUD.
+USTRUCT()
+struct FsetThrowGrenadeVisibility {
+	GENERATED_BODY()
+		ESlateVisibility visibility;
 };
 
 /**
@@ -116,6 +125,8 @@ public:
 	bool checkLegalMove(int32 actionPrice);
 
 	void callPauseMenuToggleVisibility();
+
+	void callHUDToggleThrowGrenadeInstruction(ESlateVisibility newVisibility);
 
 private:
 

@@ -10,6 +10,7 @@
 #include "../GameManagement/GridSpace.h"
 #include "../GameManagement/Grid.h"
 #include "../Controllers/CrewController.h"
+#include "Components/SlateWrapperTypes.h"
 
 AInputController::AInputController() {
 
@@ -121,6 +122,12 @@ void AInputController::disable() {
 	DisableInput(this);
 }
 
+void AInputController::resetInputMode() {
+	FInputModeGameAndUI b;
+	SetInputMode(b);
+	SetShowMouseCursor(true);
+}
+
 /**
  * Tell the game mode to end this players turn and switch control over to
  * the other player.
@@ -175,6 +182,11 @@ void AInputController::setStateToMovement() {
 	if (grid) {
 		grid->clearGridOverlay();
 	}
+
+	if (gameMode) {
+		gameMode->callHUDToggleThrowGrenadeInstruction(ESlateVisibility::Hidden);
+	}
+
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -193,6 +205,11 @@ void AInputController::setStateToRifleAttack() {
 	if (grid) {
 		grid->clearGridOverlay();
 	}
+
+	if (gameMode) {
+		gameMode->callHUDToggleThrowGrenadeInstruction(ESlateVisibility::Hidden);
+	}
+
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -214,6 +231,10 @@ void AInputController::setStateToGrenadeAttack() {
 		grid->clearGridOverlay();
 	}
 
+	if (gameMode) {
+		gameMode->callHUDToggleThrowGrenadeInstruction(ESlateVisibility::Visible);
+	}
+
 	//Start by focusing on current tile. WASD will now move highlighted so player can select 
 	//where to throw the grenade.
 	if (controlledCrew) {
@@ -233,6 +254,11 @@ void AInputController::setStateToPunchAttack() {
 	if (grid) {
 		grid->clearGridOverlay();
 	}
+
+	if (gameMode) {
+		gameMode->callHUDToggleThrowGrenadeInstruction(ESlateVisibility::Hidden);
+	}
+
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -254,6 +280,10 @@ void AInputController::setStateToHarvest() {
 		grid->clearGridOverlay();
 	}
 
+	if (gameMode) {
+		gameMode->callHUDToggleThrowGrenadeInstruction(ESlateVisibility::Hidden);
+	}
+
 	if (controlledCrew) {
 		if (currentlySelectedTile) {
 			currentlySelectedTile->SetToRegularMaterial();
@@ -271,6 +301,10 @@ void AInputController::setStateToIdle() {
 	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("NOW IN IDLE MODE"));
 	if (grid) {
 		grid->clearGridOverlay();
+	}
+
+	if (gameMode) {
+		gameMode->callHUDToggleThrowGrenadeInstruction(ESlateVisibility::Hidden);
 	}
 
 	if (controlledCrew) {

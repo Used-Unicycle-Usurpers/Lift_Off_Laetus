@@ -463,9 +463,19 @@ bool AGrid::canMove(AGridSpace* location, FVector2D direction) {
 	if (dest) {
 		if (dest->containsFragment()) {
 			FVector2D fragTarget = target + direction;
-			return !getTile(fragTarget)->isOccupied();
+			AGridSpace* fragSpace = getTile(fragTarget);
+			if (IsValid(fragSpace)) {
+				return !fragSpace->isOccupied();
+			}else{
+				return false;
+			}
 		}else {
-			return !getTile(target)->isOccupied();
+			AGridSpace* targetSpace = getTile(target);
+			if (IsValid(targetSpace)) {
+				return !targetSpace->isOccupied();
+			}else {
+				return false;
+			}
 		}
 	}else {
 		return false;
